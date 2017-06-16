@@ -1,0 +1,30 @@
+/*
+-----------------------------------------------
+CenturyLink Modem Configurator Advanced Setup Firewall Popup Stylesheet
+author:		KC Dunstan 
+date:		08.04.2007  
+----------------------------------------------- */
+*{margin:0; padding:0; font:12px/14px Verdana, Helvetica, sans-serif; color:#FFF;}
+body{background:url(../_images/advancedsetup_firewallsettings_popup_body_bg.png);}
+#advancedsetup_firewallsettings_popup_wrapper{width:513px; margin:25px auto 0 auto;}
+#advancedsetup_firewallsettings_popup_wrapper h1{margin:0 0 15px 12px; font:14px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.advancedsetup_firewallsettings_popup_content_header{margin:0 auto; width:513px; height:8px; background:url(../_images/advancedsetup_firewallsettings_popup_header_bg.png) no-repeat; overflow:hidden;}
+.advancedsetup_firewallsettings_popup_contentarea{margin:0 auto; width:513px; background:url(../_images/advancedsetup_firewallsettings_popup_content_bg.png) repeat-y;}
+.advancedsetup_firewallsettings_popup_content_footer{margin:0 auto 20px auto; width:513px; height:8px; background:url(../_images/advancedsetup_firewallsettings_popup_footer_bg.png) no-repeat; overflow:hidden;}
+.advancedsetup_firewallsettings_popup_contentarea h2{margin:0 0 0 12px; font:14px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.advancedsetup_firewallsettings_popup_contentarea h3{margin:0 0 0 12px; font:11px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.advancedsetup_firewallsettings_popup_contentarea p, p{margin:0 0 0 12px; padding:0 0 15px 0; font:11px/16px Verdana, Arial, Helvetica, sans-serif;}
+.advancedsetup_firewallsettings_popup_contentarea b{font:11px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.advancedsetup_firewallsettings_popup_contentarea a{color:#FFF; font-weight:bold; font:11px/16px Verdana, Arial, Helvetica, sans-serif;}
+.advancedsetup_firewallsettings_popup_contentarea a:hover{text-decoration:none;}
+.advancedsetup_firewallsettings_popup_contentarea .btn{margin:0 12px 0 0; float:right; clear:right;}
+ul{margin:0 24px 24px 24px; width:auto; list-style:none; float:left;}
+#advancedsetup_firewallsettings_popup_wrapper ul li a, a{text-decoration:none; font-weight:bold;}
+#advancedsetup_firewallsettings_popup_wrapper ul li a:hover, a:hover{text-decoration:underline;}
+
+.advancedsetup_firewallsettings_popup_contentarea table{margin:20px 50px 0 50px; width:80%;}
+.advancedsetup_firewallsettings_popup_contentarea th, .advancedsetup_firewallsettings_popup_contentarea td{text-align:left; font:11px/14px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.advancedsetup_firewallsettings_popup_contentarea th.checkbox, .advancedsetup_firewallsettings_popup_contentarea td.checkbox{text-align:center;}
+.advancedsetup_firewallsettings_popup_contentarea td{font-weight:normal;}
+
+#footer{margin:50px 0 50px 0; text-align:center; font:11px/11px Arial, Helvetica, sans-serif; color:#FFF;}

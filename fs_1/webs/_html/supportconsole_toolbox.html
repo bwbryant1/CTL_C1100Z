@@ -1,0 +1,484 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';// 1:atm, 2 PTM, 3 Eth
+var CPUUsed = "<%ejGetOther(sysInfo,ProcessorUsed)%>";
+var CurrentUsed=0;
+var L1M=0.00;
+var L5M=0.00;
+var L15M=0.00;
+var items=CPUUsed.split("$");
+if(items.length>2){
+    CurrentUsed = parseFloat(items[0]);
+    L1M = parseFloat(items[1]);
+    L5M = parseFloat(items[2]);
+    L15M = parseFloat(items[3]);
+}
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var debugLog = "<%ejGetOther(debugLog)%>";
+var debugLogitems=debugLog.split("$");
+if(debugLogitems.length>2){
+    Status = debugLogitems[0];
+    Downstream  = debugLogitems[1];
+    Upstream  = debugLogitems[2];
+    Mode = debugLogitems[3];
+}
+function btnGetFile(type){
+	if(type == 1){
+		var code = 'location="phyDbg.csv"';
+	}
+	else{
+		var code = 'location="processlogs.csv"';
+	}
+	eval(code);
+}
+
+function ShowIPFiled()
+{
+   with ( document.forms['toolbox'] ) {
+      $('.RebootField').show();
+      if(traffictype.value == 'ethAll' || traffictype.value == 'eth0' || traffictype.value == 'eth1' || traffictype.value == 'eth2' || traffictype.value == 'eth3')
+      {         
+         $('.USBStatus').hide();
+         $('.EtherLAN').show();
+         document.getElementById("MonitirText").innerHTML = "3. Select the port to mirror the traffic to.";
+         document.getElementById("MirrorRebootText").innerHTML = "4. Set the port mirror reboot state.";
+         document.getElementById("SaveText").innerHTML = "5. Click &quot;Apply&quot; to save your changes.";
+      }
+      else
+      {
+         document.getElementById("MonitirText").innerHTML = "4. Select the port to mirror the traffic to.";
+         document.getElementById("MirrorRebootText").innerHTML = "5. Set the port mirror reboot state.";
+         document.getElementById("SaveText").innerHTML = "6. Click &quot;Apply&quot; to save your changes.";
+         $('.EtherLAN').show();
+         $('.USBStatus').show();
+      }
+   }
+}
+function frmLoad() {
+	
+   with ( document.forms[0]) {	 
+      var monIntfInfo = '<%ejGetOther(wanInterfaceInfo, portMirror)%>';
+      var monIntfInfo2 = '<%ejGetOther(sysInfo, MirrorStatus)%>';
+      var monIntfs = '';
+      var monEntry1 = '';
+      var monEntry2 = '';
+      {
+         monIntfs = monIntfInfo.split('|');
+         monEntry1 = monIntfs[0].split('/');
+         monEntry2 = monIntfs[1].split('/');
+      }
+
+      var MirrorInfo = monIntfInfo2.split('|');
+	 
+      if (monEntry1[3] == '1' || monEntry2[3] == '1' || MirrorInfo[0] == '2')
+         tool_type.selectedIndex = 1;
+
+
+      if(MirrorInfo[3] == 'WAN' || MirrorInfo[3] == 'VLANPVC' || MirrorInfo[3] == '')
+      {
+         if((monEntry1[3] == '0' && monEntry2[3] == '0') || monEntry2 == '')
+            document.forms['toolbox'].traffictype.value = "NONE";
+         else
+            document.forms['toolbox'].traffictype.value = MirrorInfo[3];
+
+         if(monEntry2[2] == ' ' || monEntry2 == '')
+            document.forms['toolbox'].outputinterface.value = "eth0";
+         else
+            document.forms['toolbox'].outputinterface.value = monEntry2[2];
+      }
+      else
+      {
+         if(MirrorInfo[0] != '2')
+            document.forms['toolbox'].traffictype.value = "NONE";
+         else
+            document.forms['toolbox'].traffictype.value = MirrorInfo[3];
+		 
+         document.forms['toolbox'].outputinterface.value = MirrorInfo[4];	
+      }
+
+      if (monEntry1[4] == '1' || monEntry2[4] == '1')
+         document.forms['toolbox'].rebootState[1].checked = true;
+      else
+         document.forms['toolbox'].rebootState[0].checked = true;
+
+      {
+         if (monEntry1[5] == '1' || monEntry2[5] == '1')
+            document.forms['toolbox'].usbState[1].checked = true;
+         else
+            document.forms['toolbox'].usbState[0].checked = true;
+      }
+
+      ShowIPFiled();
+   }
+		if($('body').attr('id') == 'supportconsole_toolbox'){ // check to see if the body has the correct ID
+		$('select#tool_type').change(function(){
+			if($(this).val() == 'Disabled'){
+				$('div#disabled').show();
+				$('div#port_mirror, div#bits_per_tone, div#physical_layer_debug, div#processor_log').hide();
+			} else if($(this).val() == 'Port Mirror'){
+				$('div#port_mirror').show();
+				$('div#disabled, div#bits_per_tone, div#physical_layer_debug, div#processor_log').hide();
+			} else if($(this).val() == 'BITS Per Tone'){
+				$('div#bits_per_tone').show();
+				$('div#disabled, div#port_mirror, div#physical_layer_debug, div#processor_log').hide();
+			} else if($(this).val() == 'Physical Layer Debug'){
+				$('div#physical_layer_debug').show();
+				$('div#disabled, div#port_mirror, div#bits_per_tone, div#processor_log').hide();
+			} else if($(this).val() == 'Processor Log'){
+				$('div#processor_log').show();
+				$('div#disabled, div#port_mirror, div#bits_per_tone, div#physical_layer_debug').hide();
+			} 
+		}).change();
+	}
+}
+
+function btnApply(type)
+{
+   var lst = '';
+   var monIntfInfo = '<%ejGetOther(wanInterfaceInfo, portMirror)%>';
+   var monIntfs = '';
+   var monEntry1 = '';
+   var monEntry2 = '';
+
+   {
+      monIntfs = monIntfInfo.split('|');
+      monEntry1 = monIntfs[0].split('/');
+      monEntry2 = monIntfs[1].split('/');
+   }   
+   if (type == 99)
+      return;
+
+   with ( document.forms['toolbox'] ) {
+   
+   var rebootStateTemp;
+   var usbStateTemp;
+   if ( rebootState[1].checked == true )
+      rebootStateTemp = '1';
+   else
+      rebootStateTemp = '0';
+
+   if ( usbState[1].checked == true )
+      usbStateTemp = '1';
+   else
+      usbStateTemp = '0';
+
+   if (type ==  1){
+      document.forms['toolbox'].enablePortMirror.value = '1';
+      with ( document.forms[0]) {
+         {
+            lst = monEntry1[0] + '@' + monEntry1[1] + '@'+ outputinterface.value + '@';
+            if(traffictype.value == 'WAN' || traffictype.value == 'VLANPVC'){
+               lst = lst + '1';
+            }
+            else if (traffictype.value == 'rx'){
+               lst = lst + '1';
+            }
+            else {
+               lst = lst + '0';
+            }
+            lst = lst + '@' + rebootStateTemp + '@' + usbStateTemp + ',';
+            lst = lst + monEntry2[0] + '@' + monEntry2[1] + '@'+ outputinterface.value + '@';
+            if(traffictype.value == 'WAN' || traffictype.value == 'VLANPVC'){
+               lst = lst + '1';
+            }
+            else if ( traffictype.value == 'rx' ){
+               lst = lst + '1';
+            }
+            else {
+               lst = lst + '0';
+            }
+            lst = lst + '@' + rebootStateTemp + '@' + usbStateTemp + ',';
+         }
+         if(outputinterface.value == traffictype.value)
+         {
+            var Mirror = traffictype.options[traffictype.selectedIndex].text;
+            var Monitor = outputinterface.options[outputinterface.selectedIndex].text;
+            AlertOpen("Invalid Selection. Mirror " + Mirror + " to " + Monitor + ".");
+            return -1;
+         }
+      }
+   }
+
+   if (type ==  0){
+      document.forms['toolbox'].enablePortMirror.value = '0';
+      {
+         lst = monEntry1[0] + '@' + monEntry1[1] + '@'+ monEntry1[2] + '@' + '0' + '@' + '0' + '@' + '0,';
+         lst = lst + monEntry2[0] + '@' + monEntry2[1] + '@'+ monEntry1[2] + '@' + '0' + '@' + '0' + '@' + '0,';
+      }
+   }
+   mirrorLst.value = lst;
+   sessionKey.value = gblsessionKey;	
+   document.forms['toolbox'].submit();
+   }
+}
+// done hiding -->
+</script>
+<body id="supportconsole_toolbox" onLoad='frmLoad()'>
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration Actiontec M1000</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('supportconsole', '');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+<div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+</div>
+<script language="javascript">
+        WriteLogout('<% getLogin(); %>');
+</script>
+</div>
+        <div class="clear_left"></div>
+    <div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('toolbox', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+       </ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header"></div>
+    <div id="content_right_contentarea">
+        
+            <h1 class="supportconsole_toolbox">Tool Box<span>Tool box provides
+                troubleshooting tools for the modem. Do not enable the features
+                below unless specified by a qualified CenturyLink support representative.</span></h1>
+			<form>				
+              <div class="stepWrapper">
+                <p><strong>1. Select a tool.</strong></p>
+                  <table>
+                    <tr>
+                      <td width="150"><label for="tool_type">Tool:</label></td>
+                      <td><select name="tool_type" id="tool_type">
+                        <option value="Disabled">Disabled</option>
+                        <option value="Port Mirror">Port Mirror</option>
+                        <option value="BITS Per Tone">BITS Per Tone</option>
+                        <option value="Physical Layer Debug">Physical Layer Debug</option>
+                        <option value="Processor Log">Processor Log</option>
+                      </select></td>
+                    </tr>
+                  </table>
+                </div>
+                <div id="disabled">
+                	<div class="stepWrapper">
+		                <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+	              		<a href="#" class="btn apply_btn" onClick="btnApply(0)">Apply</a>
+		            </div>
+                </div>
+				</form>
+				<form method=post name="toolbox" action="engdebug.cmd" method="post">
+					<input type="hidden" name="action" id="action" value="apply">
+					<input type="hidden" name="submitValue" id="submitValue" value="0" />
+					<input type="hidden" name="enablePortMirror" id="enablePortMirror" value="" />
+					<input type="hidden" name="sessionKey" id="sessionKey" value="">
+					<input type="hidden" name="mirrorLst" id="mirrorLst" value="">					
+              	<div id="port_mirror">
+              		<div class="stepWrapper">
+	                  <p><strong>2. Select the traffic type to mirror.</strong></p>
+	                  <table>
+	                    <tr>
+	                      <td width="150"><label for="traffictype">Traffic Type:</label></td>
+	                      <td>
+	                        <%ejGetOther(sysInfo, mirrorOption)%>
+	                      </td>
+	                    </tr>
+	                  </table>
+	                </div>
+	                <div class="USBStatus">
+                    <div class="stepWrapper">
+	                  <p><strong>3. Save Mirror Packets to USB.</strong></p>
+	                  <table>
+                    <tr>
+                           <td width="150"><label for="rebootstate">State:</label></td>
+                           <td><input name="usbState" id="usbState" type="radio" value="0" checked="checked" onChange="ShowIPFiled()"/> Stop </td>
+                           <td><input name="usbState" id="usbState" type="radio" value="1" onChange="ShowIPFiled()"/> Start </td>
+                    </tr>
+	                  </table>
+	                </div>
+	                </div>
+	                <div class="EtherLAN">
+	                <div class="stepWrapper">
+	                  <p><strong id="MonitirText">Select the port to mirror the traffic to.</strong></p>
+	                  <table>
+                    <tr>
+                        <td width="150"><label for="trafficport">Traffic Type:</label></td>
+                        <td><select name="outputinterface" id="outputinterface">
+                                <option value="eth0">Ethernet 1</option>
+                                <option value="eth1">Ethernet 2</option>
+                                <option value="eth2">Ethernet 3</option>
+                                <option value="eth3">Ethernet 4</option>
+                            </select>
+                        </td>
+                    </tr>
+	                  </table>
+	                </div>
+	                </div>
+	                <div class="RebootField">
+	                <div class="stepWrapper">
+	                  <p><strong id="MirrorRebootText">Set the port mirror reboot state.</strong></p>
+	                  <table>
+                    <tr>
+                           <td width="150"><label for="rebootstate">Reboot State:</label></td>
+                           <td><input name="rebootState" id="rebootState" type="radio" value="0" checked="checked"/> Disable on Reboot</td>
+                           <td><input name="rebootState" id="rebootState" type="radio" value="1"/> Enable on Reboot </td>
+                    </tr>
+	                  </table>
+	                </div>
+	                </div>
+	                <div class="stepWrapper">
+	                  	<p><strong id="SaveText">Click &quot;Apply&quot; to save your changes. </strong></p>
+	              		<a href="#" class="btn apply_btn" onClick="btnApply(1)">Apply</a>
+	            	</div>
+				
+              	</div>
+				</form>              	
+              	<div id="bits_per_tone">
+				<form>
+              		<div class="stepWrapper">
+		                <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+		             	<a href="#" class="btn apply_btn" onClick="btnApply(99);">Apply</a>
+		              </div>
+		              <div class="stepWrapperdark">
+		              	<table>
+                	<tr>
+							<th class="tableTitle">BITS Per Tone</th>
+						</tr>
+						<tr>
+							<td style="text-align:center"><%ejGetOtherBig(usToneBits)%><%ejGetOtherBig(dsToneBits)%></td>
+						</tr>
+						</table>
+		              </div>
+				</form>
+              	</div>
+              	
+              	<div id="physical_layer_debug">
+				<form>
+              		<div class="stepWrapper">
+		                <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+		             	<a href="#" class="btn apply_btn" onClick="btnApply(99);">Apply</a>
+					</div>
+		            
+					<div class="stepWrapper">
+		                <p><strong> Click &quot;Download&quot; to save the log file to the PC.</strong></p>
+		                <a href="#" class="btn download_btn"  onClick="btnGetFile(1);">Download</a>
+					</div>
+						
+		            <div class="stepWrapperdark">
+		                <table>
+						<tr>
+							<th class="tableTitle">Physical Layer Debug Log</th>
+						</tr>
+		                  <tr>
+		                    <td><p>
+		                    DSL Status: 								
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(Status);
+								-->
+								</SCRIPT><br />
+		                    Downstream Rate: 								
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(Downstream);
+								-->
+								</SCRIPT>Mbps<br />
+		                    Upstream Rate: 								
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(Upstream);
+								-->
+								</SCRIPT>Mbps<br />
+		                    ADSL Mode: 								
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(Mode);
+								-->
+								</SCRIPT><br />	                    
+		                    </p></td>
+		                  </tr>
+		                </table>
+		            </div>
+				</form>
+				</div>
+				
+              	<div id="processor_log">
+				<form>
+              		<div class="stepWrapper">
+		                <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+		             	<a href="#" class="btn apply_btn" onClick="btnApply(99);">Apply</a>
+					</div>	
+		             
+					<div class="stepWrapper">
+		                <p><strong> Click &quot;Download&quot; to save the log file to the PC.</strong></p>
+		                <a href="#" class="btn download_btn"  onClick="btnGetFile(2);">Download</a>
+					</div>	              
+										
+					<div class="stepWrapperdark">
+		                <table>
+						<tr>
+							<th class="tableTitle">Processor Log</th>
+						</tr>
+		                <tr>
+		                    <td><p>
+								Current CPU Usage:
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(CurrentUsed);
+								-->
+								</SCRIPT>%<br>
+								Last 1 minute CPU average usage: 					
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(L1M);
+								-->
+								</SCRIPT>%<br>
+								Last 5 minutes CPU average usage: 								
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(L5M);
+								-->
+								</SCRIPT>%<br>
+								Last 15 minuteds CPU average usage: 								
+								<SCRIPT LANGUAGE="JavaScript">
+								<!--
+									document.write(L15M);
+								-->
+								</SCRIPT>%<br>							
+		                    </p></td>
+		                </tr>
+		                </table> 
+					</div>
+				</form>						
+		        </div>	
+        
+            <div class="clear_left"></div>
+    
+    </div>
+	</div>
+    <div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Communications International Inc., All Rights Reserved.</div>	
+</div>
+</body>
+</html>

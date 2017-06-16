@@ -1,0 +1,664 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/AppRule.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/PortMappingAll.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ruleinfo = '<%ejGetOtherBig(portMapRule)%>';
+var hostinfo = '<%ejGetOtherBig(dhcpLeasesinfo)%>';
+portForwardingall = '<%ejGetOtherBig(portMap, all)%>';
+var remoteport="<%ejGetOther(RemoteGUI)%>";
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var Rports = remoteport.split("|");
+
+var info = ruleinfo.split('|');
+var found = 0;
+if ( info != '' ) {
+	for ( i = 0; i < info.length ; i ++ ) {
+		found = 0;
+		if (info[i] == '')
+			break;
+		var names = info[i].split('/');
+		for ( j = 0 ; c[6][j] != null; j ++ ) {
+			if ( c[6][j].name == names[0] ) {
+				found = 1;
+				c[6][j].eNum++;
+				c[6][j].e[c[6][j].eNum-1] = new iVe(names[2], names[3], names[1], names[4]);
+				break;
+			}
+		}
+		if ( found == 0 ) {
+			c[6][j] = new cV(names[0], names[0], 1);
+			c[6][j].e[0] = new iVe(names[2], names[3], names[1], names[4]);
+		}
+	}
+}
+
+var preAppIdx = 0;
+
+function replace_name( name ) {
+	var i, j;
+	for ( i = 0 ; i < TOTAL_CAT ; i++ ) {
+		for ( j = 0; c[i][j] != null; j++ ) {
+			if ( c[i][j].name == name ) {
+				return c[i][j].show;
+			}
+		}
+	}
+	return name;
+}
+
+function clearAll()
+{
+	var i = 0;
+	with (document.forms[0]) {
+		for(i=Applications.options.length-1; i>-1; i--){
+			Applications.remove(i);
+		}
+	}
+}
+
+function showAPP ( ca ) {
+	with (document.forms[0]) {
+		if ( ca < TOTAL_CAT ) {
+			var i = 0;	
+			while ( c[ca][i] != null ) {
+				if ( c[ca][i].eNum != 0 ) {
+					var select = document.getElementById("Applications");
+					select.options[select.options.length] = new Option(processLongNameselect( c[ca][i].show, 45 ), i);
+				}
+				i++;
+			}
+		}
+	}
+}
+
+function caSelect() {
+	var i = 0;
+
+	with (document.forms[0]) {
+		if ( Category.options[Category.selectedIndex].value == -1 ) {
+			clearAll();
+		  for(i = 0; i < TOTAL_CAT; i++) { 
+		  	showAPP(i);
+			}
+		}
+		else {
+			clearAll();
+			showAPP(Category.options[Category.selectedIndex].value);
+		}
+		/*
+		if ( Category.options[Category.selectedIndex].value != TOTAL_CAT-1 ) {
+			document.getElementById("createrule_btn").style.visibility = 'hidden';
+		}
+		else {
+			document.getElementById("createrule_btn").style.visibility = 'visible';
+		}
+		*/
+		if ( Applications.options.length > 0 ) {
+			for ( i = 0 ; i < Applications.options.length ; i ++ ) {
+				if ( Applications.options[i].value == preAppIdx ) {
+					Applications.selectedIndex = i;
+					break;
+				}
+			}
+			appSelect();
+			setTimeout("viewrulebtn_showchange()" , 175);
+		}
+		else
+		document.getElementById("viewrule_btn").style.visibility = 'hidden';
+	}
+}
+
+function viewrulebtn_showchange() {
+	with (document.forms[0]) {
+		document.getElementById("viewrule_btn").style.visibility = 'visible';
+	}
+}
+
+function appSelect() {
+	var ca = 0;
+	var app = 0;
+	var i = 0;
+	var j = 0;
+	var k = 0;
+	with (document.forms[0]) {
+		if ( Category.options[Category.selectedIndex].value == -1 ) {
+			for ( i = 0 ; i < TOTAL_CAT ; i++ ) {
+				for ( j = 0; c[i][j] != null; j++ ) {
+					if ( c[i][j].eNum == 0 ) {
+						continue;
+					}
+					if ( k == Applications.selectedIndex ) {
+						ca = i;
+						break;
+					}
+					k++;
+				}
+				if ( c[i][j] != null ) {
+					break;
+				}
+			}
+		}
+		else {
+			ca = Category.options[Category.selectedIndex].value;
+		}
+		app = Applications.options[Applications.selectedIndex].value;
+		curRule = c[ca][app];
+	}
+}
+
+function createRule() {
+	var ca = 6;
+	var app = 0;
+	var srvAddress="";
+	
+	with (document.forms[0]) {
+		ca = Category.options[Category.selectedIndex].value;
+		srvAddress =  manual_ip_address.value;
+		if ( Applications.length ) {
+			app = Applications.options[Applications.selectedIndex].value;
+		}
+		action.value="user";
+		applicationsCatIdx.value = ca;
+		applicationsIdx.value = app;
+		srvAddr.value = manual_ip_address.value;	
+	}
+	//var loc = 'advancedsetup_applications_usernew.cgi?applicationsCatIdx='+ca+'&applicationsIdx='+app+'&applicationsIPaddress='+srvAddress;
+	//var code = 'location="' + loc + '"';
+	//eval(code);
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+function viewRule() {
+	var ca = 0;
+	var app = 0;
+	var i = 0;
+	var j = 0;
+	var k = 0;
+	var srvAddress="";
+	
+	with (document.forms[0]) {
+		srvAddress =  manual_ip_address.value;
+		if ( Category.options[Category.selectedIndex].value == -1 ) {
+			for ( i = 0 ; i < TOTAL_CAT ; i++ ) {
+				for ( j = 0; c[i][j] != null; j++ ) {
+					if ( c[i][j].eNum == 0 ) {
+						continue;
+					}
+					if ( k == Applications.selectedIndex ) {
+						ca = i;
+						break;
+					}
+					k++;
+				}
+				if ( c[i][j] != null ) {
+					break;
+				}
+			}
+		}
+		else {
+			ca = Category.options[Category.selectedIndex].value;
+		}
+		app = Applications.options[Applications.selectedIndex].value;
+		action.value="view";
+		applicationsCatIdx.value = ca;
+		applicationsIdx.value = app;
+		srvAddr.value = manual_ip_address.value;
+	}
+	//var loc = 'advancedsetup_applications_viewrule.cgi?applicationsCatIdx='+ca+'&applicationsIdx='+app+'&applicationsIPaddress='+srvAddress;
+	//var code = 'location="' + loc + '"';
+	//eval(code);
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+function frmLoad() {
+	preAppIdx = <%ejGetOther(appIdx)%>;
+	var ca = <%ejGetOther(appCatIdx)%>;
+	with (document.forms[0]) {
+		Category.selectedIndex = ca+1;
+		manual_ip_address.value = '<%ejGet(applicationsIPaddress)%>';
+	}
+	caSelect();
+	preAppIdx = 0;
+	ipChange();
+}
+
+function ipChange() {
+	with ( document.forms[0] ) {
+		if ( select_device.selectedIndex != 0 ) {
+			//manual_ip_address.disabled = true;
+			$('.manual_ip_address').hide();
+			manual_ip_address.value=select_device.options[select_device.selectedIndex].value;
+		}
+		else {
+			//manual_ip_address.disabled = false;
+			$('.manual_ip_address').show();
+			manual_ip_address.value = '';
+		}
+	}
+}
+
+function checkPortCover( cS, cE, rS, rE ) {
+	if ( cS >= rS && cS <= rE ) {
+		return true;
+	}
+	else if ( cE >= rS && cE <= rE ) {
+		return true;
+	}
+	else if ( rS >= cS && rS <= cE ) {
+		return true;
+	}
+	else if ( rE >= cS && rE <= cE ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function removeClick(app, ip){
+	with ( document.forms[0]) {
+		action.value="remove";
+		srvName.value=app;
+		srvAddr.value=ip;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	return;	
+}
+
+function applyClick(){
+	var loc = 'application.cmd?action=add';
+	var i = 0;
+	with ( document.forms[0]) {
+		action.value="add";
+		entryNumber=curRule.eNum;
+		appName=curRule.name;
+
+		var eStartValue="";
+		var eEndValue="";
+		var iStartValue="";
+		var iEndValue="";
+		var srvAddress="";
+		var protocol="";
+		var Prot="";
+
+		if ( select_device.options[select_device.selectedIndex].value != '' 
+				&& isValidIpAddress(select_device.options[select_device.selectedIndex].value) ) {
+				srvAddress = select_device.options[select_device.selectedIndex].value;
+		}
+		else if ( manual_ip_address.value != '' && isValidIpAddress(manual_ip_address.value) ) {
+			srvAddress = manual_ip_address.value;
+		}
+		else {
+			AlertOpen('The LAN IP Address is invalid.');
+			return false;
+		}
+	}
+
+	var info = portForwardingall.split('|');
+
+	var i = 0;
+	var j = 0;
+	var eS = 0;
+	var eE = 0;
+	var iS = 0;
+	var iE = 0;
+	for ( i = 0; i < entryNumber; i++ ) {
+		if ( curRule.e[i].proto == 0 ) {
+			Prot = "TCP";
+		}
+		else if ( curRule.e[i].proto == 1 ) {
+			Prot = "UDP";
+		}
+		else if ( curRule.e[i].proto == 2 ) {
+			Prot = "TCP or UDP";
+		}
+		else {
+		  Prot = "GRE";
+		}
+
+		if ( Prot != "GRE" ) {
+			if ( !isValidPort( curRule.e[i].eStart+":"+curRule.e[i].eEnd) || !isValidPort( curRule.e[i].iStart ) ) {
+				AlertOpen('The IP port range is invalid.');
+				return false;
+			}
+			
+			eS = parseInt(curRule.e[i].eStart);
+			eE = parseInt(curRule.e[i].eEnd);
+			iS = parseInt(curRule.e[i].iStart);
+			iE = iS + eE - eS;
+			if ( !isValidPort( curRule.e[i].iStart+":"+iE) ) {
+				AlertOpen('The IP port range is invalid.');
+				return false;
+			}
+	
+			eStartValue += curRule.e[i].eStart + ",";
+			eEndValue += curRule.e[i].eEnd + ",";
+			iStartValue += curRule.e[i].iStart + ",";
+			iEndValue += iE + ",";
+	
+			if ( Prot == "TCP" || Prot == "TCP or UDP" ) {
+				if ( eS <= Rports[3] && eE >= Rports[3] && Rports[2] == "TRUE" ) {
+					AlertOpen('The defined port or port range is in use by Remote GUI.');
+					return false;
+				}
+			}
+		}
+		else {
+			eStartValue += "0" + ",";
+			eEndValue += "0" + ",";
+			iStartValue += "0" + ",";
+			iEndValue += "0" + ",";
+		}
+
+		protocol += Prot + ",";
+
+		if (info != '') {
+			var tmpeS;
+			var tmpeE;
+			for ( j = 0; j < info.length; j++ ) 
+			{
+				if (info[j] == '')
+					break;
+				var names = info[j].split('/');
+
+				if ( Prot != "GRE" ) {
+					tmpeS = parseInt(names[5]);
+					tmpeE = parseInt(names[6]);
+					if ( tmpeS == 0 && tmpeE == 0 ) {
+						tmpeS = parseInt(names[1]);
+						tmpeE = parseInt(names[2]);
+					}
+					if ( Prot == "TCP or UDP" ) {
+						if ( checkPortCover(eS, eE, tmpeS, tmpeE ) ) {
+							AlertOpen('The defined port or port range is in use by another port forwarding or application rule.\nYou must remove the rule before a new rule using the same port can be applied.');
+							return false;
+						}
+					}
+					else if ( names[3] == "TCP or UDP" ) {
+						if ( checkPortCover(eS, eE, tmpeS, tmpeE ) ) {
+							AlertOpen('The defined port or port range is in use by another port forwarding or application rule.\nYou must remove the rule before a new rule using the same port can be applied.');
+							return false;
+						}
+					}
+					else if ( Prot == names[3] ) {
+						if ( checkPortCover(eS, eE, tmpeS, tmpeE ) ) {
+							AlertOpen('The defined port or port range is in use by another port forwarding or application rule.\nYou must remove the rule before a new rule using the same port can be applied.');
+							return false;
+						}
+					}
+				}
+				else if ( Prot == names[3] && srvAddress != names[4] ) {
+					AlertOpen('The defined rule is in use by another port forwarding or applications rule.\nYou must remove the rule before the new rule can be applied.');
+					return false;
+				}
+			}
+		}
+	}
+
+	with ( document.forms[0]) {
+		srvName.value=appName;
+		srvAddr.value=srvAddress;
+		proto.value=protocol;
+		eStart.value=eStartValue;
+		eEnd.value=eEndValue;
+		iStart.value=iStartValue;
+		iEnd.value=iEndValue;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	//Return false to avoid do submit twice.
+	return false;
+}
+</SCRIPT>
+</head>
+<body onLoad='frmLoad()' id="advancedsetup_applications">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+	
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left">
+    </div>
+<div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('applications');
+</script>
+		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+    </div>
+    <div id="content_right">
+            <div id="content_right_contentarea">
+            <h1 class="advancedsetup_applications">Application Forwarding <span>Applications forwards ports to the selected LAN device by application name.</span></h1>
+            <form action="application.cmd" method="post" onSubmit="return applyClick();">
+		<input type="hidden" name="action" id="action" value="">
+		<input type="hidden" name="srvName" id="srvName" value="">
+		<input type="hidden" name="srvAddr" id="srvAddr" value="">
+		<input type="hidden" name="proto" id="proto" value="">
+		<input type="hidden" name="eStart" id="eStart" value="">
+		<input type="hidden" name="eEnd" id="eEnd" value="">
+		<input type="hidden" name="iStart" id="iStart" value="">
+		<input type="hidden" name="iEnd" id="iEnd" value="">
+		<input type="hidden" name="applicationsCatIdx" id="applicationsCatIdx" value="">
+		<input type="hidden" name="applicationsIdx" id="applicationsIdx" value="">
+		<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+                <div class="stepWrapper">
+                <p><strong>1. Select device, or manually enter an IP address.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="select_device">Select Device:</label></td>
+                        <td><select name="select_device" id="select_device" onChange='ipChange()'>
+                                <option value="" selected="selected">Manually Enter IP Address </option>
+<script language="javascript">
+<!-- hide
+	{
+		var i=0;
+		var hinfo = hostinfo.split('|');
+		var hostname = '';
+		if (hinfo != '') {
+			for ( i = 0; i < hinfo.length; i++ ) 
+			{
+				if (hinfo[i] == '')
+					break;
+				var names = hinfo[i].split('/');
+				if ( names[5] == '0' ) {
+					continue;
+				}
+				if ( names[0] != 'unknown' ) {
+					hostname = names[0];
+				}
+				else if ( names[2] != '' ) {
+					hostname = names[2];
+				}
+				else {
+					hostname = names[1];
+				}
+				document.writeln("<option value=\""+names[2]+"\">"+names[0]+" - "+names[2]+" </option>");
+			}
+		}
+	}
+//-->
+</script>                                
+                            </select>
+                        </td>
+                    </tr>
+                    <tr class="manual_ip_address">
+                        <td width="150">Enter IP Address:</td>
+                        <td><input name="manual_ip_address" id="manual_ip_address" type="text" size="25" />
+                        </td>
+                    </tr>
+                </table>
+                </div>
+             		<div class="stepWrapper">
+                <p><strong>2. Select the application category, then
+                    the application to forward.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="application_category">Application Category:</label></td>
+                        <td colspan="2" style="padding-left:2px"><select name="Category" id="Category" onChange="caSelect()">
+                                <option value="-1" selected="selected">All </option>
+                                <option value="0">Games </option>
+                                <option value="1">Game Consoles </option>
+                                <option value="2">VPN </option>
+                                <option value="3">Audio/Video </option>
+                                <option value="4">Applications </option>
+                                <option value="5">Servers </option>
+                                <option value="6">User Created Rules </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="135" style="padding-left:10px;"><label for="pppoe_auto_connect">Applications:</label></td>
+                        <td style="padding-left:2px"><select name="Applications" id="Applications" onChange="appSelect()">
+                            </select></td>
+                        <td style="padding-left:1px"><a href="#" id="viewrule_btn" class="btn viewrule_btn" onClick="viewRule()" style="white-space: nowrap">View Rule</a></td>
+                    </tr>
+                    <tr>
+                        <td width="135" style="padding-left:10px;">&nbsp;</td>
+                        <td style="padding-left:12px">&nbsp;</td>
+                        <td style="padding-left:1px"><a href="#" id="createrule_btn" class="btn createrule_btn" onClick="createRule()" style="white-space: nowrap">Create Rule</a></td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+                <a href="#" class="btn apply_btn" onClick="applyClick()">Apply</a>
+                </div>
+                <p>&nbsp;</p>
+                <div class="stepWrapperdark">
+                <table>
+                    <tr>
+							<th colspan="5" class="tableTitle">Application Forwarding List</th>
+						</tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Device<br />
+                            Name</th>
+                        <th>IP 
+                            &nbsp;Address</th>
+                        <th>Application Forwarded</th>
+                        <th>Edit</th>
+                    </tr>
+<script language="javascript">
+<!-- hide
+{
+	var i = 0;
+	var j = 0;
+	var appinfo = '<%ejGetOtherBig(portMap,app)%>';
+	var hostinfoall = '<%ejGetOtherBig(dhcpLeasesinfo, 2)%>';
+	var hinfo = hostinfoall.split('|');
+	var ainfo = appinfo.split('|');
+	var historyhnameapp = "";
+	var found = 0;
+	
+	if ( ainfo != '' ) {
+		for ( i = 0; i < ainfo.length; i++ ) {
+			var hostname = 'unknown';
+			var htype = 'computer';
+			if (ainfo[i] == '')
+				break;
+			var names = ainfo[i].split('/');
+			
+			if (hinfo != '') {
+				for ( j = 0; j < hinfo.length; j++ ) 
+				{
+					if (hinfo[j] == '')
+						break;
+					var hnames = hinfo[j].split('/');
+					if ( hnames[2] == names[4] ) {
+						if ( hnames[0] != '' ) {
+							hostname = processLongName( hnames[0], 13 );
+						}
+						if ( hnames[3] != '' ) {
+							htype =  hnames[3];
+						}
+					}
+				}
+			}
+			
+			found = 0;
+			if ( historyhnameapp != "" ) {
+				var historyinfo = historyhnameapp.split('|');
+				for ( j = 0; j < historyinfo.length; j++ ) {
+					if ( historyinfo[j] == null )
+						break;
+					var historynames = historyinfo[j].split('/');
+					if ( historynames[0] == names[4] && historynames[1] == names[0] ) {
+						found = 1;
+						break;
+					}
+				}
+			}
+			
+			if ( found ) {
+				continue;
+			}
+			else {
+				historyhnameapp = historyhnameapp + names[4] + "/" + names[0] +"|";
+			}
+			
+			var appname = replace_name(names[0]);
+			appname = processLongName( appname, 20 );
+
+			document.writeln("<tr align=\"center\">");
+			document.writeln("<td><img src=\"../_images/icon_"+htype+".png\" width=\"39\" height=\"39\" /></td>");
+			document.writeln("<td>"+hostname+"</td>");
+			document.writeln("<td>"+names[4]+"</td>");
+			document.writeln("<td>"+appname+"</td>");
+			document.writeln("<td><a href=\"#\" onClick='removeClick(\""+names[0]+"\",\""+names[4]+"\")' class='btn remove_btn'>Remove<a/></td>");
+			document.writeln("</tr>"); 
+		}
+	}
+	if ( i == 0 ) {
+		document.writeln("<tr align=\"center\" class=\"nattable\">");
+		document.writeln("<td colspan=5 style=\"padding:10px;\">No Rules Defined</td>");
+		document.writeln("</tr>");
+	}
+}
+//-->
+</script>
+                </table>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div></div>
+</body>
+</html>

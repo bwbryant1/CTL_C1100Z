@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+var nat = '<%ejGetOther(sysInfo, enblDefNat)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+function RIPEnchange () {
+	with ( document.forms[0] ) {
+		if (routing_on[0].checked ){
+			document.getElementById("ripenabled").style.display = 'block';
+			document.getElementById("ripdisabled").style.display = 'none';
+		}
+		else{
+			document.getElementById("ripenabled").style.display = 'none';
+			document.getElementById("ripdisabled").style.display = 'block';
+		}
+	}
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+		if ( routing_on[0].checked == true && nat == '1' ) {
+			AlertOpen('Dynamic Routing can\'t enable when NAT enabled .');
+			return;
+		}
+		if ( routing_on[0].checked == true && '<%ejGetOther(sysInfo, defaultPrctl)%>' == 'RFC1483 Transparent Bridging' ) {
+			AlertOpen('Dynamic Routing can\'t enable when the WAN setting is Transparent Bridging .');
+			return;
+		}
+		//Adapter for cgiConfigRipApply()
+		if(routing_on[0].checked == true && routing_type[0].checked == true){
+			RipVer.value = 1;
+		}else if(routing_on[0].checked == true && routing_type[1].checked == true){
+			RipVer.value = 2;
+		}else{
+			RipVer.value = 0;
+		}
+		action.value="apply";
+		
+		routing_on[0].disabled=true;
+		routing_on[1].disabled=true;
+		routing_type[0].disabled=true;
+		routing_type[1].disabled=true;
+	}
+	
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	return;
+}
+
+function frmLoad() {
+	with ( document.forms[0] ) {
+		var ripVer = '<%ejGetOther(ripver)%>';
+		
+		if (ripVer == 1){
+			routing_on[0].checked=true;
+			routing_type[0].checked=true;
+		}else if (ripVer == 2){
+			routing_on[0].checked=true;
+			routing_type[1].checked=true;
+		}else{
+			routing_on[1].checked = true;
+		}
+	}
+	RIPEnchange();
+}
+</script>
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+                <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+	<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>  
+</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('dynamicrouting');
+</script>
+		</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+  </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_dynamicrouting">Dynamic Routing (RIP) <span> If a Gateway is set up behind the Modem in the network,
+					    consult the documentation that came with the Gateway
+				    to see what kind of Dynamic Routing is required.</span></h1>
+				<form action="ripcfgapply.cmd" method="post">
+					<input type="hidden" name="action" id="action" value="apply">
+            		<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+					<input name="RipVer" type="HIDDEN" id="RipVer" value="0" size="35" />
+					<div class="stepWrapper">
+					<p><strong>1. Set the dynamic routing state. </strong> </p>
+					<table>
+                      <tr>
+                        <td width="150">Dynamic Routing:</td>
+                        <td><input name="routing_on" id="routing_on" type="radio" value="on" onClick="RIPEnchange();"/>Enable</td>
+                        <td><input name="routing_on" id="routing_on" type="radio" value="off" checked="checked" onClick="RIPEnchange();"/>Disable</td>
+                      </tr>
+                    </table>
+					</div>
+<div id="ripenabled">
+                    <div class="stepWrapper">
+					<p><strong>2. Set the dynamic routing type.</strong></p>
+					<table>
+                      <tr>
+                        <td width="150">Dynamic Routing Type:</td>
+                        <td><input name="routing_type" id="routing_type" type="radio" value="1" checked="checked" />Version 1</td>
+                        <td><input name="routing_type" id="routing_type" type="radio" value="2" />Version 2</td>
+                      </tr>
+                    </table>
+					</div>
+                    <div class="stepWrapper">
+					<p><strong>3. Click &quot;Apply&quot; to save your settings. </strong></p>
+					<a href="#" id="apply_btn" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                    </div>
+</div>
+<div id="ripdisabled">
+    <div class="stepWrapper">
+        <p><strong>2. Click &quot;Apply&quot; to save your settings. </strong></p>
+        <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+    </div>
+</div>
+				</form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<SCRIPT LANGUAGE="JavaScript">
+	frmLoad();
+</SCRIPT>
+</body>
+</html>

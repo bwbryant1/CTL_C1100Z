@@ -1,0 +1,478 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';
+var numPvc = '<%ejGet(numPvc)%>';
+var upRate = parseInt('<%ejGetOther(lineRate, 0, 0)%>');
+var pcrMax = 255000;   // Assuming nitro: 255000 * 49 * 8 = 100Mbps  // SASHA: VDSL
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+function encapChange() {
+	var loc;
+	with ( document.forms[0] ) {
+		if (dslType.value == 'PTM')
+			loc = 'supportconsole_wanvlans.html'
+		else if(dslType.value == 'ATM')
+			loc = 'supportconsole_wanvlans_atm.html'
+		else {
+			AlertOpen('Internal Error!');
+			return;
+		}
+	}
+	var code = 'location="'+loc+'"';
+	eval(code);
+}
+
+function prtclChange(){
+	with ( document.forms[0] ) {
+	    if (prtcl_sel.selectedIndex == 0){ //PPPoE
+			pppUserName.value = '<%ejGet(defPppUserName)%>';
+			wanIpAddress.value = "0.0.0.0";
+			wanIntfGateway.value = "0.0.0.0";
+			wanSubnetMask.value = "0.0.0.0";
+			wanFilterOp60.value= "";
+			pppPassword.value = "**********";
+			$('.atmPoE').show();
+			$('.atmStatic').hide();
+			$('.atmBr').hide();
+		}else if (prtcl_sel.selectedIndex == 1){//Br
+			wanIpAddress.value = "0.0.0.0";
+			wanIntfGateway.value = "0.0.0.0";			
+			wanSubnetMask.value = "0.0.0.0";
+			pppPassword.value = "";
+			$('.atmPoE').hide();
+			$('.atmStatic').hide();
+			$('.atmBr').show();
+		}else if (prtcl_sel.selectedIndex == 2){//DHCP
+			wanIpAddress.value = "0.0.0.0";
+			wanIntfGateway.value = "0.0.0.0";			
+			wanSubnetMask.value = "0.0.0.0";
+			pppPassword.value = "";
+			wanFilterOp60.value= "";
+			$('.atmPoE').hide();
+			$('.atmStatic').hide();
+			$('.atmBr').hide();
+		}else{//Static
+			pppPassword.value = "";
+			wanFilterOp60.value= "";
+			$('.atmPoE').hide();
+			$('.atmStatic').show();
+			$('.atmBr').hide();
+		}
+	}
+}
+
+function frmLoad(){
+	with ( document.forms[0] ) {
+		$("#prtcl_sel").attr("value","DHCP");//Default IPoE
+		prtclChange();
+	}
+}
+
+function btnRemove(rml) {
+	with ( document.forms[1] ) {
+		rmLst.value=rml;
+	}
+	document.forms[1].sessionKey.value = gblsessionKey;
+	document.forms[1].submit();
+}
+
+function cbClick(obj) {
+   var idx = obj.selectedIndex;
+   var val = obj.options[idx].value;
+   with ( document.forms[0] ) {
+	   if ( val == "UBR" ){
+		atmPeakCellRate.disabled = true;
+		atmSustainedCellRate.disabled = true;
+		atmMaxBurstSize.disabled = true;
+		atmPeakCellRate.value = 0;
+		atmSustainedCellRate.value = 0;
+		atmMaxBurstSize.value = 0;
+	   }else if (val == "UBRWPCR" || val == "CBR"){
+		atmPeakCellRate.disabled = false;
+		atmSustainedCellRate.disabled = true;
+		atmMaxBurstSize.disabled = true;
+		atmPeakCellRate.value = 0;
+		atmSustainedCellRate.value = 0;
+		atmMaxBurstSize.value = 0;
+	   }else{
+		atmPeakCellRate.disabled = false;
+		atmSustainedCellRate.disabled = false;
+		atmMaxBurstSize.disabled = false;
+		atmPeakCellRate.value = 0;
+		atmSustainedCellRate.value = 0;
+		atmMaxBurstSize.value = 0;
+	   }
+   }
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+		if (l2Intf == 1 && numPvc > 10)
+		{
+			AlertOpen('Only support 10 ATM WAN interface.\n');
+			return false;
+		}
+		else if (l2Intf != 1 && numPvc >0)
+		{
+			AlertOpen('Please change Default WAN into ATM interface.\n');
+			return false;
+		}
+
+		var srvName = serviceName.value;
+
+		//srvName "Default" is used by Default WAN service.
+		if ((srvName=='') || (srvName=='Default')) {
+			AlertOpen('The connection name entered in step 2 is not valid.  Please enter a name containing 2 to 20 characters.\n');
+			return false;
+		}
+
+		if (prtcl_sel.selectedIndex == 0) { // PPPoE
+			ntwkPrtcl.value = 0;
+			mtuSize.value = "1492";
+			// validate user name
+			var len = pppUserName.value.length;
+			if ( len > 64 ) {
+				msg = 'The length of user name (' + len + ') is too long [0-64].';
+	 			AlertOpen(msg);
+ 				return false;
+ 			}
+
+			if ( isValidPassword(pppUserName.value) == false ) {
+			    AlertOpen('username is invalid.');
+			    return false;
+			}
+
+	 		// validate password
+ 			len = pppPassword.value.length;
+	 		if ( len > 64 ) {
+ 				msg = 'The length of password (' + len + ') is too long [0-64].';
+ 				AlertOpen(msg);
+ 				return false;
+	 		}
+
+	 		pppUserName.value = encodeUrl(pppUserName.value);
+ 			pppPassword.value = encodePassword(pppPassword.value);
+			pppPassword.value = decodePassword(pppPassword.value);
+		} else if (prtcl_sel.selectedIndex == 1) { // Br
+			if (isValidPassword(wanFilterOp60.value) == false)
+			{
+				msg = 'The DHCP option60 is invalid.';
+ 				AlertOpen(msg);
+ 				return false;
+			}
+			ntwkPrtcl.value = 3;
+			enblIgmp.value = 0;
+			mtuSize.value = "1500";
+		} else if (prtcl_sel.selectedIndex == 2) { // DHCP
+			ntwkPrtcl.value = 2;
+			 mtuSize.value = "1500";
+		} else { // Static
+			if (isValidSubnetMask(wanSubnetMask.value) == false) {
+				AlertOpen("The Subnetmask is invalid");
+				return false;
+			}
+			ntwkPrtcl.value = 2;
+			enblDhcpClnt.value = 0;
+			useStaticIpAddress.value = 1;
+			mtuSize.value = "1500";
+		}
+
+		if (atmServiceCategory.value != 'UBR') {
+			if ( atmPeakCellRate.value == "" || isNaN(atmPeakCellRate.value) == true) {
+				AlertOpen('Peak Cell Rate "' + atmPeakCellRate.value + '" is invalid.');
+				return false;
+			}
+			peak = parseInt(atmPeakCellRate.value);
+			if ( peak <= 0 || peak > pcrMax ) {
+				AlertOpen('Peak Cell Rate "' + atmPeakCellRate.value + '" is out of range [1-' + pcrMax + '].');
+				return false;
+			}
+		} else
+			atmPeakCellRate.value=0;
+
+		if (atmServiceCategory.value == 'VBR-nrt' || atmServiceCategory.value == 'VBR-rt') {
+			if ( atmSustainedCellRate.value == "" || isNaN(atmSustainedCellRate.value) == true) {
+				AlertOpen('Sustainable Cell Rate "' + atmSustainedCellRate.value + '" is invalid.');
+				return false;
+			}
+			sustainable = parseInt(atmSustainedCellRate.value);
+			if ( sustainable <= 0 || sustainable > pcrMax ) {
+				AlertOpen('Sustainable Cell Rate "' + atmSustainedCellRate.value + '" is out of range [1-' + pcrMax + '].');
+				return false;
+			}
+			if ( sustainable >= peak) {
+				AlertOpen('Sustainable Cell Rate "' + atmSustainedCellRate.value + '" has to be smaller than Peak Cell Rate');
+				return false;
+			}
+			if ( atmMaxBurstSize.value == "" || isNaN(atmMaxBurstSize.value) == true) {
+				AlertOpen('Maximum Burst Size "' + atmMaxBurstSize.value + '" is invalid.');
+				return false;
+			}
+			maximum = parseInt(atmMaxBurstSize.value);
+			if ( maximum <= 0 || maximum > 1000000 ) {
+				AlertOpen('Maximum Burst Size "' + atmMaxBurstSize.value + '" is out of range [1-1000000].');
+				return false;
+			}
+		} else {
+			atmSustainedCellRate.value=0;
+			atmMaxBurstSize.value=0;
+		}
+
+		if (atmVpi.value == "" || isNaN(atmVpi.value) == true || atmVci.value == "" ||isNaN(atmVci.value) == true) {
+			AlertOpen("The VPI/VCI combination is invalid.  Please enter a valid VPI/VCI combination.");
+			return false;
+		}
+
+		vpiNum = parseInt(atmVpi.value);
+		vciNum = parseInt(atmVci.value);
+
+		if ((vpiNum < 0 || vpiNum > 255) || (vciNum < 32 || vciNum > 65535))
+		{
+			AlertOpen("The VPI/VCI combination is invalid.  Please enter a valid VPI/VCI combination.");
+			return false;
+		}
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+
+	//Return false to avoid do submit twice.
+	return false;
+}
+
+
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<script language="javascript">
+        WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('wanvlans', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+  </div>
+		<div id="content_right">
+		  
+			<div id="content_right_contentarea">
+			  <h1 class="supportconsole_wanvlans">WAN VLANs/PVCs <span>WAN VLANs/PVCs allow the service operator to set additional network
+                  paths for enhanced services.</span></h1>
+			<form id="form1" name="form1" method="post" action="supportconsole_wanvlans.cgi" onSubmit="return btnApply();">
+ 			<input type="hidden" name="enblOnDemand" id="enblOnDemand" value="0">
+			<input type="hidden" name="pppTimeOut" id="pppTimeOut" value="0">
+			<input type="hidden" name="useStaticIpAddress" id="useStaticIpAddress" value="0">
+			<input type="hidden" name="pppLocalIpAddress" id="pppLocalIpAddress" value="0.0.0.0">
+			<input type="hidden" name="pppIpExtension" id="pppIpExtension" value="0">
+			<input type="hidden" name="enblFirewall" id="enblFirewall" value="1">
+			<input type="hidden" name="enblNat" id="enblNat" value="1">
+			<input type="hidden" name="enblFullcone" id="enblFullcone" value="0">
+			<input type="hidden" name="pppAuthErrorRetry" id="pppAuthErrorRetry" value="1">
+			<input type="hidden" name="pppAuthErrorRetryInterval" id="pppAuthErrorRetryInterval" value="120">
+			<input type="hidden" name="enblPppDebug" id="enblPppDebug" value="0">
+			<input type="hidden" name="enblIgmp" id="enblIgmp" value="1">
+			<input type="hidden" name="ntwkPrtcl" id="ntwkPrtcl" value="3">
+			<input type="hidden" name="wanAdd" id="wanAdd" value="1">
+			<input type="hidden" name="isAtm" id="isAtm" value="1">
+			<input type="hidden" name="enblDhcpClnt" id="enblDhcpClnt" value="1">
+			<input type="hidden" name="enblLan2" id="enblLan2" value="0">
+			<input type="hidden" name="usePublicIP" id="usePublicIP" value="0">
+			<input type="hidden" name="mtuSize" id="mtuSize" value="1500">
+			<input type="hidden" name="wanIpv6Mode" id="wanIpv6Mode" value="0">
+			<input type="hidden" name="enblv6" id="enblv6" value="0">
+			<input type="hidden" name="tunnel6rd" id="tunnel6rd" value="0">
+			<input type="hidden" name="enblMld" id="enblMld" value="0">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="">
+                <div class="stepWrapper">
+                <p><strong>1. Select the encapsulation type.</strong>
+					  </p><table>
+                        <tr>
+                          <td width="150">Encapsulation:</td>
+                          <td><select name="dslType" id="select" onChange="encapChange()">
+                                <option value="PTM">PTM</option>
+                                <option value="ATM" selected="selected">ATM</option>
+                              </select></td>
+                        </tr>
+                      </table>
+                      </div>
+                      <div class="stepWrapper">
+					  <p><strong>2. Enter connection name.</strong>
+					  </p><table>
+                        <tr>
+                              <td width="150">Connection Name:</td>
+                            <td><input name="serviceName" type="text" id="serviceName" maxlength="20" /></td>
+                        </tr>
+                      </table>
+                      </div>
+
+             <div class="stepWrapper">
+					  <p><strong>3. Select protocol.</strong></p><table>
+					    <tr>
+                          <td width="150">Protocol:</td>
+                          <td><select name="prtcl_sel" id="prtcl_sel" onChange="prtclChange()">
+                                <option value="PPPoE" selected="selected">PPPoE </option>
+                                <option value="Transparent Bridging">Transparent Bridging </option>
+                                <option value="DHCP">IPoE </option>
+                              </select></td>
+					    </tr>
+                   <tr class="atmPoE">
+                        <td width="135" style="padding-left:15px;"><label for="username">Username:</label></td>
+                        <td><input name="pppUserName" type="text" id="username" value="connect@qwest.com" />
+                        </td>
+                    </tr>
+                    <tr class="atmPoE">
+                        <td width="135" style="padding-left:15px;"><label for="password">Password:</label></td>
+                        <td><input name="pppPassword" type="password" id="password" value="**********" />
+                        </td>
+                    </tr>	
+                        <tr class="atmStatic">
+                            <td width="135" style="padding-left:15px;"><label for="pppoe_ip_single_static">Single Static IP:</label></td>
+                            <td><input name="wanIpAddress" id="wanIpAddress" type="text" size="35" /></td>
+                        </tr>
+                        <tr class="atmStatic">
+                            <td width="135" style="padding-left:15px;"><label for="pppoe_ip_gateway">Gateway Address:</label></td>
+                            <td><input name="wanIntfGateway" id="wanIntfGateway" type="text" size="35" /></td>
+                        </tr>
+                        <tr class="atmStatic">
+                            <td width="135" style="padding-left:15px;"><label for="pppoe_subnet_mask">Subnet Mask:</label></td>
+                            <td><input name="wanSubnetMask" id="wanSubnetMask" type="text" size="35" /></td>
+                        </tr>
+			    <tr class="atmBr">
+                              <td width="150">DHCP Option 60:</td>
+                              <td><input name="wanFilterOp60" type="text" id="wanFilterOp60" />                              </td>
+			    </tr>
+                      </table>
+                      </div>
+
+                      <div class="stepWrapper">
+					  <p><strong>4. Enter ATM values.</strong> 
+					  </p>
+               <table>
+                    <tr>
+                        <td width="150"><label for="atmVpi">VPI:</label> </td>
+                        <td><input name="atmVpi" type="text" id="atmVpi" />
+                        </td>
+						<td>(0-255)</td>
+                    </tr>
+                    <tr>
+                        <td width="150"><label for="atmVci">VCI:</label></td>
+                        <td><input name="atmVci" type="text" id="atmVci" />
+                        </td>
+						<td>(32 - 65535)</td>
+                    </tr>
+                       <tr>
+                            <td width="150"><label for="atmServiceCategory">Priority:</label></td>
+                            <td>
+					<select name="atmServiceCategory" size="1" onClick='cbClick(this)'>
+		                        <option value="UBR" selected>UBR without PCR
+		                        <option value="UBRWPCR">UBR with PCR
+		                        <option value="CBR">CBR
+		                        <option value="VBR-nrt">Non-Real Time VBR
+		                        <option value="VBR-rt">Real Time VBR</option>
+		                     </select>
+                              </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">Traffic Parameters:</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan="2">
+                                <table style="margin:0; width:100%">
+                                    <tr style="border-bottom:none;">
+                                        <td style="border-bottom:none;" width="20"><label for="atmPeakCellRate">PCR:</label></td>
+                                        <td style="border-bottom:none;"><input name="atmPeakCellRate" id="atmPeakCellRate" type="text" size="5" disabled/></td>
+                                        <td style="border-bottom:none;" width="20"><label for="atmSustainedCellRate">SCR:</label></td>
+                                        <td style="border-bottom:none;"><input name="atmSustainedCellRate" id="atmSustainedCellRate" type="text" size="5" disabled/></td>
+                                    </tr>
+                                </table>                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan="2">
+                            	<table style="border-bottom:none; margin:0; width:100%">
+                                    <tr style="border-bottom:none;">
+                                        <td style="border-bottom:none;" width="20"><label for="atmMaxBurstSize">MBS:</label></td>
+                                        <td style="border-bottom:none;"><input name="atmMaxBurstSize"  id="atmMaxBurstSize" type="text" size="5" disabled/></td>
+                                        <!--<td width="20"><label for="atm_paramenters_cdvt">CDVT:</label></td>
+                                        <td><input id="atm_paramenters_cdvt" type="text" size="5" / disabled></td>
+						  -->
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                </table>					  
+                      </div>
+                      <div class="stepWrapper">
+					  <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+					  <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+                      </div>
+			</form>            
+			<form id="form2" name="form2" method="post" action="wancfg.cmd">
+				<input type="hidden" name="action" id="action" value="remove">
+				<input type="hidden" name="rmLst" id="rmLst" value="">
+				<input type="hidden" name="isAtm" id="isAtm" value="1">
+				<input type="hidden" name="sessionKey" id="sessionKey" value="">
+                      <p>&nbsp;</p>
+                      <div class="stepWrapperdark">
+					  <p align="center"><strong>WAN PVCs </strong></p>
+			          <table border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                        <tr>
+                          <th height="45" width="20%">Name</th>
+                          <th width="25%">Protocol</th>
+                          <th width="13%">VPI</th>
+                          <th width="13%">VCI</th>
+                          <th width="10%">EDIT</th>
+                        </tr>
+					<%ejGetOther(wanShow, atm)%>
+                      </table>
+					  </div>
+					</form>
+					<div class="clear_left"></div>
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

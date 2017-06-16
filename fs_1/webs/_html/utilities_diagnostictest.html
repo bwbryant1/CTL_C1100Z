@@ -1,0 +1,303 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--
+var noresponse = 0;
+var diagTesting=0;
+
+var buildHPNA = '<%ejGet(HpnaFeature)%>'; if ( buildHPNA == '&nbsp' || buildHPNA == '') buildHPNA = '0';
+var buildBonding = '<%ejGet(buildBonding)%>'; if ( buildBonding == '&nbsp' || buildBonding == '') buildBonding = '0';
+var build5G = '<%ejGet(wifi5GFeature)%>'; if ( build5G == '&nbsp' || build5G == '') build5G = '0';
+var buildEthWAN = '<%ejGet(EthWan)%>' ; if ( buildEthWAN == '&nbsp' || buildEthWAN == '') buildEthWAN = '0';
+var buildVoIP = '<%ejGet(voiceFeature)%>' ; if ( buildVoIP == '&nbsp' || buildVoIP == '') buildVoIP = '0';
+
+function hide_tr(optionID)
+{
+   var result_style = document.getElementById(optionID).style;
+   result_style.display = 'none';
+}
+
+function pagePos()
+{
+ 	var pos;
+    if (document.documentElement && document.documentElement.scrollTop) {
+        pos = document.documentElement.scrollTop;
+    } else if (document.body) {
+        pos = document.body.scrollTop;
+    }
+	return pos;
+}
+
+function btnApply()
+{
+    var loc='utilities_diagnostictest.cgi';
+    var i;
+
+    if(diagTesting == 1){
+        return;
+    }
+    diagTesting = 1;
+
+    //Clear test result
+    var table = document.getElementById("diagResult");
+    var lastRow = table.rows.length;
+    for ( i = 1; i < lastRow ; i++ ) {
+        table.rows[i].cells[1].innerHTML = "N/A";
+    }
+    table.rows[1].cells[1].innerHTML = "<font color='#edab12'>TESTING</font>";
+    
+    BackgroundUrl(loc);
+    setTimeout("getRefresh();", 1000);
+}
+
+function showResult ( diagResult )
+{
+    //Clear test result
+    var table = document.getElementById("diagResult");
+    var lastRow = table.rows.length;
+    var i;
+    
+    for ( i = 1; i < lastRow ; i++ ) {
+        table.rows[i].cells[1].innerHTML = "N/A";
+    }
+    i = 0;
+    
+    if( diagResult.indexOf("|") > 0 )
+    {
+        var results=diagResult.split("|");
+        for( i=0 ; i < results.length ; i++ ){
+            if ( results[i].indexOf("end")>=0 ) {
+                diagTesting=0;
+                return;
+            }
+            table.rows[i+1].cells[1].innerHTML = results[i];
+        }
+    }
+    if(i < table.rows.length ){
+        table.rows[i+1].cells[1].innerHTML = "<font color='#edab12'>TESTING</font>";
+    }
+    
+    setTimeout("getRefresh();", 1000);
+}
+
+function watchDog () 
+{
+    if ( noresponse ) {
+        getRefresh();
+    }
+}
+
+function getRefresh()
+{
+    var objXMLHTTP = null; 
+
+        if (window.XMLHttpRequest)  { 
+        objXMLHTTP=new XMLHttpRequest(); 
+    }// code for IE 
+        else if (window.ActiveXObject)  { 
+        objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+    }
+
+    if ( objXMLHTTP != null ) {
+        objXMLHTTP.open("GET","./diagTestResult.html",true);
+        objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+        objXMLHTTP.onreadystatechange = function()
+        {
+            if (objXMLHTTP.readyState == 4) {
+                noresponse = 0;
+                var tmpResult=objXMLHTTP.responseText;
+                if(tmpResult!=""){
+                    showResult ( tmpResult );
+                }
+                else{
+                    setTimeout("getRefresh();", 1000);
+                }
+            }
+        }
+        objXMLHTTP.send(null);
+    }
+}
+
+function frmLoad()
+{
+	if(buildHPNA == '0')
+		hide_tr('HPNAOption');
+	if(buildBonding == '0')
+		hide_tr('DSLBondingOption');
+	if(build5G == '0')
+		hide_tr('5GOption');
+	if(buildEthWAN == '0')
+		hide_tr('EthWANOption');
+	if(buildVoIP == '0')
+		hide_tr('VoIPOption');
+}
+//-->
+</script>
+</head>
+<body onLoad='frmLoad()'>
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+        WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="content_left">
+			<ul id="subnav">
+<script language="javascript">   
+	WriteUtilitiesMenuHeader('diagnostictest', '<%ejGet(HpnaFeature)%>');
+</script>		
+			</ul>
+			<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+           WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+            </div>
+        	</div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="utilities_speedtest"> Diagnostic Test</h1>
+        <form>
+          <div class="stepWrapper">
+            <p><strong>1. Click &quot;Test&quot; to begin the diagnostic test.</strong></p>
+            <a href="javascript:scroll(0,pagePos())" class="btn test_btn" onClick="btnApply()">Test</a>
+          </div>
+            <p>&nbsp;</p>
+            <div id="test_results">
+           	  <div class="stepWrapperdark">
+                <p align="center"><strong>Diagnostic Test Results</strong></p>
+                <div align="left">
+                  <table id="diagResult">
+                    <tbody>
+                    <tr>
+                      <th width="150">Test</th>
+                      <th>Result</th>
+                    </tr>
+                    <tr>
+                      <td width="150">Software Test:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">Hardware Test:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">2.4 GHz Wireless Interface:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr id ="5GOption">
+                      <td width="150">5 GHz Wireless Interface:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">LAN Ethernet Switch:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr id ="HPNAOption">
+                      <td width="150">HPNA Interface:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr id ="VoIPOption">
+                      <td width="150">VoIP Interface:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">LED Test:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr id ="EthWANOption">
+                      <td width="150">WAN Ethernet:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">
+<script language="javascript">
+   if(buildBonding == '1')
+      document.writeln( 'DSL 1 PHY:' );
+   else
+      document.writeln( 'DSL PHY:' );
+</script>
+                      </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr id ="DSLBondingOption">
+                      <td width="150">DSL 2 PHY:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">Encapsulation Type: </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">Encapsulation Test:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">Protocol:</td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">PPP Authentication: </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">DNS Resolve: </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">DNS #1: </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">DNS #2: </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">NTP Test: </td>
+                      <td>N/A</td>
+                    </tr>
+                    <tr>
+                      <td width="150">Walled Garden: </td>
+                      <td>N/A</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="footer">
+        Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.
+    </div>
+</div>
+</body>
+</html>

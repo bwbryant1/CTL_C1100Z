@@ -1,0 +1,3181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/common.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<style type="text/css">
+   input {
+       font-family: sans-serif;
+   }
+</style>
+<script language="javascript">
+<!-- hide
+//get l2
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';// 1:atm, 2 PTM, 3 Eth
+var atmEncap = '<%ejGet(atmEncap)%>';
+var defPrctl = '<%ejGetOther(sysInfo, defaultPrctl)%>';
+
+//PPPoE
+var onDemand = '<%ejGet(enblOnDemand)%>';
+var localIpAddr = '<%ejGet(pppLocalIpAddress)%>';
+
+//IPoE
+var enblIpAddr = '<%ejGet(useStaticIpAddress)%>';
+var dns1 = '<%ejGetOther(sysInfo, dns1)%>'; if ( dns1 == '&nbsp' ) dns1 = '0.0.0.0';
+var dns2 = '<%ejGetOther(sysInfo, dns2)%>'; if ( dns2 == '&nbsp' ) dns2 = '0.0.0.0';
+var dnsIfcvalue = '<%ejGetOther(sysInfo, dnsIfc)%>'; if (dnsIfcvalue == '&nbsp') dnsIfcvalue = '';
+
+var hostName = '<%ejGet(wanHostName)%>';
+var domainName = '<%ejGet(wanDomainName)%>';
+var wanIp = '<%ejGet(wanIpAddress)%>';
+var subnetMask = '<%ejGet(wanSubnetMask)%>';
+var gateway = '<%ejGet(wanIntfGateway)%>';
+var vah_atm_enable = '<%ejGetOther(vah, atm, l2)%>';
+var vah_ptm_enable = '<%ejGetOther(vah, ptm, l2)%>';
+var vah_eth_enable = '<%ejGetOther(vah, ptm, l2)%>';
+var vah_atm_l3_enable = '<%ejGetOther(vah, atm, l3)%>';
+var vah_ptm_l3_enable = '<%ejGetOther(vah, ptm, l3)%>';
+var vah_eth_l3_enable = '<%ejGetOther(vah, ethernet, l3)%>';
+
+// MTU
+var mtusize = '<%ejGetOther(sysInfo, defaultMtuSize)%>';
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var g_vpi = '<%ejGet(atmVpi)%>';
+var g_vci = '<%ejGet(atmVci)%>';
+
+//__MSTC__, Loujia 0813 6rd
+var g_ipv6enable = '<%ejGet(enblv6)%>';
+var g_tunnel6rd='<%ejGet(tunnel6rd)%>';
+var g_addr6rdEndpoint='<%ejGet(addr6rdEndpoint)%>';
+var g_addr6rdPrefix='<%ejGet(addr6rdPrefix)%>';
+var g_tunnel6rdMaskLen='<%ejGet(tunnel6rdMaskLen)%>';
+var g_tunnel6rdPrefixLen='<%ejGet(tunnel6rdPrefixLen)%>';
+var g_tunnel6rdDnsType='<%ejGet(tunnel6rdDnsType)%>';
+
+var g_wanIpv6Mode='<%ejGet(wanIpv6Mode)%>'; //0: ipv4 1:DualStack 2:6rd 3:DS-Lite
+
+//__MSTC__, Loujia 0813 6rd - dns
+var dns6type = '<%ejGetOther(sysInfo, dns6Type)%>'; if ( dns6type == '&nbsp' ) dns6type = '';
+var dns6pri = '<%ejGetOther(sysInfo, dns6Pri)%>'; if ( dns6pri == '&nbsp' ) dns6pri = '';
+var dns6sec = '<%ejGetOther(sysInfo, dns6Sec)%>'; if ( dns6sec == '&nbsp' ) dns6sec = '';
+var dns6pref = '<%ejGetOther(sysInfo, dns6Pref)%>'; if ( dns6pref == '&nbsp' ) dns6pref = '';
+
+//__MSTC__, Loujia 0813 6rd - load
+var defPrctlv6 = '<%ejGetOther(sysInfo, defaultIPv6Prctl)%>';
+
+//__MSTC__, Loujia 0814 IPoE-dhcpv6
+var g_wanAddr6Type='<%ejGet(wanAddr6Type)%>';
+
+//__MSTC__, Loujia 0821 Integrate WAN Pate, 6rd 212 option 
+var g_tunnel6rdType='<%ejGet(tunnel6rdType)%>'; //DHCP or Static
+
+//__MSTC__, Loujia 0818 ISP Protocol split VPi/VCi from prctlOption
+var g_brPVC=g_vpi+g_vci;
+
+var isACSWanMode = '<%ejGetOther(sysInfo, isACSWanMode)%>';
+var vlanMuxId='<%ejGet(vlanMuxIdDefault)%>';
+
+var specMode = 1; // Mode0 : IPoE support block of static IP address, Mode1: Only dynamic and Static IPoE
+
+function modifyIPoETitle()
+{
+   /* This function support modify the title for dynamic */
+   with ( document.forms[0] ) {
+      var BasicNumber = 3;
+      var EnableBlock = 0;
+      var EnableIPv6 = 0;
+      var Enable6rd = 0;
+	  
+      if(rfc_dhcp_ip_type.value == 'BlockDHCP' || rfc_dhcp_ip_type.value == 'BlockManual')
+      {
+         EnableBlock = 1;
+      }
+	  
+      if(wan_ipV6_ip_protocol.selectedIndex == 1)
+      {
+         EnableIPv6 = 1;
+         Enable6rd = 1;
+      }
+      else if(wan_ipV6_ip_protocol.selectedIndex == 2)
+      {
+         EnableIPv6 = 1;
+         Enable6rd = 0;
+      }
+      else
+      {
+         EnableIPv6 = 0;
+         Enable6rd = 0;
+      }
+	  
+      var BlockTitle;
+      var DnsTitle;
+      var IPv6Title;
+      var SixRDTitle;
+      var IPv6DNSTitle;
+      var IPv6DNSPreTitle;
+      var ApplyTitle;
+	  
+      var RadioStaticTitle;
+      if(specMode == 1 && (rfc_dhcp_ip_type.value == 'StaticManual'))
+      {
+         BasicNumber +=1;
+      }
+	  
+      if(EnableBlock)
+      {
+         BlockTitle = BasicNumber +1;
+      }	  
+      DnsTitle = BasicNumber + EnableBlock + 1;
+      IPv6Title = DnsTitle + 1;
+
+      if(EnableIPv6)
+      {
+         if(Enable6rd)
+         {
+            SixRDTitle = IPv6Title +1;
+            IPv6DNSTitle = SixRDTitle +1;
+         }
+         else
+         {
+            IPv6DNSTitle = IPv6Title +1;
+         }
+         IPv6DNSPreTitle = IPv6DNSTitle +1;
+         ApplyTitle = IPv6DNSPreTitle +1;
+      }
+      else
+      {
+         ApplyTitle = IPv6Title +1;
+      }
+
+      if(specMode == 1)
+      {
+         document.getElementById("RadioStaticTitle").innerHTML = BasicNumber + ". Enter the Static IP Information.";
+      }
+	  
+      document.getElementById("IPoEBlcokTitle").innerHTML = BlockTitle + ". Enter the Static Block IP Information.";
+      document.getElementById("IPoEDNSTitle").innerHTML = DnsTitle + ". Select the DNS type.";
+      document.getElementById("IPoEIPv6Title").innerHTML = IPv6Title + ". Select the WAN IPv6 connection protocol.";
+      document.getElementById("IPoE6rdTitle").innerHTML = SixRDTitle + ". Set the IPv6 addressing values.";
+      document.getElementById("IPoEDNSv6").innerHTML = IPv6DNSTitle + ". Set the WAN IPv6 DNS server.";
+      document.getElementById("IPoEDNSPre").innerHTML = IPv6DNSPreTitle + ". Set the DNS IP version resolver preference below.";
+      document.getElementById("ApplyDHCPTitle").innerHTML = ApplyTitle + ". Click &quot;Apply&quot; to save your changes.";
+   }
+}
+function isValidWanIpAddress(address)
+{
+   var addrParts;
+   var tmp = 0;
+   addrParts = address.split('.');
+   tmp = parseInt(addrParts[0]);
+
+   if (tmp >= 224)
+   	return false;
+   else 
+   	return true;
+}
+
+function ipTypeChange(reload)
+{
+	with ( document.forms[0] ) {
+		if (rfc_static_routed_ip_type.selectedIndex == 0) {
+			rfc_static_routed_ip_gateway.disabled = true;
+			rfc_static_routed_subnet_mask.disabled = true;
+			rfc_static_routed_subnet_static[0].disabled = true;
+			rfc_static_routed_subnet_static[0].checked = true;
+			rfc_static_routed_subnet_static[1].disabled = true;
+		} else if (rfc_static_routed_ip_type.selectedIndex == 1) {
+			rfc_static_routed_ip_gateway.disabled = false;
+			rfc_static_routed_subnet_mask.disabled = false;
+			rfc_static_routed_subnet_static[0].disabled = false;
+			rfc_static_routed_subnet_static[1].disabled = false;
+		}
+	}
+}
+function IpoeTypeChange(reload)
+{
+   with ( document.forms[0] ) {
+      if(rfc_dhcp_ip_type.value == 'Dynamic' || rfc_dhcp_ip_type.value == 'BlockDHCP')
+      {
+         rfc_dhcp_routed_dns_type[0].disabled = false;		 
+         rfc_dhcp_routed_dns_type[0].checked = true;
+         single_static_ip.disabled = true;
+         single_static_subnet.disabled = true;
+         single_static_gateway.disabled = true;
+         if(specMode == 1)
+         {
+            document.getElementById('rfc_dhcp_routed_text').style.display = "none";
+         }
+      }
+      else if(rfc_dhcp_ip_type.value == 'StaticDHCP' || rfc_dhcp_ip_type.value == 'StaticManual' || rfc_dhcp_ip_type.value == 'BlockManual')
+      {
+         rfc_dhcp_routed_dns_type[0].disabled = true;
+         rfc_dhcp_routed_dns_type[1].checked = true;
+         single_static_ip.disabled = false;
+         single_static_subnet.disabled = false;
+         single_static_gateway.disabled = false;
+         if(specMode == 1)
+         {
+            document.getElementById('rfc_dhcp_routed_text').style.display = "";
+         }
+      }
+
+      if(rfc_dhcp_ip_type.value == 'StaticDHCP' || rfc_dhcp_ip_type.value == 'BlockDHCP')
+      {
+         if(rfc_dhcp_ip_type.value == 'StaticDHCP')
+         {
+            document.getElementById("single_dhcp_wanip").innerHTML = '<%ejGetOther(sysInfo, acsWanIP)%>';
+            document.getElementById("single_dhcp_lable").innerHTML = 'ACS WAN IP Address:';
+         }
+         else
+         {
+            document.getElementById("single_dhcp_wanip").innerHTML = '<%ejGet(wanIpAddress)%>';
+            document.getElementById("single_dhcp_lable").innerHTML = 'WAN IP Address:';
+         }
+         document.getElementById("single_label_text").innerHTML = "Static IP - Automatic: The Static IP information for the WAN interface of the router is provided via DHCP from the network.";
+      }
+      else if(rfc_dhcp_ip_type.value == 'StaticManual' || rfc_dhcp_ip_type.value == 'BlockManual')
+      {
+         document.getElementById("single_label_text").innerHTML = "Static IP - Manual: The Static IP information for the WAN interface of the router is provided via the GUI.";
+      }
+
+      if(rfc_dhcp_ip_type.value == 'BlockDHCP' || rfc_dhcp_ip_type.value == 'BlockManual')
+      {
+         ipoe_ip_block_lan_dhcp[0].disabled = false;
+         ipoe_ip_block_lan_dhcp[1].disabled = false;
+      }
+      else
+      {
+         ipoe_ip_block_lan_dhcp[0].disabled = true;
+         ipoe_ip_block_lan_dhcp[1].disabled = true;
+      }
+      dhcpDnsChange();
+      modifyIPoETitle();
+   }
+}
+function pppIpTypeChange(reload)
+{
+	with ( document.forms[0] ) {
+		if (pppoe_ip_type.selectedIndex == 0) {
+			pppoe_ip_single_static.disabled = true;
+			pppoe_ip_gateway.disabled = true;
+			pppoe_subnet_mask.disabled = true;
+			pppoe_subnet_dhcp[0].checked = true;
+			pppoe_subnet_dhcp[0].disabled = true;
+			pppoe_subnet_dhcp[1].disabled = true;
+		} else if (pppoe_ip_type.selectedIndex == 1) {
+			pppoe_ip_single_static.disabled = false;
+			pppoe_ip_gateway.disabled = true;
+			pppoe_subnet_mask.disabled = true;
+			pppoe_subnet_dhcp[0].checked = true;
+			pppoe_subnet_dhcp[0].disabled = true;
+			pppoe_subnet_dhcp[1].disabled = true;
+		} else {
+			pppoe_ip_single_static.disabled = true;
+			pppoe_ip_gateway.disabled = false;
+			pppoe_subnet_mask.disabled = false;
+			pppoe_subnet_dhcp[0].disabled = false;
+			pppoe_subnet_dhcp[1].disabled = false;
+		}		
+	}
+}
+
+function pppDnsChange()
+{
+	with ( document.forms[0] ) {
+
+		if($('input[name=pppoe_dns_type]:checked').val()=='pppoe_dns_type_dynamic'){
+			$('.pppoe_dns_type_dynamic_group').hide();
+		} else {
+			$('.pppoe_dns_type_dynamic_group').show();
+		}
+/*
+		if (pppoe_dns_type[1].checked == true)
+		{
+			pppoe_dns_primary.disabled = false;
+			pppoe_dns_secondary.disabled = false;
+		}
+		else
+		{
+			pppoe_dns_primary.disabled = true;
+			pppoe_dns_secondary.disabled = true;
+		}
+*/
+	}
+}
+
+function pwdCheckRequire()
+{
+	with ( document.forms[0] ) {
+		if (pppoe_no_credentials[0].checked == true)
+		{
+			pppoe_username.disabled = true;
+			pppoe_password.disabled = true;
+			pppoe_password_confirm.disabled = true;
+
+			hide_password_change();
+
+			$('.class_hide_password').hide();
+			$('.class_pppoe_username').hide();
+			$('.class_pppoe_password').hide();
+		}
+		else
+		{
+			pppoe_username.disabled = false;
+			pppoe_password.disabled = false;
+			pppoe_password_confirm.disabled = false;
+
+			$('.class_hide_password').show();
+			$('.class_pppoe_username').show();
+			$('.class_pppoe_password').show();
+
+			hide_password_change();
+		}
+	}
+}
+
+function getLastOrFirstAddrOfBlockIPAddress(addr,mask, getLast) 
+{
+   /* This function will choose the latest address of block of static ip addresses */
+   var ipArr = [0, 0, 0, 0],  maskArr = [0, 0, 0, 0], startArr = [0, 0, 0, 0],  endArr = [0, 0, 0, 0];
+   var lastAddr = "";
+   with ( document.forms[0] ) 
+   {
+      if(addr==""||mask=="")
+         return;
+	  
+      var msg = "";    
+      var addrParts = addr.split('.');
+      var maskParts = mask.split('.');
+  
+      for (i = 0; i < 4; i++) {
+         ipArr[i] = parseInt(addrParts[i]);
+         startArr[i] = parseInt(addrParts[i]);
+         endArr[i] = parseInt(addrParts[i]);
+         maskArr[i] = parseInt(maskParts[i]);
+      }
+      var m3 = maskArr[3];
+      var bcast = 255;
+      var n3 = 0;
+
+      if ((maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 255 ) &&
+           (m3 == 0 || m3 == 128 || m3 == 192 || m3 == 224 || m3== 240 || m3 == 248 ||  m3 == 252)) {
+         // 255.255.255.0/128/192... class C supported
+         n3 = ipArr[3] & m3;
+         hosts = 255 - m3;
+         bcast = n3 + hosts;
+      }
+      else {
+         // alert("Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.");
+         // msg = "Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.";
+         msg = "Only support subnet mask: Class C: 255.255.255.0/255.255.255.128/<br>255.255.255.192/255.255.255.224/<br>255.255.255.240/255.255.255.248/<br>255.255.255.252.";
+         AlertOpen(msg);
+         return;         
+      }
+      if (ipArr[3] == bcast) {
+         // alert('Ip address cannot be same as the broadcast ip address.');
+         msg = 'The Modem IP Address cannot be same as the broadcast IP address.';
+         AlertOpen(msg);
+         return;
+      }
+     
+      for (i = 0; i < 3; i++) {
+         lastAddr = lastAddr + endArr[i] + ".";
+      }
+
+      if(getLast)
+         endArr[3] = bcast -1;
+      else
+      {
+         /* need to get subnet +1 */
+         endArr[3] = n3 + 1;
+      }
+	  
+      lastAddr = lastAddr + endArr[3];
+      return lastAddr;
+   }
+}
+
+function btnPppApply()
+{
+	var nat = '<%ejGetOther(sysInfo, enblDefNat)%>';
+
+	with ( document.forms[0] ) {
+		if (isp_protocol.value == "PPPoE")
+			ntwkPrtcl.value = 0;
+		else
+			ntwkPrtcl.value = 1;
+
+		if(isp_protocol.value == "AutoSelect"){
+			ntwkPrtcl.value = 0;
+			atmVahL3en.value='1';
+			ptmVahL3en.value='1';
+         ethVahL3en.value='1';
+		}
+
+		// validate user name
+		var len = pppoe_username.value.length;
+		if ( len > 64 ) {
+			msg = 'The length of user name (' + len + ') is too long [0-64].';
+			AlertOpen(msg);
+			return;
+		}
+		// validate password
+		len = pppoe_password.value.length;
+		if ( len > 64 ) {
+			msg = 'The length of password (' + len + ') is too long [0-64].';
+			AlertOpen(msg);
+			return;
+		}
+		
+		if (pppoe_no_credentials[1].checked == true)
+		{
+			if (pppoe_username.value == '') {
+				AlertOpen('username can not be empty.');
+				return;
+			}
+
+			if(hide_password.checked == true)
+			{
+				if( (pppoe_password_confirm.value!=pppoe_password.value))
+				{
+					AlertOpen("The passwords entered do not match. Please enter matching passwords.");
+					return false;
+				}
+			}
+
+			pppUserName.value=encodeUrl(pppoe_username.value);
+			pppPassword.value = encodePassword(pppoe_password.value);
+			pppPassword.value = decodePassword(pppPassword.value); 
+		}
+		else
+		{
+			pppUserName.value="";
+			pppPassword.value="";
+		}
+		
+		if (pppoe_auto_connect[1].checked == true)
+		{
+			enblOnDemand.value=1;
+			pppTimeOut.value=5;
+			pppAuthErrorRetry.value=0;
+		}
+		else
+		{
+			enblOnDemand.value=0;
+			pppTimeOut.value=0;
+			pppAuthErrorRetry.value=1;
+		}
+		
+		if (nat == 1)
+			enblNat.value=1;
+		else
+			enblNat.value=0;
+
+		if (pppoe_dns_type[0].checked == true)
+		{
+			pppoe_dns_primary.value='0.0.0.0';
+			pppoe_dns_secondary.value='0.0.0.0';
+		}
+		else
+		{				
+			if (pppoe_dns_primary.value == "" && pppoe_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (pppoe_dns_primary.value != "" && (isValidIpAddress(pppoe_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (pppoe_dns_secondary.value != "" && (isValidIpAddress(pppoe_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (pppoe_dns_primary.value == pppoe_dns_secondary.value){
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return;
+			}
+			
+			if (pppoe_dns_primary.value == ""){ //pppoe_dns_primary.value == ""
+				if (pppoe_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return;
+				}
+			}
+			
+			if (pppoe_dns_secondary.value == "")
+				pppoe_dns_secondary.value='0.0.0.0';
+			dnsPrimary.value = pppoe_dns_primary.value;
+			dnsSecondary.value = pppoe_dns_secondary.value;
+		}
+
+
+		if (pppoe_ip_type.selectedIndex == 0)
+		{
+			useStaticIpAddress.value=0;
+			enblLan2.value=0;
+			pppLocalIpAddress.value=localIpAddr;
+			usePublicIP.value=0;
+		}
+		else if (pppoe_ip_type.selectedIndex == 1)
+		{
+			useStaticIpAddress.value=1;
+			enblLan2.value=0;
+			if (isValidIpAddress(pppoe_ip_single_static.value) == false) {
+				AlertOpen("The Single Static IP Address is invalid.");
+				return;
+			}
+
+			if (isValidWanIpAddress(pppoe_ip_single_static.value) == false){
+		         AlertOpen(pppoe_ip_single_static.value+" is not a valid IP address.");
+		         return;
+			}
+			
+			pppLocalIpAddress.value=pppoe_ip_single_static.value;
+			usePublicIP.value=0;
+		}
+		else if (pppoe_ip_type.selectedIndex == 2)
+		{
+			useStaticIpAddress.value=2;
+			enblLan2.value=1;
+			if (isValidIpAddress(pppoe_ip_gateway.value) == false) {
+				AlertOpen("The Gateway Address is invalid.");
+				return;
+			}
+
+			var subnetParts = pppoe_subnet_mask.value.split('.');
+			var last = parseInt(subnetParts[3]);
+			if (isValidSubnetMask(pppoe_subnet_mask.value) == false || last > 252) {
+				AlertOpen("The Subnet Mask is invalid.");
+				return;
+			}
+
+			if (!(subnetParts[0] == '255' && subnetParts[1] == '255' && subnetParts[2] == '255'))
+			{
+				AlertOpen("The range of Subnet Mask should be less than class C");
+				return;
+			}
+			/* Added By SeanLu,  choose the last address become PPPoE address */
+			var latestAddr = getLastOrFirstAddrOfBlockIPAddress(pppoe_ip_gateway.value, pppoe_subnet_mask.value, 1);
+			var firstAddr = getLastOrFirstAddrOfBlockIPAddress(pppoe_ip_gateway.value, pppoe_subnet_mask.value, 0);
+			if((pppoe_ip_gateway.value != latestAddr) && (pppoe_ip_gateway.value != firstAddr))
+			{
+			   AlertOpen("The Gateway Address is invalid.");
+			   return;
+			}
+			pppLocalIpAddress.value = pppoe_ip_gateway.value;
+			//delayConfigType.value="wan_reboot";
+			
+			lan2IpAddress.value = pppoe_ip_gateway.value;
+			lan2SubnetMask.value = pppoe_subnet_mask.value;
+			if (pppoe_subnet_dhcp[0].checked == true) {
+				usePublicIP.value=0;
+				enblNat.value=1;
+			} else {
+				usePublicIP.value=1;
+			}
+		}
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd S_
+		var istrue=btnPPP6rdApply();
+        if(istrue==false)
+			return;
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd E_
+		if((isp_protocol.value).match('PPPoE') != null)
+		{
+			mtuSize.value = 1492;
+		}
+		else
+			mtuSize.disabled = true;
+
+			delayConfigType.value="none";
+		}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd S_
+function btnPPP6rdtypeChange()
+{
+	with ( document.forms[0] ) {
+		if($('input[name=ppp_t6rdenable]:checked').val()=='disable'){
+			$('.ppp_t6rd_state_enable_group').hide();
+			$('.originPPPSave').show();
+		} else {
+			$('.ppp_t6rd_state_enable_group').show();
+			$('.originPPPSave').hide();
+		}
+	}
+}
+function btnPPP6rdApply()
+{
+	with ( document.forms[0] ) {
+		enblv6.value="0";
+		//LL__, check 6rd enable or not 
+		if(ppp_t6rdenable[1].checked==true)
+		{
+			tunnel6rd.value = "1";
+			wanIpv6Mode.value = "2";
+		}
+		else
+		{
+			tunnel6rd.value = "0";
+			wanIpv6Mode.value = "0";
+			return true; //No need to setting IPv6
+		}
+//__MSTC__, Loujia 0819 Dnsproxy Pref, PPP-6rd S_		
+		if(ppp_t6rd_dns_pref_type[0].checked==true)
+			dns6Pref.value = 4;
+		else
+			dns6Pref.value = 6;					
+//__MSTC__, Loujia 0819 Dnsproxy Pref, PPP-6rd E_      	
+      if (isValidIpAddress6(ppp_tunnel6rd_Prefix.value) == false) {
+         AlertOpen(" The 6rd prefix entered is invalid.  ");
+         return false;
+      }
+		addr6rdPrefix.value = ppp_tunnel6rd_Prefix.value;
+			
+		if(isValidIpAddress(ppp_Border_Router_Address.value)==false)
+		{
+			AlertOpen(" The IPv4 boarder router address entered is invalid. ");
+			return false;
+		}
+		addr6rdEndpoint.value = ppp_Border_Router_Address.value;
+      
+      if(ppp_IPv4_CE_Mask_Length.value == '' || isValidDecKey(ppp_IPv4_CE_Mask_Length.value)==false ){
+         msg = " The IPv4 CE mask length entered is invalid. ";
+         AlertOpen(msg);
+         return false; 	            
+      }
+      if(parseInt(ppp_IPv4_CE_Mask_Length.value) <0 || parseInt(ppp_IPv4_CE_Mask_Length.value) >32)
+      {
+         msg = " The IPv4 CE mask length entered is invalid. ";
+         AlertOpen(msg);
+         return false; 	  
+      }
+      tunnel6rdMaskLen.value = ppp_IPv4_CE_Mask_Length.value;
+      
+      if(ppp_tunnel6rd_Prefix_Length.value == '' || isValidDecKey(ppp_tunnel6rd_Prefix_Length.value)==false ){
+         msg = " The 6rd prefix length entered is invalid. ";
+         AlertOpen(msg);
+         return false; 	            
+      }
+      if((parseInt(ppp_tunnel6rd_Prefix_Length.value)<24) || (parseInt(ppp_tunnel6rd_Prefix_Length.value) >64))
+      {
+         msg = " The 6rd prefix length entered is invalid.  ";
+         AlertOpen(msg);
+         return false; 	 
+      }	  
+      if(((32 - parseInt(ppp_IPv4_CE_Mask_Length.value))+ parseInt(ppp_tunnel6rd_Prefix_Length.value)) >64)
+      {
+         msg = " Invalid total length with IPv4 CE mask and 6rd prefix length. ";
+         AlertOpen(msg);
+         return false; 	  
+      }	  
+      tunnel6rdPrefixLen.value = ppp_tunnel6rd_Prefix_Length.value;
+		
+		tunnel6rdType.value = "Static";
+		
+		//mtuSize.disabled = true;
+
+		//LL__, 6rd's DNS can't dhcp get...
+		if (ppp_t6rd_dns_type[0].checked == true)
+		{
+			dns6Type.value="Static";
+			dns6Pri.value="2001:428::1";
+			dns6Sec.value="2001:428::2";
+			tunnel6rdDnsType.value = "Default";
+		}
+		else
+		{
+			dns6Type.value="Static";
+			tunnel6rdDnsType.value = "Custom";
+			if (ppp_t6rd_dns_primary.value == "" && ppp_t6rd_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return false;
+			}
+			
+			if (ppp_t6rd_dns_primary != "" && (isValidIpAddress6(ppp_t6rd_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return false;
+			}
+			
+			if (ppp_t6rd_dns_secondary.value != "" && (isValidIpAddress6(ppp_t6rd_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return false;
+			}
+			
+			if (ppp_t6rd_dns_primary.value == ppp_t6rd_dns_secondary.value){
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return false;
+			}
+			
+			if (ppp_t6rd_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+				if (ppp_t6rd_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return false;
+				}
+			}
+			
+			if (ppp_t6rd_dns_secondary.value == "")
+				ppp_t6rd_dns_secondary.value="";
+			dns6Pri.value = ppp_t6rd_dns_primary.value;
+			dns6Sec.value = ppp_t6rd_dns_secondary.value;
+		}	
+
+		return true;
+	}  
+}
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd E_
+
+function IPoEprtclIpv6Change()
+{
+   with ( document.forms[0] ) 
+   {
+      if (wan_ipV6_ip_protocol.value == "DHCPv6")
+      {
+         if (defPrctlv6 != 'DHCPv6' || g_ipv6enable == "0") 
+         {
+            //Set the Default Value
+            ipv6_dns_type[0].checked=true;
+         }
+         else
+         {
+            if (dns6type =='Static')
+            {
+               ipv6_dns_type[1].checked=true;
+               ipv6_dns_type[0].checked=false;
+               ipv6_dns_primary.value = dns6pri;
+               ipv6_dns_secondary.value = dns6sec;	
+            }
+            else
+            {
+               ipv6_dns_type[0].checked=true;
+               ipv6_dns_type[1].checked=false;
+            }
+         }
+
+         if (dns6pref==6)
+            ipoe_dns6_pref_type[1].checked=true;
+         else
+            ipoe_dns6_pref_type[0].checked=true;
+         $('div#IPv6OfIPoE').show();
+         $('div#ipoesixRD').hide();
+         dhcpv6DnsChange();
+      }
+      else if (wan_ipV6_ip_protocol.value == "6rd")
+      { 
+         if (defPrctlv6 != "6rd" || g_tunnel6rd=="0")
+         {
+            //Set the Default Value
+            ipv6_dns_type[0].checked=true;
+         }
+         else
+         {
+            v4_tunnel6rd_Prefix.value = g_addr6rdPrefix;
+            v4_Border_Router_Address.value = g_addr6rdEndpoint;
+            v4_IPv4_CE_Mask_Length.value = g_tunnel6rdMaskLen;
+            v4_tunnel6rd_Prefix_Length.value = g_tunnel6rdPrefixLen;
+
+            if (dns6type == 'Static')
+            {
+               if(g_tunnel6rdDnsType == 'Default')
+               {
+                  ipv6_dns_type[0].checked=true;
+                  ipv6_dns_type[1].checked=false;
+               }
+               else
+               {
+                  ipv6_dns_type[0].checked=false;
+                  ipv6_dns_type[1].checked=true;
+               }
+               ipv6_dns_primary.value = dns6pri;
+               ipv6_dns_primary.value = dns6sec ;		
+            }
+            else
+            {
+               ipv6_dns_type[0].checked=true;
+               ipv6_dns_type[1].checked=false;
+            }
+         }
+         if (dns6pref==6)
+            ipoe_dns6_pref_type[1].checked=true;
+         else
+            ipoe_dns6_pref_type[0].checked=true;
+		 
+         $('div#IPv6OfIPoE').show();
+         $('div#ipoesixRD').show();
+         tunnel6rdDnsChange();
+      }
+      else
+      {
+         $('div#IPv6OfIPoE').hide();
+      }
+      modifyIPoETitle();
+   }
+}
+function dhcpv6DnsChange()
+{
+	with ( document.forms[0] ) 
+   {
+      if($('input#ipv6_dns_type_static').is(':checked'))
+      {
+         $('tr.ipv6_dns_static_group').show();
+      }
+      else
+      {
+         $('tr.ipv6_dns_static_group').hide();
+      }
+      $('input#ipv6_dns_type_dynamic, input#ipv6_dns_type_static').click(function(){ dhcpv6DnsChange(); });
+   }
+}
+function tunnelpppoe6rdDnsChange()
+{
+   with ( document.forms[0] ) 
+   {
+      if($('input#ppp_sixRD_dns_type_static').is(':checked'))
+      {
+         $('tr.ppp_sixRD_dns_type_dynamic_group').show();
+      }
+      else
+      {
+         $('tr.ppp_sixRD_dns_type_dynamic_group').hide();
+      }
+      $('input#ppp_sixRD_dns_type_dynamic, input#ppp_sixRD_dns_type_static').click(function(){ tunnelpppoe6rdDnsChange(); });
+   }
+}
+function tunnel6rdDnsChange()
+{
+	with ( document.forms[0] ) 
+   {
+      if($('input#ipv6_dns_type_static').is(':checked'))
+      {
+         $('tr.ipv6_dns_static_group').show();
+      }
+      else
+      {
+         $('tr.ipv6_dns_static_group').hide();
+      }
+      $('input#ipv6_dns_type_dynamic, input#ipv6_dns_type_static').click(function(){ tunnel6rdDnsChange(); });
+   }
+}
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE function part E_
+function dhcpDnsChange()
+{
+	with ( document.forms[0] ) {
+		if($('input[name=rfc_dhcp_routed_dns_type]:checked').val()=='rfc_dhcp_routed_dns_type_dynamic'){
+			$('.rfc_dhcp_routed_dns_type_dynamic_group').hide();
+		} else {
+			$('.rfc_dhcp_routed_dns_type_dynamic_group').show();
+		}
+/*
+		if (rfc_dhcp_routed_dns_type[1].checked == true)
+		{
+			rfc_dhcp_routed_dns_primary.disabled = false;
+			rfc_dhcp_routed_dns_secondary.disabled = false;
+		}
+		else
+		{
+			rfc_dhcp_routed_dns_primary.disabled = true;
+			rfc_dhcp_routed_dns_secondary.disabled = true;
+		}
+*/
+	}
+}
+
+function btnBrApply()
+{
+	var loc = '';
+	var nat = '<%ejGetOther(sysInfo, enblDefNat)%>';
+
+	with ( document.forms[0] ) {		
+		ntwkPrtcl.value = 3;
+
+		/* popup alert message */
+		if (nat == 1)
+			enblNat.value=1;
+		else
+			enblNat.value=0;
+
+			delayConfigType.value="none";
+
+		if(l2Intf=='1')//atm
+		{
+		   if (isp_protocol.value == 'RFC 1483 Transparent Bridging_PVC032'){
+		      brPVC.value='032';
+		   }else if (isp_protocol.value == 'RFC 1483 Transparent Bridging_PVC835'){
+		      brPVC.value='835';
+		   }else if (isp_protocol.value == 'RFC 1483 Transparent Bridging_PVC035'){
+		      brPVC.value='035';
+		   }else{
+		      brPVC.value='0';
+		   }
+		   
+		   if (v4v6_brPVC_option.value == '032'){
+		      brPVC.value='032';
+		   }else if (v4v6_brPVC_option.value == '835'){
+		      brPVC.value='835';
+		   }else if (v4v6_brPVC_option.value == '035'){
+		      brPVC.value='035';
+		   }else{
+		      brPVC.value='0';
+		   }
+		}
+		else if(l2Intf=='2' || l2Intf=='3') //ptm mode
+		{
+		   brPVC.disabled=true;
+		   /* Support setting VLAN */
+		   brVLAN.value = v4v6_brVLAN_option.value;
+		}
+		enblIgmp.value = 0;
+		mtuSize.disabled = true;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+
+}
+
+function btnStaticApply()
+{
+   var nat = '<%ejGetOther(sysInfo, enblDefNat)%>';
+
+   with ( document.forms[0] ) {
+	ntwkPrtcl.value = 2;
+
+      if (nat == 1)
+         enblNat.value=1;
+      else
+         enblNat.value=0;
+
+      if (isValidIpAddress(rfc_dhcp_bridged_ip_single_static.value) == false) {
+         AlertOpen("The Single Static IP Address is invalid.");
+         return;
+      }
+
+	if (isValidWanIpAddress(rfc_dhcp_bridged_ip_single_static.value) == false){
+         AlertOpen(rfc_dhcp_bridged_ip_single_static.value+" is not a valid IP address.");
+         return;
+	}
+
+
+      if (isValidSubnetMask(rfc_dhcp_bridged_subnetMask.value) == false) {
+         AlertOpen("The Subnet Mask is invalid.");
+         return;
+      }
+
+      if (isValidIpAddress(rfc_dhcp_bridged_ip_gateway.value) == false) {
+         AlertOpen("The Gateway Address is invalid.");
+         return;
+      }
+
+      if (rfc_static_bridged_dns_primary.value == "" && rfc_static_bridged_dns_secondary.value == "") {
+         AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+         return;
+      }
+      if (rfc_static_bridged_dns_primary.value != "" && (isValidIpAddress(rfc_static_bridged_dns_primary.value) == false)) {
+         AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+         return;
+      }
+
+      if (rfc_static_bridged_dns_secondary.value != "" && (isValidIpAddress(rfc_static_bridged_dns_secondary.value) == false)) {
+         AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+         return;
+      }
+
+      if (rfc_static_bridged_dns_primary.value == rfc_static_bridged_dns_secondary.value){
+         AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+         return;
+      }
+
+      if (rfc_static_bridged_dns_primary.value == "") {
+        if (rfc_static_bridged_dns_secondary.value != ""){
+		AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+		return;
+        }
+      }
+
+	if (rfc_static_bridged_dns_secondary.value == "")
+		rfc_static_bridged_dns_secondary.value='0.0.0.0';
+
+	wanIpAddress.value = rfc_dhcp_bridged_ip_single_static.value;
+	wanSubnetMask.value = rfc_dhcp_bridged_subnetMask.value;
+	wanIntfGateway.value = rfc_dhcp_bridged_ip_gateway.value;
+	dnsPrimary.value = rfc_static_bridged_dns_primary.value;
+	dnsSecondary.value = rfc_static_bridged_dns_secondary.value;
+	enblDhcpClnt.value = 0;
+//	useStaticIpAddress.value = 1;
+	enblFirewall.value = 0;
+//
+	if (rfc_dhcp_bridged_ip_type.selectedIndex == 0) {
+		useStaticIpAddress.value=1;
+		enblLan2.value=0;
+
+		usePublicIP.value=0;
+	
+		if (nat == 1) {
+			enblNat.value=1;
+		} else {
+			enblNat.value=0;
+		}
+			delayConfigType.value="none";
+	} else if (rfc_dhcp_bridged_ip_type.selectedIndex == 1) {
+		useStaticIpAddress.value=2;
+		enblLan2.value=1;
+		if (isValidIpAddress(rfc_dhcp_bridged_gateway.value) == false) {
+			AlertOpen("The Gateway Address is invalid.");
+			return;
+		}
+		
+		var subnetParts = rfc_dhcp_bridged_subnet_mask.value.split('.');
+		var last = parseInt(subnetParts[3]);
+		if (isValidSubnetMask(rfc_dhcp_bridged_subnet_mask.value) == false) {
+			AlertOpen("The Subnet Mask is invalid.");
+			return;
+		}
+		
+		if (!(subnetParts[0] == '255' && subnetParts[1] == '255' && subnetParts[2] == '255'))
+		{
+			AlertOpen("The range of Subnet Mask should be less than class C");
+			return;
+		}
+		
+		lan2IpAddress.value=rfc_dhcp_bridged_gateway.value;
+		lan2SubnetMask.value=rfc_dhcp_bridged_subnet_mask.value;
+		if (rfc_dhcp_bridged_subnet_static[0].checked == true) {
+			usePublicIP.value=0;
+			enblNat.value=1;
+		} else {
+			usePublicIP.value=1;
+			if (nat == 1) {
+				enblNat.value=1;
+			} else {
+				enblNat.value=0;
+			}
+		}
+		enblDhcpSrv.value=1;
+			delayConfigType.value="none";
+		}
+
+	mtuSize.disabled = true;
+//
+
+/*
+	if (enblIpAddr == 2)
+	{
+		comStr = "Unnumbered mode will be disabled, you may need to re-configure your IP address. \nAre you sure you want to do this?";
+		delayConfigType.value="wan_reboot";
+		ConfirmOpen(comStr, goSubmit);
+		return;
+	}
+	else
+	{
+		delayConfigType.value="none";
+	}
+*/	
+   }
+   document.forms[0].sessionKey.value = gblsessionKey;	
+   document.forms[0].submit();
+}
+
+function btnIpoaApply()
+{
+	var nat = '<%ejGetOther(sysInfo, enblDefNat)%>';
+	
+	with ( document.forms[0] ) {		
+		ntwkPrtcl.value = 5;
+
+		// wan IP address
+		if (rfc_static_routed_ip_single_static.value == "" || isValidIpAddress(rfc_static_routed_ip_single_static.value) == false) {
+			AlertOpen("The Single Static IP Address is invalid.");
+			return;
+		}
+
+		if (isValidWanIpAddress(rfc_static_routed_ip_single_static.value) == false){
+	         AlertOpen(rfc_static_routed_ip_single_static.value+" is not a valid IP address.");
+	         return;
+		}
+
+		if (rfc_static_routed_subnetMask.value == "" || isValidSubnetMask(rfc_static_routed_subnetMask.value) == false) {
+			AlertOpen("The Subnet Mask is invalid.");
+			return;
+		}
+		
+		if (rfc_static_routed_dns_primary.value == "" && rfc_static_routed_dns_secondary.value == "") {
+			AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+			return;
+		}
+		
+		if (rfc_static_routed_dns_primary.value != "" && (isValidIpAddress(rfc_static_routed_dns_primary.value) == false)) {
+			AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+			return;
+		}
+		
+		if (rfc_static_routed_dns_secondary.value != "" && (isValidIpAddress(rfc_static_routed_dns_secondary.value) == false)) {
+			AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+			return;
+		}
+		
+		if (rfc_static_routed_dns_primary.value == rfc_static_routed_dns_secondary.value){
+			AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+			return;
+		}
+		
+		if (rfc_static_routed_dns_primary.value == ""){ //rfc_static_bridged_dns_primary.value == ""
+			if (rfc_static_routed_dns_secondary.value != ""){
+				AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+				return;
+			}
+		}
+		
+		if (rfc_static_routed_dns_secondary.value == "")
+			rfc_static_routed_dns_secondary.value='0.0.0.0';
+
+		wanIpAddress.value = rfc_static_routed_ip_single_static.value;
+		wanSubnetMask.value = rfc_static_routed_subnetMask.value;
+		wanIntfGateway.value = rfc_static_routed_ip_gateway.value;
+		dnsPrimary.value = rfc_static_routed_dns_primary.value;
+		dnsSecondary.value = rfc_static_routed_dns_secondary.value;
+		enblDhcpClnt.value = 0;
+		enblFirewall.value = 0;
+
+//		alert(useStaticIpAddress.value);
+//		alert(rfc_static_routed_ip_single_static.value+'@'+wanIpAddress.value);
+
+		if (rfc_static_routed_ip_type.selectedIndex == 0) {
+			useStaticIpAddress.value=1;
+			enblLan2.value=0;
+			usePublicIP.value=0;
+			
+			if (nat == 1) {
+				enblNat.value=1;
+			} else {
+				enblNat.value=0;
+			}
+				delayConfigType.value="none";
+		} else if (rfc_static_routed_ip_type.selectedIndex == 1) {
+			useStaticIpAddress.value=2;
+			enblLan2.value=1;
+			if (isValidIpAddress(rfc_static_routed_ip_gateway.value) == false) {
+				AlertOpen("The Gateway Address is invalid.");
+				return;
+			}
+			
+			var subnetParts = rfc_static_routed_subnet_mask.value.split('.');
+			var last = parseInt(subnetParts[3]);
+			if (isValidSubnetMask(rfc_static_routed_subnet_mask.value) == false) {
+				AlertOpen("The Subnet Mask is invalid.");
+				return;
+			}
+			
+			if (!(subnetParts[0] == '255' && subnetParts[1] == '255' && subnetParts[2] == '255'))
+			{
+				AlertOpen("The range of Subnet Mask should be less than class C");
+				return;
+			}
+			
+			lan2IpAddress.value=rfc_static_routed_ip_gateway.value;
+			lan2SubnetMask.value=rfc_static_routed_subnet_mask.value;
+			if (rfc_static_routed_subnet_static[0].checked == true) {
+				usePublicIP.value=0;
+				enblNat.value=1;
+			} else {
+				usePublicIP.value=1;
+				if (nat == 1) {
+					enblNat.value=1;
+				} else {
+					enblNat.value=0;
+				}
+			}
+			enblDhcpSrv.value=1;
+				delayConfigType.value="none";
+			}
+
+		mtuSize.disabled = true;		
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+function btnDhcpApply()
+{
+	var nat = '<%ejGetOther(sysInfo, enblDefNat)%>';
+	
+	with ( document.forms[0] ) {		
+		ntwkPrtcl.value = 2;
+
+		if(isp_protocol.value == "AutoSelect"){
+			atmVahL3en.value='1';
+			ptmVahL3en.value='1';
+         ethVahL3en.value='1';
+		}
+
+		if (nat == 1)
+			enblNat.value=1;
+		else
+			enblNat.value=0;
+		
+		var len = rfc_dhcp_routed_host.value.length;
+		if ( len > 64 ) {
+			msg = 'The length of host name (' + len + ') is too long [0-64].';
+			AlertOpen(msg);
+			return;
+		}
+		
+		len = rfc_dhcp_routed_domain.value.length;
+		if ( len > 64 ) {
+			msg = 'The length of domain name (' + len + ') is too long [0-64].';
+			AlertOpen(msg);
+			return;
+		}
+		
+		if (rfc_dhcp_routed_host.value != "" && isValidName(rfc_dhcp_routed_host.value) == false) {
+			AlertOpen('The Host Name is invalid.');
+			return;
+		}
+		wanHostName.value=rfc_dhcp_routed_host.value;
+
+		if (rfc_dhcp_routed_domain.value != "" && isValidUrl(rfc_dhcp_routed_domain.value) == false) {
+			AlertOpen('The Domain Name is invalid.');
+			return;
+		}
+		wanDomainName.value=rfc_dhcp_routed_domain.value;
+		
+		if (rfc_dhcp_routed_dns_type[0].checked == true)
+		{
+			dnsPrimary.value='0.0.0.0';
+			dnsSecondary.value='0.0.0.0';
+		}
+		else
+		{
+			if (rfc_dhcp_routed_dns_primary.value == "" && rfc_dhcp_routed_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+
+			if (rfc_dhcp_routed_dns_primary.value != "" && (isValidIpAddress(rfc_dhcp_routed_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (rfc_dhcp_routed_dns_secondary.value != "" && (isValidIpAddress(rfc_dhcp_routed_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (rfc_dhcp_routed_dns_primary.value == rfc_dhcp_routed_dns_secondary.value){
+				AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return;
+			}
+			
+			if (rfc_dhcp_routed_dns_primary.value == ""){ //dnsPrimary.value == ""
+				if (rfc_dhcp_routed_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return;
+				}
+			}
+			
+			if (rfc_dhcp_routed_dns_secondary.value == "")
+				dnsSecondary.value='0.0.0.0';
+
+			dnsPrimary.value = rfc_dhcp_routed_dns_primary.value;
+			dnsSecondary.value = rfc_dhcp_routed_dns_secondary.value;
+		}
+
+		/* Handle the WanIP, Subnet, ..etc */
+		if(rfc_dhcp_ip_type.value == 'Dynamic' || rfc_dhcp_ip_type.value == 'BlockDHCP') //WAN IP is DHCP
+		{
+		   useStaticIpAddress.value=0;
+		   enblDhcpClnt.value = 1;
+		   addDHCPBridge.value = 0;
+		}
+		else if (rfc_dhcp_ip_type.value == 'StaticDHCP' || rfc_dhcp_ip_type.value == 'StaticManual' || rfc_dhcp_ip_type.value == 'BlockManual') //WAN IP is Static
+		{
+		   useStaticIpAddress.value=1;
+		   enblDhcpClnt.value = 0;
+
+		   if(specMode == 1)
+		   {
+		      single_static_ip.value = radio_single_static_ip.value;
+                      single_static_subnet.value = radio_single_static_subnet.value;
+                      single_static_gateway.value = radio_single_static_gateway.value;
+		   }
+		   
+		   if (isValidIpAddress(single_static_ip.value) == false) {
+		      AlertOpen("The Static IP Address is invalid.");
+		      return;
+		   }
+
+		   if (isValidWanIpAddress(single_static_ip.value) == false){
+		      AlertOpen(single_static_ip.value+" is not a valid IP address.");
+		      return;
+		   }
+		   if (isValidSubnetMask(single_static_subnet.value) == false) {
+		      AlertOpen("The Subnet Mask is invalid.");
+		      return;
+		   }
+			
+		   if (isValidIpAddress(single_static_gateway.value) == false) {
+		      AlertOpen("The Gateway Address is invalid.");
+		      return;
+		   }
+		   wanIpAddress.value=single_static_ip.value;
+		   wanSubnetMask.value = single_static_subnet.value;	
+		   wanIntfGateway.value = single_static_gateway.value;
+		   if(rfc_dhcp_ip_type.value == 'StaticDHCP')
+		      addDHCPBridge.value = 1;
+		   else
+		      addDHCPBridge.value = 0;
+		}
+
+		/* Handle the Block of static IP Address */
+		if(rfc_dhcp_ip_type.value == 'BlockDHCP' || rfc_dhcp_ip_type.value == 'BlockManual')
+		{
+		   enblLan2.value=1;
+		   useStaticIpAddress.value = 2; //Modify the useStaticIpAddress
+		   if (isValidIpAddress(ipoe_ip_block_gateway.value) == false) {
+		      AlertOpen("The beginning Address is invalid.");
+				return;
+		   }
+
+		   var subnetParts = ipoe_ip_block_mask.value.split('.');
+		   var last = parseInt(subnetParts[3]);
+		   if (isValidSubnetMask(ipoe_ip_block_mask.value) == false || last > 252) {
+		      AlertOpen("The Subnet Mask is invalid.");
+		      return;
+		   }
+
+		   if (!(subnetParts[0] == '255' && subnetParts[1] == '255' && subnetParts[2] == '255'))
+		   {
+		      AlertOpen("The range of Subnet Mask should be less than class C");
+		      return;
+		   }
+			
+		   var dhcplatestAddr = getLastOrFirstAddrOfBlockIPAddress(ipoe_ip_block_gateway.value, ipoe_ip_block_mask.value, 1);
+		   var dhcpfirstAddr = getLastOrFirstAddrOfBlockIPAddress(ipoe_ip_block_gateway.value, ipoe_ip_block_mask.value, 0);
+
+		   if((ipoe_ip_block_gateway.value != dhcplatestAddr) && (ipoe_ip_block_gateway.value != dhcpfirstAddr))
+		   {
+			   AlertOpen("The Gateway Address is invalid.");
+		      return;
+		   }
+		   lan2IpAddress.value = ipoe_ip_block_gateway.value;
+		   lan2SubnetMask.value = ipoe_ip_block_mask.value;
+		   /* For block of static IP addresses, must enable the NAT */
+		   enblNat.value=1;
+			
+		   if (ipoe_ip_block_lan_dhcp[0].checked == true) 
+		   {
+		      usePublicIP.value=0;
+		   } 
+		   else 
+		   {
+		      usePublicIP.value=1;
+		   }
+		}
+		else
+		{
+		   /* No need to enable the block of static IP Address */
+		   enblLan2.value=0;
+		   usePublicIP.value=0;
+		}
+	
+		if((isp_protocol.value).match("DHCP") != null)
+		{
+			mtuSize.value = 1500;
+		}
+		else
+			mtuSize.disabled = true;
+
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE Apply part S_
+	  if(wan_ipV6_ip_protocol.value == "DHCPv6")
+	  {
+		enblv6.value="1";
+		  
+//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE dhcp S_		
+		if(ipoe_dns6_pref_type[0].checked==true)
+			dns6Pref.value = 4;
+		else
+			dns6Pref.value = 6;					
+//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE dhcp E_ 		  	
+		  if (ipv6_dns_type[0].checked == true)
+		  {
+				dns6Type.value="DHCP";
+				dns6Pri.value="";
+				dns6Sec.value="";	
+				if(l2Intf==1)
+			  	dns6Ifc.value="atm0";
+			    else if(l2Intf==2)
+			  	dns6Ifc.value="ptm0.1";
+		  }
+		  else
+			{
+				dns6Type.value="Static";
+				if (ipv6_dns_primary.value == "" && ipv6_dns_secondary.value == "") {
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					return;
+				}
+				
+				if (ipv6_dns_primary.value != "" && (isValidIpAddress6(ipv6_dns_primary.value) == false)) {
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					return;
+				}
+				
+				if (ipv6_dns_secondary.value != "" && (isValidIpAddress6(ipv6_dns_secondary.value) == false)) {
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					return;
+				}
+				
+				if (ipv6_dns_primary.value == ipv6_dns_secondary.value){
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+					return;
+				}
+				
+				if (ipv6_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+					if (ipv6_dns_secondary.value != ""){
+						AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+						return;
+					}
+				}
+				
+				if (ipv6_dns_secondary.value == "")
+					ipv6_dns_secondary.value="";
+				dns6Pri.value = ipv6_dns_primary.value;
+				dns6Sec.value = ipv6_dns_secondary.value;
+			}
+		  
+			wanAddr6Type.value="DHCP";
+			wanIpv6Mode.value = "1";
+      }
+      else if(wan_ipV6_ip_protocol.value == "6rd")
+      {
+			enblv6.value="0";
+
+			//LL__, check 6rd enable or not 
+			tunnel6rd.value = "1";
+			
+//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE 6rd S_		
+			if(ipoe_dns6_pref_type[0].checked==true)
+				dns6Pref.value = 4;
+			else
+				dns6Pref.value = 6;					
+//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE 6rd E_
+
+//__MSTC__, Loujia 0821 Integrate WAN Page, 6rd 212 option ipoe S_
+			if(v4_6rd_212Opiton[0].checked==true)// Dynamic
+			{
+				tunnel6rdType.value = "DHCP";
+				wanIpv6Mode.value = "2";
+			}
+			else
+			{
+//__MSTC__, Loujia 0821 Integrate WAN Pate, 6rd 212 option ipoe E_		
+		      if (isValidIpAddress6(v4_tunnel6rd_Prefix.value) == false) {
+		         AlertOpen(" The 6rd prefix entered is invalid.  ");
+		         return;
+		      }
+				addr6rdPrefix.value = v4_tunnel6rd_Prefix.value;
+					
+				if(isValidIpAddress(v4_Border_Router_Address.value)==false)
+				{
+					AlertOpen(" The IPv4 boarder router address entered is invalid. ");
+					return;
+				}
+				addr6rdEndpoint.value = v4_Border_Router_Address.value;
+		      
+		      if(v4_IPv4_CE_Mask_Length.value == '' || isValidDecKey(v4_IPv4_CE_Mask_Length.value)==false ){
+		         msg = " The IPv4 CE mask length entered is invalid. ";
+		         AlertOpen(msg);
+		         return; 	            
+		      }
+		      if(parseInt(v4_IPv4_CE_Mask_Length.value) <0 || parseInt(v4_IPv4_CE_Mask_Length.value) >32)
+		      {
+		         msg = " The IPv4 CE mask length entered is invalid. ";
+		         AlertOpen(msg);
+		         return false; 	  
+		      }
+		      tunnel6rdMaskLen.value = v4_IPv4_CE_Mask_Length.value;
+		      
+		      if(v4_tunnel6rd_Prefix_Length.value == '' || isValidDecKey(v4_tunnel6rd_Prefix_Length.value)==false ){
+		         msg = " The 6rd prefix length entered is invalid. ";
+		         AlertOpen(msg);
+		         return; 	            
+		      }
+	  
+		      if((parseInt(v4_tunnel6rd_Prefix_Length.value)<24) || (parseInt(v4_tunnel6rd_Prefix_Length.value) >64))
+		      {
+		         msg = " The 6rd prefix length entered is invalid.  ";
+		         AlertOpen(msg);
+		         return false; 
+		 
+		      }	  
+		      if(((32 - parseInt(v4_IPv4_CE_Mask_Length.value)) + parseInt(v4_tunnel6rd_Prefix_Length.value)) >64)
+		      {
+		         msg = " Invalid total length with IPv4 CE mask and 6rd prefix length. ";
+		         AlertOpen(msg);
+		         return false; 	  
+		      }
+		        tunnel6rdPrefixLen.value = v4_tunnel6rd_Prefix_Length.value;
+			
+				tunnel6rdType.value = "Static";
+				wanIpv6Mode.value = "2";
+//__MSTC__, Loujia 0821 Integrate WAN Pate, 6rd 212 option ipoe S_
+			}
+//__MSTC__, Loujia 0821 Integrate WAN Pate, 6rd 212 option ipoe E_
+
+			//LL__, 6rd's DNS can't use dhcpv6 to get...
+			if (ipv6_dns_type[0].checked == true)
+			{
+				dns6Type.value="Static";
+				dns6Pri.value="2001:428::1";
+				dns6Sec.value="2001:428::2";	
+				if(l2Intf==1)
+			  	dns6Ifc.value="atm0";
+			    else if(l2Intf==2)
+			  	dns6Ifc.value="ptm0.1";
+				tunnel6rdDnsType.value = "Default";
+			}
+			else
+			{
+				dns6Type.value="Static";
+				tunnel6rdDnsType.value = "Custom";
+				if (ipv6_dns_primary.value == "" && ipv6_dns_secondary.value == "") {
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					return;
+				}
+				
+				if (ipv6_dns_primary != "" && (isValidIpAddress6(ipv6_dns_primary.value) == false)) {
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					return;
+				}
+				
+				if (ipv6_dns_secondary.value != "" && (isValidIpAddress6(ipv6_dns_secondary.value) == false)) {
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					return;
+				}
+				
+				if (ipv6_dns_primary.value == ipv6_dns_secondary.value){
+					AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+					// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+					return;
+				}
+				
+				if (ipv6_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+					if (ipv6_dns_secondary.value != ""){
+						AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+						return;
+					}
+				}
+				
+				if (ipv6_dns_secondary.value == "")
+					ipv6_dns_secondary.value="";
+				dns6Pri.value = ipv6_dns_primary.value;
+				dns6Sec.value = ipv6_dns_secondary.value;
+			}
+			
+	  }
+	  else 
+      {
+			enblv6.value="0";
+			dns6Pref.value = 0;
+			tunnel6rd.value = "0";
+			wanIpv6Mode.value = "0";
+
+			dns6Pri.value ="";
+			dns6Sec.value ="";
+	  }	  
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE Apply part E_
+			delayConfigType.value="none";
+		}		
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+function hide_password_change(){
+   with ( document.forms[0] ) {
+      if(hide_password.checked == false || pppoe_no_credentials[0].checked == true)
+      {
+         $('.PasswordConfirmID').hide();
+      }
+      else{
+         $('.PasswordConfirmID').show();
+      }
+   }	
+}
+
+function prtclChange()
+{
+	with ( document.forms[0] ) {
+		var enterppp='0';
+		var enterdhcp='0';
+
+		if(specMode == 1)
+		{
+		   document.getElementById('rfc_dhcp_ip_type_text').style.display = "none";
+		   document.getElementById('rfc_dhcp_ip_type_label').style.display = "none";
+		   document.getElementById('single_ip_group_lable').style.display = "none";
+		   document.getElementById('single_ip_group_text').style.display = "none";
+
+		   document.getElementById('static_ip').style.display = "none";
+		   document.getElementById('static_subnet').style.display = "none";
+		   document.getElementById('static_gateway').style.display = "none";
+		   document.getElementById('static_ip_text').style.display = "none";
+		   document.getElementById('static_subnet_text').style.display = "none";
+		   document.getElementById('static_gateway_text').style.display = "none";
+		}
+		else
+		{
+		   document.getElementById('rfc_dhcp_routed_text').style.display = "none";
+		   document.getElementById('rfc_dhcp_routed_type_td').style.display = "none";
+		   document.getElementById('rfc_dhcp_routed_type_dynamic_td').style.display = "none";
+		   document.getElementById('rfc_dhcp_routed_type_static_td').style.display = "none";
+		   $('.radio_single_static_ip_group').hide();
+		}
+		
+		if( isp_protocol.value=='AutoSelect' ){
+			if(defPrctl=='PPPoE')
+				enterppp='1';
+			else if(defPrctl=='RFC1483 via DHCP' || defPrctl=='RFC1483 via Static IP')
+				enterdhcp='1';
+			else
+				enterppp='1';
+			$("#protocolSelect").show();
+		}else{
+			$("#protocolSelect").hide();
+		}
+
+		if (isp_protocol.value == 'PPPoE' || isp_protocol.value == 'PPPoA' || enterppp=='1'){
+			if (defPrctl != 'PPPoA' && defPrctl != 'PPPoE') {
+				var prePppUsername = '<%ejGet(prePppUsername)%>';
+
+				if( prePppUsername == ''){
+					pppoe_username.value = '<%ejGet(defPppUserName)%>';
+					pppoe_password.value = '**********';
+					pppoe_password_confirm.value = '**********';
+				}else{
+					pppoe_username.value = prePppUsername;
+					pppoe_password.value = '***********';
+					pppoe_password_confirm.value = '***********';
+				}
+				pppoe_no_credentials[1].checked = true;
+				pwdCheckRequire();			
+				pppoe_ip_type.selectedIndex = 0;			
+				pppoe_auto_connect[0].checked = true;
+				pppoe_ip_single_static.value = "";
+				pppoe_ip_gateway.value = "";
+				pppoe_subnet_mask.value = "";
+				pppoe_subnet_dhcp[0].checked = true;
+				pppIpTypeChange(1);			
+				pppoe_dns_primary.value = "";
+				pppoe_dns_secondary.value = "";
+				pppoe_dns_type[0].checked = true;		
+				pppDnsChange();			
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd S_
+				if (defPrctlv6 == "6rd")
+			    {
+			         ppp_t6rdenable[1].checked=true;					 	
+			         if (g_tunnel6rd=="0")
+			         {
+			            //no 6rd info to set for text
+					 }
+			         else
+			         {
+						ppp_tunnel6rd_Prefix.value = g_addr6rdPrefix;
+						ppp_Border_Router_Address.value = g_addr6rdEndpoint;
+			            ppp_IPv4_CE_Mask_Length.value = g_tunnel6rdMaskLen;
+			            ppp_tunnel6rd_Prefix_Length.value = g_tunnel6rdPrefixLen;
+							
+						if (dns6type == 'Static')
+			            {
+								if(g_tunnel6rdDnsType == 'Default')
+									ppp_t6rd_dns_type[0].checked = true;
+								else
+									ppp_t6rd_dns_type[1].checked = true;
+								
+								ppp_t6rd_dns_primary.value = dns6pri;
+								ppp_t6rd_dns_secondary.value = dns6sec ;		
+						}
+			            else
+								ppp_t6rd_dns_type[0].checked=true;
+			            tunnelpppoe6rdDnsChange();
+//__MSTC__, Loujia 0819 Dnsproxy Pref, PPP-6rd S_
+			            if (dns6pref==6)
+								ppp_t6rd_dns_pref_type[1].checked=true;
+						else
+								ppp_t6rd_dns_pref_type[0].checked=true;
+//__MSTC__, Loujia 0819 Dnsproxy Pref, PPP-6rd E_
+					}
+				}
+				else
+				{					
+					ppp_t6rdenable[0].checked=true;
+				}
+
+				btnPPP6rdtypeChange();
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd E_	
+
+			}else{
+				var username = '<%ejGet(pppUserName)%>';
+				username = decodeSpecialChars(username);
+				pppoe_username.value = username;
+				pppoe_password.value = '<%ejGet(pppPasswordFake)%>';
+				pppoe_password_confirm.value = '<%ejGet(pppPasswordFake)%>';
+				if (pppoe_username.value == '' /*&& ppp_password.value == ''*/)
+					pppoe_no_credentials[0].checked = true;
+				else
+					pppoe_no_credentials[1].checked = true;
+				
+				pwdCheckRequire();
+				
+				if (enblIpAddr == 0)
+					pppoe_ip_type.selectedIndex = 0;
+				else
+					pppoe_ip_type.selectedIndex = 1;
+				
+				if (onDemand == 1)
+					pppoe_auto_connect[1].checked = true;
+				else
+					pppoe_auto_connect[0].checked = true;
+				
+				if (enblIpAddr == '0')
+					pppoe_ip_type.selectedIndex = 0;
+				else if (enblIpAddr == '1') {
+					pppoe_ip_type.selectedIndex = 1;
+					if (localIpAddr != "0.0.0.0")
+						pppoe_ip_single_static.value = localIpAddr;
+				} else if (enblIpAddr == '2') {
+					pppoe_ip_type.selectedIndex = 2;
+					pppoe_ip_gateway.value = '<%ejGet(lan2IpAddress)%>';
+					pppoe_subnet_mask.value = '<%ejGet(lan2SubnetMask)%>';
+					var vip = '<%ejGet(usePublicIP)%>';
+					if (vip == '0')
+						pppoe_subnet_dhcp[0].checked = true;
+					else
+						pppoe_subnet_dhcp[1].checked = true;
+				}
+
+				if ($('#pppoe_ip_type').attr('value') == 'Single Static IP'){					
+					$('.block_static_ip_group').hide();
+					$('.single_static_ip_group').show();
+				} else if ($('#pppoe_ip_type').attr('value') == 'Block of Static IP Addresses'){					
+					$('.single_static_ip_group').hide();
+					$('.block_static_ip_group').show();
+				} else {					
+					$('.single_static_ip_group').hide();
+					$('.block_static_ip_group').hide();
+				}
+				
+				pppIpTypeChange(1);
+				
+				if ((dns1 != '' || dns2 != '') && dnsIfcvalue == '' && (dns1 != '0.0.0.0' || dns2 != '0.0.0.0'))
+				{
+					pppoe_dns_type[1].checked = true;
+					if (dns1 != '0.0.0.0')
+						pppoe_dns_primary.value = dns1;
+					if (dns2 != '0.0.0.0')
+						pppoe_dns_secondary.value = dns2;
+				}
+				else
+				{
+					pppoe_dns_type[0].checked = true;
+				}			
+				pppDnsChange();
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd S_		
+				if (defPrctlv6 == "6rd")
+			    {
+			         ppp_t6rdenable[1].checked=true;					 	
+			         if (g_tunnel6rd=="0")
+			         {
+			         	//no 6rd info to set for text
+					 }
+			         else
+			         {
+						ppp_tunnel6rd_Prefix.value = g_addr6rdPrefix;
+						ppp_Border_Router_Address.value = g_addr6rdEndpoint;
+			            ppp_IPv4_CE_Mask_Length.value = g_tunnel6rdMaskLen;
+			            ppp_tunnel6rd_Prefix_Length.value = g_tunnel6rdPrefixLen;
+							
+						if (dns6type == 'Static')
+			            {	
+								if(g_tunnel6rdDnsType == 'Default')
+									ppp_t6rd_dns_type[0].checked = true;
+								else
+									ppp_t6rd_dns_type[1].checked = true;
+								ppp_t6rd_dns_primary.value = dns6pri;
+								ppp_t6rd_dns_secondary.value = dns6sec ;		
+						}
+			            else
+								ppp_t6rd_dns_type[0].checked=true;
+			            tunnelpppoe6rdDnsChange();
+//__MSTC__, Loujia 0819 Dnsproxy Pref, PPP-6rd S_
+			            if (dns6pref==6)
+								ppp_t6rd_dns_pref_type[1].checked=true;
+						else
+								ppp_t6rd_dns_pref_type[0].checked=true;
+//__MSTC__, Loujia 0819 Dnsproxy Pref, PPP-6rd E_
+					}
+				}
+				else
+				{					
+					ppp_t6rdenable[0].checked=true;
+				}
+
+				btnPPP6rdtypeChange();
+//__MSTC__, Loujia 0813 Integrate WAN Page, PPP-6rd E_
+			}
+			hide_password.checked = true;
+			hide_password_change();	
+		}else if (isp_protocol.value == "RFC 1483 via DHCP" || enterdhcp=='1'){
+			if (defPrctl != "RFC1483 via DHCP" && defPrctl != "RFC1483 via Static IP"){				
+				rfc_dhcp_routed_host.value = "";
+				rfc_dhcp_routed_domain.value = "";
+				rfc_dhcp_routed_dns_type[0].checked = true;            
+				rfc_dhcp_routed_dns_primary.value = "";
+				rfc_dhcp_routed_dns_secondary.value = "";                       
+				dhcpDnsChange();
+				
+				// Added by SeanLu, Init the IPoE Setting
+				rfc_dhcp_ip_type.selectedIndex = 0;			
+				single_static_ip.value = "";
+				single_static_subnet.value = "";
+				single_static_gateway.value = "";
+
+				if(specMode == 1)
+				{
+				   radio_single_static_ip.value = "";
+				   radio_single_static_subnet.value = "";
+				   radio_single_static_gateway.value = "";
+				}
+				ipoe_ip_block_gateway.value ="";
+				ipoe_ip_block_mask.value = "";
+				ipoe_ip_block_lan_dhcp[0].checked = true;
+				
+				IpoeTypeChange(1);
+				//SeanLu End.
+				
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE dhcpv6 S_	 
+				if (defPrctlv6 == "DHCPv6" && g_ipv6enable != "0")
+				{
+					wan_ipV6_ip_protocol.value = "DHCPv6";
+
+					if (dns6type =='Static')
+					{
+						ipv6_dns_type[1].checked=true;
+						ipv6_dns_primary.value = dns6pri;
+						ipv6_dns_secondary.value = dns6sec;	
+					}
+					else
+						ipv6_dns_type[0].checked=true;	
+					
+					//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE dhcp S_
+					if (dns6pref==6)
+					ipoe_dns6_pref_type[1].checked=true;
+					else
+					ipoe_dns6_pref_type[0].checked=true;
+					//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE dhcp E_
+					    
+
+					$('div#IPv6OfIPoE').show();
+					$('div#ipoesixRD').hide();
+
+					dhcpv6DnsChange();
+				}
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE 6rd S_	
+				else if (defPrctlv6 == "6rd")
+				{
+					wan_ipV6_ip_protocol.value = "6rd";
+					if (defPrctlv6 != "6rd" || g_tunnel6rd=="0")
+					{
+						//no 6rd info to set for text
+					}
+					else
+					{
+						v4_tunnel6rd_Prefix.value = g_addr6rdPrefix;
+						v4_Border_Router_Address.value = g_addr6rdEndpoint;
+						v4_IPv4_CE_Mask_Length.value = g_tunnel6rdMaskLen;
+						v4_tunnel6rd_Prefix_Length.value = g_tunnel6rdPrefixLen;
+
+						if (dns6type == 'Static')
+						{
+							if(g_tunnel6rdDnsType == 'Default')								
+								ipv6_dns_type[0].checked=true;
+							else
+								ipv6_dns_type[1].checked=true;
+							ipv6_dns_primary.value = dns6pri;
+							ipv6_dns_secondary.value = dns6sec ;		
+						}
+						else
+							ipv6_dns_type[0].checked=true;
+						
+						//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE 6rd S_
+						if (dns6pref==6)
+							ipoe_dns6_pref_type[1].checked=true;
+						else
+							ipoe_dns6_pref_type[0].checked=true;
+						//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE 6rd E_
+					}
+
+					
+					//__MSTC__, Loujia 0821 Integrate WAN Page, 6rd 212 option S_ 
+					if(g_tunnel6rdType=="DHCP")
+					{
+						v4_6rd_212Opiton[0].checked=true;	
+
+						$('input#v4_tunnel6rd_Prefix').attr("disabled","ture");
+						$('input#v4_tunnel6rd_Prefix_Length').attr("disabled","ture");
+						$('input#v4_IPv4_CE_Mask_Length').attr("disabled","ture");
+						$('input#v4_Border_Router_Address').attr("disabled","ture");
+					}
+					else
+					{
+						v4_6rd_212Opiton[1].checked=true;	
+
+						$('input#v4_tunnel6rd_Prefix').removeAttr("disabled");
+						$('input#v4_tunnel6rd_Prefix_Length').removeAttr("disabled");
+						$('input#v4_IPv4_CE_Mask_Length').removeAttr("disabled");
+						$('input#v4_Border_Router_Address').removeAttr("disabled");
+					}		
+					//__MSTC__, Loujia 0821 Integrate WAN Page, 6rd 212 option E_
+
+					$('div#IPv6OfIPoE').show();
+					$('div#ipoesixRD').show();
+					dhcpv6DnsChange();
+				}				
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE 6rd E_				
+				else
+				{
+				   $('div#IPv6OfIPoE').hide();
+				   $('div#ipoesixRD').hide();
+				   dhcpv6DnsChange();
+				}			
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE dhcpv6 E_				
+			}else{
+				// Added by SeanLu
+				
+				if (enblIpAddr == '0') //dynamic
+				{
+				   rfc_dhcp_ip_type.selectedIndex = 0;
+				}
+				else if (enblIpAddr == '1') { //static IP
+				   if(l2Intf == 1)
+				   {
+				      rfc_dhcp_ip_type.selectedIndex = 1;
+				   }
+				   else
+				   {
+				      if(isACSWanMode == '1')
+				         rfc_dhcp_ip_type.selectedIndex = 1;
+				      else
+				         rfc_dhcp_ip_type.selectedIndex = 2;
+				   }
+				   if (wanIp  != "0.0.0.0")
+				      single_static_ip.value = wanIp ;
+				   single_static_subnet.value = subnetMask;
+				   if(gateway != "0.0.0.0")
+				      single_static_gateway.value = gateway;
+
+				   if(specMode == 1)
+				   {				   
+				      if (wanIp  != "0.0.0.0")
+				         radio_single_static_ip.value = wanIp ;
+				      radio_single_static_subnet.value = subnetMask;
+				      if(gateway != "0.0.0.0")
+				         radio_single_static_gateway.value = gateway;
+				   }
+				} else if (enblIpAddr == '2') { //block of static address
+					if(l2Intf == 1)
+					   rfc_dhcp_ip_type.selectedIndex = 2;
+					else
+					   rfc_dhcp_ip_type.selectedIndex = 3;
+					ipoe_ip_block_gateway.value = '<%ejGet(lan2IpAddress)%>';
+					ipoe_ip_block_mask.value = '<%ejGet(lan2SubnetMask)%>';					
+					var vip = '<%ejGet(usePublicIP)%>';
+					if (vip == '0')
+						ipoe_ip_block_lan_dhcp[0].checked = true;
+					else
+						ipoe_ip_block_lan_dhcp[1].checked = true;
+					
+					if(defPrctl == "RFC1483 via Static IP")
+					{
+					   single_static_ip.value = wanIp;
+					   single_static_subnet.value = subnetMask;
+					   single_static_gateway.value = gateway;
+					   if(specMode == 1)
+					   {					   
+					      radio_single_static_ip.value = wanIp;
+					      radio_single_static_subnet.value = subnetMask;
+					      radio_single_static_gateway.value = gateway;
+					   }
+					   if(l2Intf == 1)
+					      rfc_dhcp_ip_type.selectedIndex = 3;
+					   else
+					      rfc_dhcp_ip_type.selectedIndex = 4;
+					}
+					else
+					{
+					   if(l2Intf == 1)
+					      rfc_dhcp_ip_type.selectedIndex = 2;
+					   else
+					      rfc_dhcp_ip_type.selectedIndex = 3;
+					}
+				}
+
+				if ($('#rfc_dhcp_ip_type').attr('value') == 'Dynamic'){
+					$('.single_dhcp_ip_group').hide();
+					$('.single_static_ip_group').hide();
+					$('.single_ip_group').hide();
+					$('.block_static_ip_group').hide();
+					if(specMode == 1)
+					   $('.radio_single_static_ip_group').hide();
+				}
+				else if ($('#rfc_dhcp_ip_type').attr('value') == 'StaticDHCP'){
+					$('.single_dhcp_ip_group').show();
+					$('.single_static_ip_group').show();
+					$('.single_ip_group').show();
+					$('.block_static_ip_group').hide();
+				} else if ($('#rfc_dhcp_ip_type').attr('value') == 'StaticManual'){
+					$('.single_dhcp_ip_group').hide();
+					$('.single_static_ip_group').show();
+					$('.single_ip_group').show();
+					$('.block_static_ip_group').hide();
+                                        if(specMode == 1)
+					   $('.radio_single_static_ip_group').show();
+				} else if ($('#rfc_dhcp_ip_type').attr('value') == 'BlockDHCP'){
+					$('.single_dhcp_ip_group').show();
+					$('.single_static_ip_group').hide();
+					$('.single_ip_group').show();
+					$('.block_static_ip_group').show();
+				}
+				else if ($('#rfc_dhcp_ip_type').attr('value') == 'BlockManual'){
+					$('.single_dhcp_ip_group').hide();
+					$('.single_static_ip_group').show();
+					$('.single_ip_group').show();
+					$('.block_static_ip_group').show();
+				}
+				
+				IpoeTypeChange(1);
+
+				
+				if(specMode == 1)
+				{
+				   if(rfc_dhcp_ip_type.selectedIndex == 0)
+				   {
+				      rfc_dhcp_routed_type[0].checked = true;
+				      rfc_dhcp_routed_type[1].checked = false;
+				   }
+				   else
+				   {				   
+				      rfc_dhcp_routed_type[0].checked = false;
+				      rfc_dhcp_routed_type[1].checked = true;
+				   }
+				   IpoeAddressChange();
+				}
+				
+				// Added by SeanLu
+				
+				rfc_dhcp_routed_host.value = hostName;
+				rfc_dhcp_routed_domain.value = domainName;
+				
+				if ((dns1 != '' || dns2 != '') && dnsIfcvalue == '' && (dns1 != '0.0.0.0' || dns2 != '0.0.0.0'))
+				{
+					rfc_dhcp_routed_dns_type[1].checked = true;
+					if (dns1 != '0.0.0.0')
+						rfc_dhcp_routed_dns_primary.value = dns1;
+					if (dns2 != '0.0.0.0')
+						rfc_dhcp_routed_dns_secondary.value = dns2;
+				}
+				else
+				{
+					rfc_dhcp_routed_dns_type[0].checked = true;
+				}
+				dhcpDnsChange();
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE dhcpv6 S_	
+		if (defPrctlv6 == "DHCPv6" && g_ipv6enable != "0")
+		{
+			wan_ipV6_ip_protocol.value = "DHCPv6";
+
+			if (dns6type =='Static')
+			{
+				ipv6_dns_type[1].checked=true;
+				ipv6_dns_primary.value = dns6pri;
+				ipv6_dns_secondary.value = dns6sec;	
+			}
+			else
+			{				
+			    ipv6_dns_type[0].checked=true;	
+			}
+			
+			//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE dhcp S_
+			if (dns6pref==6)
+				ipoe_dns6_pref_type[1].checked=true;
+			else
+				ipoe_dns6_pref_type[0].checked=true;
+			//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE dhcp E_
+			    
+			$('div#IPv6OfIPoE').show();
+			$('div#ipoesixRD').hide();
+
+			dhcpv6DnsChange();
+			modifyIPoETitle();
+		}
+		//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE 6rd S_	
+		else if (defPrctlv6 == "6rd")
+		{
+			wan_ipV6_ip_protocol.value = "6rd";
+			if (defPrctlv6 != "6rd" || g_tunnel6rd=="0")
+			{
+				//no 6rd info to set for text
+			}
+			else
+			{
+				v4_tunnel6rd_Prefix.value = g_addr6rdPrefix;
+				v4_Border_Router_Address.value = g_addr6rdEndpoint;
+				v4_IPv4_CE_Mask_Length.value = g_tunnel6rdMaskLen;
+				v4_tunnel6rd_Prefix_Length.value = g_tunnel6rdPrefixLen;
+
+				if (dns6type == 'Static')
+				{
+					if(g_tunnel6rdDnsType == 'Default')								
+						ipv6_dns_type[0].checked=true;
+					else
+						ipv6_dns_type[1].checked=true;
+					ipv6_dns_primary.value = dns6pri;
+					ipv6_dns_secondary.value = dns6sec ;		
+				}
+				else
+				{
+					ipv6_dns_type[0].checked=true;
+				}
+				//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE 6rd S_
+				if (dns6pref==6)
+					ipoe_dns6_pref_type[1].checked=true;
+				else
+					ipoe_dns6_pref_type[0].checked=true;
+				//__MSTC__, Loujia 0819 Dnsproxy Pref, IPoE 6rd E_
+			}
+
+			//__MSTC__, Loujia 0821 Integrate WAN Page, 6rd 212 option S_
+			if(g_tunnel6rdType=="DHCP")
+			{
+				v4_6rd_212Opiton[0].checked=true;	
+
+				$('input#v4_tunnel6rd_Prefix').attr("disabled","ture");
+				$('input#v4_tunnel6rd_Prefix_Length').attr("disabled","ture");
+				$('input#v4_IPv4_CE_Mask_Length').attr("disabled","ture");
+				$('input#v4_Border_Router_Address').attr("disabled","ture");
+			}
+			else
+			{
+				$('input#v4_tunnel6rd_Prefix').removeAttr("disabled");
+				$('input#v4_tunnel6rd_Prefix_Length').removeAttr("disabled");
+				$('input#v4_IPv4_CE_Mask_Length').removeAttr("disabled");
+				$('input#v4_Border_Router_Address').removeAttr("disabled");
+				v4_6rd_212Opiton[1].checked=true;	
+			}			
+			//__MSTC__, Loujia 0821 Integrate WAN Page, 6rd 212 option E_	
+			$('div#IPv6OfIPoE').show();
+			$('div#ipoesixRD').show();
+			dhcpv6DnsChange();
+			modifyIPoETitle();
+		}				
+		//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE 6rd E_			
+		else
+		{
+			wan_ipV6_ip_protocol.value = "Disable";
+			$('div#IPv6OfIPoE').hide();
+			$('div#ipoesixRD').hide();
+
+			ppp_t6rdenable[0].checked=true;
+			btnPPP6rdtypeChange();
+			modifyIPoETitle();
+		}			
+//__MSTC__, Loujia 0814 Integrate WAN Page, IPoE dhcpv6 E_	
+			}
+		}else if (isp_protocol.value == "RFC 1483 via Static IP"){
+			if (defPrctl == "IPoA Static" || (atmEncap == "LLC Routed" && l2Intf == 1))
+			{
+				if (defPrctl != "IPoA Static" ){//strange..
+					rfc_static_routed_ip_single_static.value = "0.0.0.0";
+					rfc_static_routed_subnetMask.value = "0.0.0.0"
+					rfc_static_routed_ip_type.selectedIndex = 0;
+
+					ipTypeChange(1);
+					rfc_static_routed_dns_primary.value = "0.0.0.0";
+					rfc_static_routed_dns_secondary.value = "0.0.0.0";
+				} else {
+					if (wanIp != "0.0.0.0")
+						rfc_static_routed_ip_single_static.value = wanIp;
+					if (subnetMask != "0.0.0.0")
+						rfc_static_routed_subnetMask.value = subnetMask;
+					
+					if (enblIpAddr == '1') {
+						rfc_static_routed_ip_type.selectedIndex = 0;
+					} else if (enblIpAddr == '2') {
+						rfc_static_routed_ip_type.selectedIndex = 1;
+						rfc_static_routed_ip_gateway.value = '<%ejGet(lan2IpAddress)%>';
+						rfc_static_routed_subnet_mask.value = '<%ejGet(lan2SubnetMask)%>';
+
+						var vip = '<%ejGet(usePublicIP)%>';
+						
+						if (vip == '0')
+							rfc_static_routed_subnet_static[0].checked = true;
+						else
+							rfc_static_routed_subnet_static[1].checked = true;
+					}
+
+					if ($('#rfc_static_routed_ip_type').attr('value') == 'Single Static IP'){					
+						$('.block_static_ip_group').hide();
+						$('.single_static_ip_group').show();
+					} else if ($('#rfc_static_routed_ip_type').attr('value') == 'Block of Static IP Addresses'){					
+						$('.single_static_ip_group').hide();
+						$('.block_static_ip_group').show();
+					} else {					
+						$('.single_static_ip_group').hide();
+						$('.block_static_ip_group').hide();
+					}
+
+					ipTypeChange(1);
+					
+				      if (dns1 != "0.0.0.0")
+				         rfc_static_routed_dns_primary.value = dns1;
+				      if (dns2 != "0.0.0.0")
+				         rfc_static_routed_dns_secondary.value = dns2;
+				}		
+				rfc_static_routed_dns_type[1].checked = true;
+			}	
+			else				
+			{
+			      if (defPrctl != "RFC1483 via Static IP"){
+				         rfc_dhcp_bridged_ip_single_static.value = "";
+				         rfc_dhcp_bridged_ip_gateway.value = "";
+				         rfc_dhcp_bridged_subnetMask.value = "";
+				         rfc_static_bridged_dns_primary.value = "";
+				         rfc_static_bridged_dns_secondary.value = "";
+			      }else{
+				      if (wanIp != "0.0.0.0")
+				         rfc_dhcp_bridged_ip_single_static.value = wanIp;
+				      if (subnetMask != "0.0.0.0")
+				         rfc_dhcp_bridged_ip_gateway.value = gateway;
+				      if (gateway != "0.0.0.0")
+				         rfc_dhcp_bridged_subnetMask.value = subnetMask;
+
+// add on 0318
+					if (enblIpAddr == '1') {
+						rfc_dhcp_bridged_ip_type.selectedIndex = 0;
+					} else if (enblIpAddr == '2') {
+						rfc_dhcp_bridged_ip_type.selectedIndex = 1;
+						rfc_dhcp_bridged_gateway.value = '<%ejGet(lan2IpAddress)%>';
+						rfc_dhcp_bridged_subnet_mask.value = '<%ejGet(lan2SubnetMask)%>';
+
+						var vip = '<%ejGet(usePublicIP)%>';
+						
+						if (vip == '0')
+							rfc_dhcp_bridged_subnet_static[0].checked = true;
+						else
+							rfc_dhcp_bridged_subnet_static[1].checked = true;
+					}
+
+					if ($('#rfc_dhcp_bridged_ip_type').attr('value') == 'Single Static IP'){					
+						$('.block_static_ip_group').hide();
+						$('.single_static_ip_group').show();
+					} else if ($('#rfc_dhcp_bridged_ip_type').attr('value') == 'Block of Static IP Addresses'){					
+						$('.single_static_ip_group').hide();
+						$('.block_static_ip_group').show();
+					} else {					
+						$('.single_static_ip_group').hide();
+						$('.block_static_ip_group').hide();
+					}
+//end
+
+				      if (dns1 != "0.0.0.0")
+				         rfc_static_bridged_dns_primary.value = dns1;
+				      if (dns2 != "0.0.0.0")
+				         rfc_static_bridged_dns_secondary.value = dns2;
+					rfc_static_bridged_dns_type[1].checked = true;
+			      }
+			}
+		}else{
+			//must be bridge service
+//__MSTC__, Loujia 0818 ISP Protocol split VPi/VCi from prctlOption	S_
+			if(l2Intf=='1')//atm
+			{
+				if(g_brPVC=="032")
+			    {			             
+         			v4v6_brPVC_option.value = "032";
+				}
+				else if(g_brPVC=="835")
+				{
+					v4v6_brPVC_option.value = "835";
+				}
+				else if(g_brPVC=="035")
+				{
+					v4v6_brPVC_option.value = "035";
+				}
+				else
+				{
+				   /* Default Select 032 */
+				   v4v6_brPVC_option.value = "032";
+				}
+				$('div#atmbridgepvc').show();
+				$('div#ptmbridgesave').hide();
+			}	
+			else //ptm or eth
+			{
+			   if(vlanMuxId == 201)/* tag 201 */
+			   {
+			      v4v6_brVLAN_option.value = "tag201";
+			   }
+			   else if(vlanMuxId == 0)/* tag 0 */
+			   {
+			      v4v6_brVLAN_option.value = "tag0";
+			   }
+			   else if(vlanMuxId == -1)/* untag */
+			   {
+			      v4v6_brVLAN_option.value = "untag";
+			   }
+			   else // User define 
+			   {
+			      /* Default select this vlaue */
+			      v4v6_brVLAN_option.value = "tag201";
+			   }
+			   
+			   $('div#atmbridgepvc').hide();
+			   $('div#ptmbridgesave').show();
+			}				
+//__MSTC__, Loujia 0818 ISP Protocol split VPi/VCi from prctlOption	E_			
+		}	
+
+	}
+}
+
+function IpoeAddressChange()
+{
+   with ( document.forms[0] ) {
+      if(rfc_dhcp_routed_type[0].checked == true)
+      {
+         rfc_dhcp_ip_type.selectedIndex = 0;
+      }
+      else
+      {
+         if(l2Intf == 1)
+            rfc_dhcp_ip_type.selectedIndex = 1;
+         else
+            rfc_dhcp_ip_type.selectedIndex = 2;
+      }
+	  
+      if ($('#rfc_dhcp_ip_type').attr('value') == 'Dynamic'){
+         $('.single_dhcp_ip_group').hide();
+         $('.single_static_ip_group').hide();
+         $('.single_ip_group').hide();
+         $('.block_static_ip_group').hide();
+         if(specMode == 1)
+            $('.radio_single_static_ip_group').hide();
+      } else if ($('#rfc_dhcp_ip_type').attr('value') == 'StaticManual'){
+         $('.single_dhcp_ip_group').hide();
+         $('.single_static_ip_group').show();
+         $('.single_ip_group').hide();
+         $('.block_static_ip_group').hide();
+         if(specMode == 1)
+            $('.radio_single_static_ip_group').show();
+      }
+      IpoeTypeChange(0);
+   }
+}
+
+function frmLoad()
+{
+	prtclChange();
+}
+
+function highlight(field) {
+       field.focus();
+       field.select();
+}
+
+function goSubmit(){
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+$(function(){
+  $('#pppoe_password').hidePassword('#hide_password');
+});
+
+$(document).ready(function(){
+	if(l2Intf=='1')//atm
+		vah_status='<%ejGetOther(vah, atm, status)%>';
+	else if(l2Intf=='2') //ptm
+		vah_status='<%ejGetOther(vah, ptm, status)%>';
+   else  //ethernet
+      vah_status='<%ejGetOther(vah, ethernet, status)%>';
+      
+	var vah_atm_enable = '<%ejGetOther(vah, atm, l2)%>';
+
+	with ( document.forms[0] ) {
+		var vahEn='0';
+		if((l2Intf=='1' && vah_atm_l3_enable=='1') || (l2Intf=='2' && vah_ptm_l3_enable=='1') || (l2Intf=='3' && vah_eth_l3_enable=='1'))
+			vahEn = '1';
+
+		$("#protocolSelect").hide();
+		if (vahEn == '1'){
+			$("#isp_protocol").attr("value",'AutoSelect');
+			if(((defPrctl=='RFC1483 via DHCP') || defPrctl == "RFC1483 via Static IP")){
+				$('.pppoe_group').hide();
+				$('.rfc_transparent_group').hide();					
+				$('.rfc_static_group').hide();
+				$('.rfc_dhcp_group').show();
+
+				$('.rfc_static_routed_group').hide();
+				$('.rfc_static_bridged_group').hide();
+				$('.rfc_dhcp_routed_group').show();
+			}
+			$("#protocolSelect").show();
+		}
+		else if (defPrctl == "PPPoA")
+			$("#isp_protocol").attr("value",'PPPoA');
+		else if (defPrctl == "RFC1483 Transparent Bridging"){
+			if(l2Intf=='2' || l2Intf=='3' ){
+				$("#isp_protocol").attr("value","RFC 1483 Transparent Bridging");
+			}
+			else{
+//__MSTC__, Loujia 0818 ISP Protocol split VPi/VCi from prctlOption, no need show PVC035,	PVC835, 	PVC032 option S_	
+				/*if( vah_atm_enable == '0' ){
+					if(g_vpi == '0' && g_vci == '32')
+						$("#isp_protocol").attr("value","RFC 1483 Transparent Bridging_PVC032");
+					else if(g_vpi == '8' && g_vci == '35')
+						$("#isp_protocol").attr("value","RFC 1483 Transparent Bridging_PVC835");
+					else if(g_vpi == '0' && g_vci == '35')
+						$("#isp_protocol").attr("value","RFC 1483 Transparent Bridging_PVC035");
+					else
+						$("#isp_protocol").attr("value","RFC 1483 Transparent Bridging");
+				}else*/
+//__MSTC__, Loujia 0818 ISP Protocol split VPi/VCi from prctlOption, no need show PVC035,	PVC835, 	PVC032 option E_
+				{
+					$("#isp_protocol").attr("value","RFC 1483 Transparent Bridging");
+				}
+			}
+			$('.pppoe_group').hide();
+			$('.rfc_dhcp_group').hide();
+			$('.rfc_static_group').hide();
+			$('.rfc_transparent_group').show();
+		}else if (defPrctl == "RFC1483 via DHCP"){
+			$("#isp_protocol").attr("value","RFC 1483 via DHCP");
+			$('.pppoe_group').hide();
+			$('.rfc_transparent_group').hide();					
+			$('.rfc_static_group').hide();
+			$('.rfc_dhcp_group').show();
+
+			$('.rfc_static_routed_group').hide();
+			$('.rfc_static_bridged_group').hide();
+			$('.rfc_dhcp_routed_group').show();
+		}else if (defPrctl == "IPoA Static" || (atmEncap == "LLC Routed" && l2Intf == 1)){
+			$("#isp_protocol").attr("value","RFC 1483 via Static IP");
+			$('.pppoe_group').hide();
+			$('.rfc_transparent_group').hide();
+			$('.rfc_dhcp_group').hide();
+			$('.rfc_static_group').show();	
+
+			if (defPrctl == "IPoA Static" || atmEncap == "LLC Routed"){
+				$('.rfc_static_routed_group').show();
+				$('.rfc_static_bridged_group').hide();						
+			}else{
+				$('.rfc_static_routed_group').hide();
+				$('.rfc_static_bridged_group').show();						
+			}
+			$('.rfc_dhcp_routed_group').hide();
+		}
+		else if (defPrctl == "RFC1483 via Static IP")
+		{
+		   /* For new IPoE Design */
+		    $("#isp_protocol").attr("value","RFC 1483 via DHCP");
+			$('.pppoe_group').hide();
+			$('.rfc_transparent_group').hide();					
+			$('.rfc_static_group').hide();
+			$('.rfc_dhcp_group').show();
+
+			$('.rfc_static_routed_group').hide();
+			$('.rfc_static_bridged_group').hide();
+			$('.rfc_dhcp_routed_group').show();
+		}
+
+		$('.hide_rfc_dhcp_bridged_ip_type').hide();
+	}
+});
+-->
+</script>	
+<body id="advancedsetup_wanipaddress" onLoad="frmLoad()">
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+            <!--li class="modemstatus"><a href="modemstatus_home.html">Modem Status</a></li>
+            <li class="quicksetup"><a href="quicksetup.html">Quick Setup</a></li>
+            <li class="wirelesssetup"><a href="wirelesssetup_basicsettings.html">Wireless Setup</a></li>
+            <li class="utilities"><a href="utilities_reboot.html">Utilities</a></li>
+            <li class="advancedsetup"><a href="advancedsetup_accessscheduler.html" id="selected">Advanced Setup</a></li-->
+<script language="javascript">
+      WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+      <a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<script language="javascript">
+         WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+      </div>
+<script language="JavaScript">
+      WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <ul id="subnav">
+<script language="javascript">
+      WriteAdvancedSetupMenuHeader('wanipaddress');
+</script>
+      </ul>
+   <div id="connectionstatus">
+      <h1>Connection Status</h1>
+      <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+      </div>
+   </div>
+</div>
+<div id="content_right">
+   <div id="content_right_header">
+   </div>
+   <div id="content_right_contentarea">
+      <h1 class="advancedsetup_wan">WAN Settings<span>WAN Settings set the protocol and addressing type required by your ISP for Internet access. </span></h1>
+      <form action="advancedsetup_wanipaddress.cgi" method="post" onSubmit="return false;">
+      <input type="hidden" name="ntwkPrtcl" id="ntwkPrtcl" value="1">
+      <input type="hidden" name="defaultWanCfg" id="defaultWanCfg" value="1">
+      <input type="hidden" name="pppAuthErrorRetryInterval" id="pppAuthErrorRetryInterval" value="120">
+      <input type="hidden" name="enblDhcpSrv" id="enblDhcpSrv" value="1">
+      <input type="hidden" name="pppIpExtension" id="pppIpExtension" value="0">
+      <input type="hidden" name="enblFirewall" id="enblFirewall" value="0">
+      <input type="hidden" name="enblFullcone" id="enblFullcone" value="0">
+      <input type="hidden" name="enblPppDebug" id="enblPppDebug" value="0">
+      <input type="hidden" name="enblIgmp" id="enblIgmp" value="1">
+      <input type="hidden" name="pppUserName" id="pppUserName" value="">
+      <input type="hidden" name="pppPassword" id="pppPassword" value="">
+      <input type="hidden" name="enblOnDemand" id="enblOnDemand" value="">
+      <input type="hidden" name="pppTimeOut" id="pppTimeOut" value="">
+      <input type="hidden" name="pppAuthErrorRetry" id="pppAuthErrorRetry" value="">
+      <input type="hidden" name="enblNat" id="enblNat" value="">
+      <input type="hidden" name="enblLan2" id="enblLan2" value="">
+      <input type="hidden" name="pppLocalIpAddress" id="pppLocalIpAddress" value="">
+      <input type="hidden" name="usePublicIP" id="usePublicIP" value="">
+      <input type="hidden" name="delayConfigType" id="delayConfigType" value="">
+      <input type="hidden" name="lan2IpAddress" id="lan2IpAddress" value="">
+      <input type="hidden" name="lan2SubnetMask" id="lan2SubnetMask" value="">
+      <input type="hidden" name="dnsIfc" id="dnsIfc" value="">
+      <input type="hidden" name="mtuSize" id="mtuSize" value="1500">
+      <input type="hidden" name="enblDhcpClnt" id="enblDhcpClnt" value="1">
+      <input type="hidden" name="useStaticIpAddress" id="useStaticIpAddress" value="0">
+      <input type="hidden" name="wanIpAddress" id="wanIpAddress" value="0.0.0.0">
+      <input type="hidden" name="wanSubnetMask" id="wanSubnetMask" value="0.0.0.0">
+      <input type="hidden" name="wanIntfGateway" id="wanIntfGateway" value="0.0.0.0">
+      <input type="hidden" name="wanHostName" id="wanHostName" value="">
+      <input type="hidden" name="wanDomainName" id="wanDomainName" value="">
+      <input type="hidden" name="dnsPrimary" id="dnsPrimary" value="0.0.0.0">
+      <input type="hidden" name="dnsSecondary" id="dnsSecondary" value="0.0.0.0">
+      <input type="hidden" name="sessionKey" id="sessionKey" value="">
+      <input type="hidden" name="atmVahL3en" id="atmVahL3en" value="0">
+      <input type="hidden" name="ptmVahL3en" id="ptmVahL3en" value="0">
+      <input type="hidden" name="ethVahL3en" id="ethVahL3en" value="0">
+      <input type="hidden" name="brPVC" id="brPVC" value="0">
+      <input type="hidden" name="addDHCPBridge" id="addDHCPBridge" value="0">
+      <input type="hidden" name="brVLAN" id="brVLAN" value="0">
+<!--__MSTC__, Loujia 0813 Integrate WAN Page all parameter S~-->
+      <input type="hidden" name="tunnel6rdType" id="tunnel6rdType" value="">
+      <input type="hidden" name="enblv6" id="enblv6" value="0">
+      <input type="hidden" name="tunnel6rd" id="tunnel6rd" value="0">
+      <input type="hidden" name="addr6rdPrefix" id="addr6rdPrefix" value="">
+      <input type="hidden" name="addr6rdEndpoint" id="addr6rdEndpoint" value="">
+      <input type="hidden" name="wanIpv6Mode" id="wanIpv6Mode" value="0">
+      <input type="hidden" name="tunnel6rdMaskLen" id="tunnel6rdMaskLen" value="0">
+      <input type="hidden" name="tunnel6rdPrefixLen" id="tunnel6rdPrefixLen" value="0">
+      <input type="hidden" name="tunnel6rdDnsType" id="tunnel6rdDnsType" value="Default">
+      <input type="hidden" name="dns6Type" id="dns6Type" value="Static">
+      <input type="hidden" name="dns6Pref" id="dns6Pref" value="0">				
+      <input type="hidden" name="dns6Pri" id="dns6Pri" value="">
+      <input type="hidden" name="dns6Sec" id="dns6Sec" value="">
+      <input type="hidden" name="dns6Ifc" id="dns6Ifc" value="">
+      <input type="hidden" name="wanAddr6Type" id="wanAddr6Type" value="">
+<!--__MSTC__, Loujia 0813 Integrate WAN Page all parameter E~-->
+      <div class="stepWrapper">
+         <p><strong>1. Select the ISP protocol.</strong></p>
+         <table>
+         <tr>
+              <td width="150"><label for="isp_protocol">ISP Protocol:</label></td>
+              <td colspan="2">
+              <%ejGetOther(sysInfo, prctlOption)%>
+<!--                        	<select name="isp_protocol" id="isp_protocol" onChange="prtclChange()">
+                                <option value="PPPoE" selected="selected">PPPoE </option>
+                                <option value="PPPoA">PPPoA </option>
+                                <option value="RFC 1483 Transparent Bridging">Transparent Bridging </option>
+                                <option value="RFC 1483 via DHCP">DHCP </option>
+                                <option value="RFC 1483 via Static IP">Static IP </option>
+                            </select>-->
+         </td>
+         </tr>
+         <tr id="protocolSelect">
+              <td>Protocol Selected:</td>
+              <td><%ejGetOther(vah, prctlSelected)%></td>
+         </tr>
+         </table>
+      </div>
+      <div class="pppoe_group">
+         <div class="stepWrapper">
+            <p><strong>2. Enter the PPP username and password. </strong></p>
+            <table>
+            <tr class='class_pppoe_username'>
+               <td width="150"><label for="pppoe_username">PPP Username:</label></td>
+               <td colspan="2"><input id="pppoe_username" type="text" size="30" /></td>
+            </tr>
+            <tr class='class_pppoe_password'>
+               <td width="150"><label for="pppoe_password">PPP Password:</label></td>
+               <td colspan="2"><input id="pppoe_password" type="password" size="30" /></td>
+            </tr>
+            <tr class='PasswordConfirmID'>
+               <td width="150"><label for="pppoe_password_confirm">Confirm PPP Password:</label></td>
+               <td colspan="2"><input id="pppoe_password_confirm" type="password" size="30" /></td>
+            </tr>
+            <tr class='class_hide_password'>
+               <td colspan="2"><input type="checkbox" checked="checked" id="hide_password" name="hide_password" size="25" onClick="hide_password_change()"> Hide Password</td>
+               <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+               <td width="135"><label for="pppoe_auto_connect">PPP Auto Connect:</label></td>
+               <td><label><input name="pppoe_auto_connect" id="pppoe_auto_connect_enable"  type="radio" /> Enable</label></td>
+               <td><label><input name="pppoe_auto_connect" id="pppoe_auto_connect_disable"  type="radio" /> Disable</label></td>
+            </tr>
+            <tr>
+               <td width="135"><label for="pppoe_no_credentials">PPP Credentials Not Required:</label></td>
+               <td><label><input name="pppoe_no_credentials" id="pppoe_no_credentials_enable" type="radio" onClick="pwdCheckRequire(1)" /> Enable</label></td>
+               <td><label><input name="pppoe_no_credentials" id="pppoe_no_credentials_disable" type="radio" onClick="pwdCheckRequire(1)" /> Disable</label></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>3. Select the IP addressing type. </strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="pppoe_ip_type">IP Addressing Type:</label></td>
+               <td colspan="2"><select name="pppoe_ip_type" id="pppoe_ip_type" onChange="pppIpTypeChange(1)">
+                              <option value="Dynamic IP" selected="selected">Dynamic IP </option>
+                              <option value="Single Static IP">Single Static IP </option>
+                              <option value="Block of Static IP Addresses">Block of Static IP Addresses </option></select></td>
+            </tr>
+            <tr class="single_static_ip_group">
+               <td width="135"><label for="pppoe_ip_single_static">Single Static IP:</label></td>
+               <td colspan="2"><input id="pppoe_ip_single_static" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="block_static_ip_group">
+               <td width="135"><label for="pppoe_subnet_mask">Subnet Mask:</label></td>
+               <td colspan="2"><input id="pppoe_subnet_mask" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="block_static_ip_group">
+               <td width="135"><label for="pppoe_ip_gateway">Gateway Address:</label></td>
+               <td colspan="2"><input id="pppoe_ip_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="block_static_ip_group">
+               <td width="135"><label for="pppoe_subnet_dhcp">LAN DHCP Addressing:</label></td>
+               <!--<td><input id="pppoe_subnet_dhcp" type="checkbox" /></td>-->
+               <td><label><input type="radio" name="pppoe_subnet_dhcp" id="pppoe_subnet_dhcp" checked="checked" /> Private LAN Subnet</label></td>
+               <td><label><input type="radio" name="pppoe_subnet_dhcp" id="pppoe_subnet_dhcp" /> Public Static Subnet</label></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>4. Set the DNS type.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="pppoe_dns_type">DNS Type:</label></td>
+               <td><label><input name="pppoe_dns_type" type="radio" id="pppoe_dns_type_dynamic" value="pppoe_dns_type_dynamic" checked="checked" /> Dynamic DNS</label></td>
+               <td><label><input name="pppoe_dns_type" type="radio" id="pppoe_dns_type_static" value="pppoe_dns_type_static" /> Static DNS</label></td>
+            </tr>
+            <tr class="pppoe_dns_type_dynamic_group">
+               <td width="135"><label for="pppoe_dns_primary">Primary DNS:</label></td>
+               <td colspan="2"><input id="pppoe_dns_primary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="pppoe_dns_type_dynamic_group">
+               <td width="135"><label for="pppoe_dns_secondary">Secondary DNS:</label></td>
+               <td colspan="2"><input id="pppoe_dns_secondary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>5. Set the IPv6 addressing values.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="ppp_t6rdenable">6rd state:</label></td>
+               <td><label><input name="ppp_t6rdenable" type="radio" id="ppp_t6rd_state_disable" value="disable" checked="checked" /></label>Disable</td>
+               <td><label><input name="ppp_t6rdenable" type="radio" id="ppp_t6rd_state_enable" value="enable" /> Enable</label></td>
+            </tr>
+            <tr class="ppp_t6rd_state_enable_group"> 
+               <td width="135"><label for="ppp_tunnel6rd_Prefix">6rd Prefix:</label></td>
+               <td colspan="2"><input name="ppp_tunnel6rd_Prefix" type="text" id="ppp_tunnel6rd_Prefix" value="2602::" size="25" /></td>
+            </tr>
+            <tr class="ppp_t6rd_state_enable_group"> 
+               <td width="135"><label for="ppp_tunnel6rd_Prefix_Length">6rd Prefix Length:</label></td>
+               <td colspan="2"><input name="ppp_tunnel6rd_Prefix_Length" type="text" id="ppp_tunnel6rd_Prefix_Length" value="24" size="5" /></td>
+            </tr>
+            <tr class="ppp_t6rd_state_enable_group"> 
+               <td width="135"><label for="ppp_IPv4_CE_Mask_Length">IPv4 CE Mask Length:</label> </td>
+               <td colspan="2"><input name="ppp_IPv4_CE_Mask_Length" type="text" id="ppp_IPv4_CE_Mask_Length" value="0" size="5" /></td>
+            </tr>
+            <tr class="ppp_t6rd_state_enable_group"> 
+               <td width="135"><label for="ppp_Border_Router_Address">IPv4 Border Router Address:</label></td>
+               <td colspan="2"><input name="ppp_Border_Router_Address" type="text" id="ppp_Border_Router_Address" value="205.171.2.64" size="25" /></td>
+            </tr> 		                
+            </table>
+         </div>
+         <div class="ppp_t6rd_state_enable_group">
+            <div class="stepWrapper">
+               <p><strong>6. Set the WAN IPv6 DNS server.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="ppp_t6rd_dns_type">IPv6 DNS Type:</label></td>
+                  <td><label>
+                  <input name="ppp_t6rd_dns_type" type="radio" id="ppp_sixRD_dns_type_dynamic" value="ppp_sixRD_dns_type_dynamic"  checked="checked"  onChange="tunnelpppoe6rdDnsChange()"/>Default  Servers</label></td>
+                  <td><label>
+                  <input name="ppp_t6rd_dns_type" type="radio" id="ppp_sixRD_dns_type_static" value="ppp_sixRD_dns_type_static" onChange="tunnelpppoe6rdDnsChange()"/>Custom  Servers</label></td>
+               </tr>
+               <tr class="ppp_sixRD_dns_type_dynamic_group">
+                  <td width="135"><label for="ppp_t6rd_dns_primary">Primary DNS:</label></td>
+                  <td colspan="2"><input type="text" id="ppp_t6rd_dns_primary" value="2001:428::1" size="40" /></td>
+               </tr>
+               <tr class="ppp_sixRD_dns_type_dynamic_group">
+                  <td width="135"><label for="ppp_t6rd_dns_secondary">Secondary DNS:</label></td>
+                  <td colspan="2"><input type="text" id="ppp_t6rd_dns_secondary" value="2001:428::2" size="40" /></td>
+               </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>7. Set the DNS IP version resolver preference below.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="ppp_t6rd_dns_pref_type">DNS Preference:</label></td>
+                  <td><label>
+                  <input name="ppp_t6rd_dns_pref_type" type="radio" id="ppp_DNSPref_ipv4" value="4" checked="checked"/>IPv4 First</label></td>
+                  <td><label>
+                  <input name="ppp_t6rd_dns_pref_type" type="radio" id="ppp_DNSPref_ipv6" value="6" />IPv6 First</label></td>
+               </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>8. Click &quot;Apply&quot; to save your changes.</strong></p>
+               <a href="#" class="btn apply_btn" onClick='btnPppApply()'>Apply</a>
+            </div>
+         </div>
+         <div class="originPPPSave">
+            <div class="stepWrapper">
+              <p><strong>6. Click &quot;Apply&quot; to save your changes.</strong></p>
+              <a href="#" class="btn apply_btn" onClick='btnPppApply()'>Apply</a>
+            </div>
+         </div>   
+      </div> <!-- End of class "pppoe_group" -->
+      
+      <div class="rfc_transparent_group">
+         <div id="atmbridgepvc">
+            <div class="stepWrapper">
+               <p><strong>2. Select the VPI/VCI Setting.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="v4v6_brPVC_option">VPI/VCI Setting:</label></td>
+                  <td><select name="v4v6_brPVC_option" id="v4v6_brPVC_option">
+                      <option value="032"selected="selected">0/32</option>
+                      <option value="835">8/35</option>
+                      <option value="035">0/35</option>
+                      </select></td>
+               </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+               <a href="#" class="btn apply_btn" onClick='btnBrApply()'>Apply</a>
+            </div>
+         </div>    
+         <div id="ptmbridgesave">          
+            <div class="stepWrapper">
+               <p><strong>2. Select the VLAN Setting.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="v4v6_brVLAN_option">VLAN ID Setting:</label></td>
+                  <td><select name="v4v6_brVLAN_option" id="v4v6_brVLAN_option">
+                      <option value="tag201" selected="selected">Tagged-201</option>
+                      <option value="tag0">Tagged-0</option>
+                      <option value="untag">Untagged</option>
+                      </select></td>
+               </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+               <a href="#" class="btn apply_btn" onClick='btnBrApply()'>Apply</a>
+            </div>
+          </div>    
+      </div> <!-- End of class "rfc_transparent_group" -->
+      
+      <div class="rfc_static_group rfc_static_bridged_group">
+         <div class="stepWrapper">
+            <p><strong>2. </strong><strong>  Set the IP information.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_dhcp_bridged_ip_single_static">Single Static IP:</label></td>
+               <td colspan="2"><input id="rfc_dhcp_bridged_ip_single_static" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr>
+               <td width="150"><label for="rfc_dhcp_bridged_subnetMask">Subnet Mask:</label></td>
+               <td colspan="2"><input id="rfc_dhcp_bridged_subnetMask" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr>
+               <td width="150"><label for="rfc_dhcp_bridged_ip_gateway">Gateway Address:</label></td>
+               <td colspan="2"><input id="rfc_dhcp_bridged_ip_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            </table>
+         </div>
+         <div class="hide_rfc_dhcp_bridged_ip_type">
+            <div class="stepWrapper">
+               <p><strong>3. </strong><strong> Select the IP type.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="rfc_dhcp_bridged_ip_type">IP Addressing Type:</label></td>
+                  <td colspan="2"><select name="rfc_dhcp_bridged_ip_type" id="rfc_dhcp_bridged_ip_type" onChange="ipTypeChange()">
+                                  <option value="Single Static IP" selected="selected">Single Static IP </option>
+                                  <!--<option value="Block of Static IP Addresses">Block of Static IP Addresses </option>-->
+                                  </select></td>
+               </tr>
+               <tr class="block_static_ip_group">
+                  <td width="135"><label for="rfc_dhcp_bridged_subnet_mask">Subnet Mask:</label></td>
+                  <td colspan="2"><input id="rfc_dhcp_bridged_subnet_mask" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               <tr class="block_static_ip_group">
+                  <td width="135"><label for="rfc_dhcp_bridged_gateway">Gateway Address:</label></td>
+                  <td colspan="2"><input id="rfc_dhcp_bridged_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               <tr class="block_static_ip_group">
+                  <td width="135"><label for="rfc_static_routed_subnet_static">LAN DHCP Addressing:</label></td>
+                  <td><label><input type="radio" name="rfc_dhcp_bridged_subnet_static" id="rfc_dhcp_bridged_subnet_static" checked="checked" /> Private LAN Subnet</label></td>
+                  <td><label><input type="radio" name="rfc_dhcp_bridged_subnet_static" id="rfc_dhcp_bridged_subnet_static" /> Public Static Subnet</label></td>
+               </tr>
+               </table>
+            </div>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>3. </strong><strong> Select the DNS type.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_static_bridged_dns_type">DNS Type:</label></td>
+               <td><label><input name="rfc_static_bridged_dns_type" type="radio" id="rfc_static_bridged_dns_type_dynamic" value="rfc_static_bridged_dns_type_dynamic"  disabled /> Dynamic DNS</label></td>
+               <td><label><input name="rfc_static_bridged_dns_type" type="radio" id="rfc_static_bridged_dns_type_static" value="rfc_static_bridged_dns_type_static" checked="checked" disabled /> Static DNS</label></td>
+            </tr>
+            <tr class="rfc_static_bridged_dns_type_dynamic_group">
+               <td width="135"><label for="rfc_static_bridged_dns_primary">Primary DNS:</label></td>
+               <td colspan="2"><input id="rfc_static_bridged_dns_primary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="rfc_static_bridged_dns_type_dynamic_group">
+               <td width="135"><label for="rfc_static_bridged_dns_secondary">Secondary DNS:</label></td>
+               <td colspan="2"><input id="rfc_static_bridged_dns_secondary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>4. Click &quot;Apply&quot; to save your changes.</strong></p>
+            <a href="#" class="btn apply_btn" onClick='btnStaticApply()'>Apply</a>
+         </div>
+      </div> <!-- End of class "rfc_static_group rfc_static_bridged_groupp" -->
+      
+      <div class="rfc_static_group rfc_static_routed_group">
+         <div class="stepWrapper">
+            <p><strong>2. </strong><strong> Set the IP information.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_static_routed_ip_single_static">Single Static IP:</label></td>
+               <td colspan="2"><input id="rfc_static_routed_ip_single_static" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr>
+               <td width="150"><label for="rfc_static_routed_subnetMask">Subnet Mask:</label></td>
+               <td colspan="2"><input id="rfc_static_routed_subnetMask" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>3. </strong><strong> Select the IP type.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_static_routed_ip_type">IP Addressing Type:</label></td>
+               <td colspan="2"><select name="rfc_static_routed_ip_type" id="rfc_static_routed_ip_type" onChange="ipTypeChange()">
+                               <!--<option value="Dynamic IP" selected="selected">Dynamic IP (Default) </option>-->
+                               <option value="Single Static IP" selected="selected">Single Static IP </option>
+                               <option value="Block of Static IP Addresses">Block of Static IP Addresses </option>
+                               </select></td>
+            </tr>
+            <!--<tr class="single_static_ip_group">
+                     <td width="135"><label for="rfc_static_routed_ip_single_static">Single Static IP:</label></td>
+                     <td colspan="2"><input id="rfc_static_routed_ip_single_static" type="text" size="35" /></td>
+                     </tr>-->
+            <tr class="block_static_ip_group">
+               <td width="135"><label for="rfc_static_routed_subnet_mask">Subnet Mask:</label></td>
+               <td colspan="2"><input id="rfc_static_routed_subnet_mask" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="block_static_ip_group">
+               <td width="135"><label for="rfc_static_routed_ip_gateway">Gateway Address:</label></td>
+               <td colspan="2"><input id="rfc_static_routed_ip_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="block_static_ip_group">
+               <td width="135"><label for="rfc_static_routed_subnet_static">LAN DHCP Addressing:</label></td>
+               <!--<td><input id="rfc_static_routed_subnet_static" type="checkbox" /></td>-->
+               <td><label><input type="radio" name="rfc_static_routed_subnet_static" id="rfc_static_routed_subnet_static" checked="checked" /> Private LAN Subnet</label></td>
+               <td><label><input type="radio" name="rfc_static_routed_subnet_static" id="rfc_static_routed_subnet_static" /> Public Static Subnet</label></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>4. </strong><strong> Select the DNS type.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_static_routed_dns_type">DNS Type:</label></td>
+               <td><label><input name="rfc_static_routed_dns_type" type="radio" id="rfc_static_routed_dns_type_dynamic" value="rfc_static_routed_dns_type_dynamic"  disabled /> Dynamic DNS</label></td>
+               <td><label><input name="rfc_static_routed_dns_type" type="radio" id="rfc_static_routed_dns_type_static" value="rfc_static_routed_dns_type_static" checked="checked" disabled/> Static DNS</label></td>
+            </tr>
+            <tr class="rfc_static_routed_dns_type_dynamic_group">
+               <td width="135"><label for="rfc_static_routed_dns_primary">Primary DNS:</label></td>
+               <td colspan="2"><input id="rfc_static_routed_dns_primary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="rfc_static_routed_dns_type_dynamic_group">
+               <td width="135"><label for="rfc_static_routed_dns_secondary">Secondary DNS:</label></td>
+               <td colspan="2"><input id="rfc_static_routed_dns_secondary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>5. Click &quot;Apply&quot; to save your changes.</strong></p>
+            <a href="#" class="btn apply_btn" onClick="btnIpoaApply()">Apply</a>
+         </div>
+      </div> <!-- End of class "rfc_static_group rfc_static_routed_group" --> 
+      
+      <div class="rfc_dhcp_group rfc_dhcp_routed_group">
+         <div class="stepWrapper">
+            <p><strong>2. Enter the ISP host name and domain name (optional).</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_dhcp_routed_host">Host Name:</label></td>
+               <td><input name="rfc_dhcp_routed_host" id="rfc_dhcp_routed_host" type="text" size="35" /></td>
+            </tr>
+            <tr>
+               <td width="150"><label for="rfc_dhcp_routed_domain">Domain Name:</label></td>
+               <td><input name="rfc_dhcp_routed_domain" id="rfc_dhcp_routed_domain" type="text" size="35" /></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>3. Select the IP addressing type. </strong></p>
+            <table>
+            <tr>
+               <td width="150" id="rfc_dhcp_routed_type_td"><label for="rfc_dhcp_routed_type">IP Addressing Type:</label></td>
+               <td id="rfc_dhcp_routed_type_dynamic_td"><label><input type="radio" name="rfc_dhcp_routed_type" id="rfc_dhcp_routed_type_dynamic" value="rfc_dhcp_routed_type_dynamic" checked="checked" onClick="IpoeAddressChange()"/> Dynamic</label></td>
+               <td id="rfc_dhcp_routed_type_static_td"><label><input type="radio" name="rfc_dhcp_routed_type" id="rfc_dhcp_routed_type_static" value="rfc_dhcp_routed_type_static"/ onClick="IpoeAddressChange()"> Static IP</label></td>                   
+            </tr>
+             <tr>
+               <td colspan="3" id="rfc_dhcp_routed_text">Static IP: This option is used when the WAN IP must be configured manually on the RG. Consult your documentation to see if this applies to your service before entering the WAN IP information in Step 4.</td>
+            </tr>
+            <tr>
+               <td width="150" id="rfc_dhcp_ip_type_label"><label for="rfc_dhcp_ip_type">IP Addressing Type:</label></td>
+               <td colspan="2" id="rfc_dhcp_ip_type_text">
+               <%ejGetOther(sysInfo, ipoeOption)%>
+               <!--
+               <select name="rfc_dhcp_ip_type" id="rfc_dhcp_ip_type" onChange="IpoeTypeChange(0)">
+                               <option value="Dynamic"  selected="selected" >Dynamic IP</option>
+                               <option value="StaticDHCP">Single Static IP - Automatic</option>
+                               <option value="StaticManual">Single Static IP - Manual</option>
+                               <option value="BlockDHCP"   >Block Static IP - Automatic</option>
+                               <option value="BlockManual" >Block Static IP - Manual</option>
+                               </select> -->
+               </td>
+            </tr>                    
+            <!-- DHCP IP Config -->
+            <tr class="single_dhcp_ip_group">
+               <td width="135"><label for="single_dhcp_lable" id="single_dhcp_lable">WAN IP Address:</label></td>
+               <td colspan="2"><label for="single_dhcp_wanip" id="single_dhcp_wanip"></label></td>
+            </tr>
+            <!-- Static Config -->
+            <tr class="single_static_ip_group">
+               <td width="135" id="static_ip_text"><label for="single_static_ip">WAN IP Address:</label></td>
+               <td colspan="2" id="static_ip"><input id="single_static_ip" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="single_static_ip_group">
+               <td width="135" id="static_subnet_text"><label for="single_static_subnet">Subnet Mask:</label></td>
+               <td colspan="2" id="static_subnet"><input id="single_static_subnet" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="single_static_ip_group">
+               <td width="135" id="static_gateway_text"><label for="single_static_gateway">Gateway Address:</label></td>
+               <td colspan="2" id="static_gateway"><input id="single_static_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <!-- label -->
+            <tr class="single_ip_group">
+               <td width="135" id="single_ip_group_lable"><label for="single_label" id="single_label"></label></td>
+               <td colspan="2" id="single_ip_group_text"><label for="single_label_text" id="single_label_text"></label></td>
+            </tr>
+            </table>
+         </div>
+         <div class="radio_single_static_ip_group">
+            <div class="stepWrapper">
+               <p id="RadioStaticTitle"><strong>Enter the Static IP Information.</strong></p>
+               <table>
+               <tr class="radio_single_static_ip_group">
+                  <td width="150"><label for="radio_single_static_ip">WAN IP Address:</label></td>
+                  <td colspan="2"><input id="radio_single_static_ip" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               <tr class="radio_single_static_ip_group">
+                  <td width="150"><label for="radio_single_static_subnet">Subnet Mask:</label></td>
+                  <td colspan="2"><input id="radio_single_static_subnet" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               <tr class="radio_single_static_ip_group">
+                  <td width="150"><label for="radio_single_static_gateway">Gateway Address:</label></td>
+                  <td colspan="2"><input id="radio_single_static_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               </table>
+            </div>
+         </div>
+         <div class="block_static_ip_group">
+            <div class="stepWrapper">
+               <p id="IPoEBlcokTitle"><strong>Enter the Static Block IP Information.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="ipoe_ip_block_mask">Subnet Mask:</label></td>
+                  <td colspan="2"><input id="ipoe_ip_block_mask" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               <tr>
+                  <td width="150"><label for="ipoe_ip_block_gateway">Gateway Address:</label></td>
+                  <td colspan="2"><input id="ipoe_ip_block_gateway" type="text" size="35" value="" onClick='highlight(this);'/></td>
+               </tr>
+               <tr class="block_static_ip_group">
+                  <td width="135"><label for="ipoe_ip_block_lan_dhcp">LAN DHCP Addressing:</label></td>
+                  <td><label><input type="radio" name="ipoe_ip_block_lan_dhcp" id="ipoe_ip_block_lan_dhcp" checked="checked" /> Private LAN Subnet</label></td>
+                  <td><label><input type="radio" name="ipoe_ip_block_lan_dhcp" id="ipoe_ip_block_lan_dhcp" /> Public Static Subnet</label></td>
+               </tr>
+               </table>
+            </div>
+         </div>
+         <div class="stepWrapper">
+            <p id="IPoEDNSTitle"><strong>Select the DNS type.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="rfc_dhcp_routed_dns_type">DNS Type:</label></td>
+               <td><label><input name="rfc_dhcp_routed_dns_type" type="radio" id="rfc_dhcp_routed_dns_type_dynamic" value="rfc_dhcp_routed_dns_type_dynamic" checked="checked" /> Dynamic DNS</label></td>
+               <td><label><input name="rfc_dhcp_routed_dns_type" type="radio" id="rfc_dhcp_routed_dns_type_static" value="rfc_dhcp_routed_dns_type_static" /> Static DNS</label></td>
+            </tr>
+            <tr class="rfc_dhcp_routed_dns_type_dynamic_group">
+               <td width="135"><label for="rfc_dhcp_routed_dns_primary">Primary DNS:</label></td>
+               <td colspan="2"><input id="rfc_dhcp_routed_dns_primary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            <tr class="rfc_dhcp_routed_dns_type_dynamic_group">
+               <td width="135"><label for="rfc_dhcp_routed_dns_secondary">Secondary DNS:</label></td>
+               <td colspan="2"><input id="rfc_dhcp_routed_dns_secondary" type="text" size="35" value="" onClick='highlight(this);'/></td>
+            </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p id="IPoEIPv6Title"><strong>Select the WAN IPv6 connection protocol.</strong></p>
+            <table>
+            <tr>
+               <td width="150"><label for="wan_ipV6_ip_protocol">WAN IPv6 IP Protocol:</label></td>
+               <td><select name="wan_ipV6_ip_protocol" id="wan_ipV6_ip_protocol" onChange="IPoEprtclIpv6Change()">
+                   <option value="Disable" selected="selected">Disable</option>
+                   <option value="6rd">6rd</option>
+                   <option value="DHCPv6">DHCPv6-PD</option>
+                   </select></td>
+            </tr>
+            </table>
+         </div>
+         <div id="IPv6OfIPoE">
+            <div id="ipoesixRD">  
+               <div class="stepWrapper">
+                  <p id="IPoE6rdTitle"><strong>Set the IPv6 addressing values.</strong></p>
+                  <table>
+                  <tr class="v4_t6rd_state_enable_group"> 
+                     <td width="135"><label for="v4_tunnel6rd_Prefix">6rd Prefix:</label></td>
+                     <td colspan="2"><input name="v4_tunnel6rd_Prefix" type="text" id="v4_tunnel6rd_Prefix" value="2602::" size="25" /></td>
+                  </tr>
+                  <tr class="v4_t6rd_state_enable_group"> 
+                     <td width="135"><label for="v4_tunnel6rd_Prefix_Length">6rd Prefix Length:</label></td>
+                     <td colspan="2"><input name="v4_tunnel6rd_Prefix_Length" type="text" id="v4_tunnel6rd_Prefix_Length" value="24" size="5" /></td>
+                  </tr>
+                  <tr class="v4_t6rd_state_enable_group"> 
+                     <td width="135"><label for="v4_IPv4_CE_Mask_Length">IPv4 CE Mask Length:</label> </td>
+                     <td colspan="2"><input name="v4_IPv4_CE_Mask_Length" type="text" id="v4_IPv4_CE_Mask_Length" value="0" size="5"/></td>
+                  </tr>
+                  <tr class="v4_t6rd_state_enable_group"> 
+                     <td width="135"><label for="v4_6rd_212Opiton">DHCPv4 6rd Option 212:</label></td>
+                     <td><label>
+                     <input name="v4_6rd_212Opiton" type="radio" id="v4_6rd_212Opiton_enable" value="enable" />Enable</label></td>
+                     <td><label>
+                     <input name="v4_6rd_212Opiton" type="radio" id="v4_6rd_212Opiton_disable" value="disable" checked="checked"/>Disable</label></td>
+                  </tr> 
+                 <tr class="v4_t6rd_state_enable_group"> 
+                    <td width="135"><label for="v4_Border_Router_Address">IPv4 Border Router Address:</label></td>
+                    <td colspan="2"><input name="v4_Border_Router_Address" type="text" id="v4_Border_Router_Address" value="205.171.2.64" size="25" /></td>
+                  </tr> 		                
+                  </table>
+               </div>
+            </div>
+            <div class="stepWrapper">
+               <p id="IPoEDNSv6"><strong>Set the WAN IPv6 DNS server.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="ipv6_dns_type">IPv6 DNS Type:</label></td>
+                  <td><label>
+                  <input name="ipv6_dns_type" type="radio" id="ipv6_dns_type_dynamic" value="ipv6_dns_type_dynamic" checked="checked"/>Default  Servers</label></td>
+                  <td><label>
+                  <input name="ipv6_dns_type" type="radio" id="ipv6_dns_type_static" value="ipv6_dns_type_static"/>Custom  Servers</label></td>
+               </tr>
+               <tr class="ipv6_dns_static_group">
+                  <td width="135"><label for="ipv6_dns_primary">Primary DNS:</label></td>
+                  <td colspan="2"><input type="text" id="ipv6_dns_primary" value="2001:428::1" size="40" /></td>
+               </tr>
+               <tr class="ipv6_dns_static_group">
+                  <td width="135"><label for="ipv6_dns_secondary">Secondary DNS:</label></td>
+                  <td colspan="2"><input type="text" id="ipv6_dns_secondary" value="2001:428::2" size="40" /></td>
+               </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p id="IPoEDNSPre"><strong>Set the DNS IP version resolver preference below.</strong></p>
+               <table>
+               <tr>
+                  <td width="150"><label for="ipoe_dns6_pref_type">DNS Preference:</label></td>
+                  <td><label>
+                  <input name="ipoe_dns6_pref_type" type="radio" id="ipoe_dns6_pref_IPv4" value="4" checked="checked"/>IPv4 First</label></td>
+                  <td><label>
+                  <input name="ipoe_dns6_pref_type" type="radio" id="ipoe_dns6_pref_IPv6" value="6" />IPv6 First</label></td>
+               </tr>
+               </table>
+            </div>
+         </div>
+         <div class="stepWrapper">
+            <p id ="ApplyDHCPTitle"><strong>Click &quot;Apply&quot; to save your changes.</strong></p>
+            <a href="#" class="btn apply_btn" onClick='btnDhcpApply()'>Apply</a>
+         </div>
+      </div> <!-- End of class "rfc_dhcp_group rfc_dhcp_routed_group"-->
+      </form>
+   </div>
+</div>
+<div class="clear_left">
+</div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var allFWruleName = "<%ejGetOtherBig(GetAllFirewallName)%>";
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+function checkProtocolType(port_protocol_No, port_start_No, port_end_No)
+{
+	with ( document.forms[0] )
+	{
+		if( port_protocol_No.value == "GRE" ){
+			port_start_No.disabled = true;
+			port_end_No.disabled = true;
+		}
+		else{
+			port_start_No.disabled = false;
+			port_end_No.disabled = false;
+		}
+	}
+}
+
+function btnRemove(securityLevel, serviceName)
+{
+	with ( document.forms[0] )
+	{
+		security_Level.value = securityLevel;
+		service_Name.value = serviceName;
+
+		submit_check.value = "1";
+		page_action.value = "del"
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+function checkBeforeApply()
+{
+	with ( document.forms[0] )
+	{
+		if( service_name.value == "" ){
+			AlertOpen('The Service Name is empty.');
+			return false;
+		}
+
+		if( isAppValidName(service_name.value) == false ){
+			AlertOpen('The Service Name is invalid.');
+			return false;
+		}
+
+		if( service_type.value == "" ){
+			AlertOpen('The Service Type is empty.');
+			return false;
+		}
+
+		if( isAppValidName(service_type.value) == false ){
+			AlertOpen('The Service Type is invalid.');
+			return false;
+		}
+
+		// validate port range
+		if( port_quantity.value == "1" ){
+			port_start_2.value = "";
+			port_end_2.value = "";
+			port_start_3.value = "";
+			port_end_3.value = "";
+			port_start_4.value = "";
+			port_end_4.value = "";
+			port_start_5.value = "";
+			port_end_5.value = "";
+			port_start_6.value = "";
+			port_end_6.value = "";
+
+			if( port_protocol_1.value != "GRE" && port_end_1.value == "" ){
+				port_end_1.value = port_start_1.value;
+			}
+			if ( port_protocol_1.value != "GRE" && !isValidPort( port_start_1.value+":"+port_end_1.value) ) {
+				AlertOpen('The port range 1 is invalid.');
+				return false;
+			}
+		}
+		else if( port_quantity.value == "2" ){
+			port_start_3.value = "";
+			port_end_3.value = "";
+			port_start_4.value = "";
+			port_end_4.value = "";
+			port_start_5.value = "";
+			port_end_5.value = "";
+			port_start_6.value = "";
+			port_end_6.value = "";
+
+			if( port_protocol_1.value != "GRE" && port_end_1.value == "" ){
+				port_end_1.value = port_start_1.value;
+			}
+			if ( port_protocol_1.value != "GRE" && !isValidPort( port_start_1.value+":"+port_end_1.value) ) {
+				AlertOpen('The port range 1 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_2.value != "GRE" && port_end_2.value == "" ){
+				port_end_2.value = port_start_2.value;
+			}
+			if ( port_protocol_2.value != "GRE" && !isValidPort( port_start_2.value+":"+port_end_2.value) ) {
+				AlertOpen('The port range 2 is invalid.');
+				return false;
+			}
+		}
+		else if( port_quantity.value == "3" ){
+			port_start_4.value = "";
+			port_end_4.value = "";
+			port_start_5.value = "";
+			port_end_5.value = "";
+			port_start_6.value = "";
+			port_end_6.value = "";
+
+			if( port_protocol_1.value != "GRE" && port_end_1.value == "" ){
+				port_end_1.value = port_start_1.value;
+			}
+			if ( port_protocol_1.value != "GRE" && !isValidPort( port_start_1.value+":"+port_end_1.value) ) {
+				AlertOpen('The port range 1 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_2.value != "GRE" && port_end_2.value == "" ){
+				port_end_2.value = port_start_2.value;
+			}
+			if ( port_protocol_2.value != "GRE" && !isValidPort( port_start_2.value+":"+port_end_2.value) ) {
+				AlertOpen('The port range 2 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_3.value != "GRE" && port_end_3.value == "" ){
+				port_end_3.value = port_start_3.value;
+			}
+			if ( port_protocol_3.value != "GRE" && !isValidPort( port_start_3.value+":"+port_end_3.value) ) {
+				AlertOpen('The port range 3 is invalid.');
+				return false;
+			}
+		}
+		else if( port_quantity.value == "4" ){
+			port_start_5.value = "";
+			port_end_5.value = "";
+			port_start_6.value = "";
+			port_end_6.value = "";
+
+			if( port_protocol_1.value != "GRE" && port_end_1.value == "" ){
+				port_end_1.value = port_start_1.value;
+			}
+			if ( port_protocol_1.value != "GRE" && !isValidPort( port_start_1.value+":"+port_end_1.value) ) {
+				AlertOpen('The port range 1 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_2.value != "GRE" && port_end_2.value == "" ){
+				port_end_2.value = port_start_2.value;
+			}
+			if ( port_protocol_2.value != "GRE" && !isValidPort( port_start_2.value+":"+port_end_2.value) ) {
+				AlertOpen('The port range 2 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_3.value != "GRE" && port_end_3.value == "" ){
+				port_end_3.value = port_start_3.value;
+			}
+			if ( port_protocol_3.value != "GRE" && !isValidPort( port_start_3.value+":"+port_end_3.value) ) {
+				AlertOpen('The port range 3 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_4.value != "GRE" && port_end_4.value == "" ){
+				port_end_4.value = port_start_4.value;
+			}
+			if ( port_protocol_4.value != "GRE" && !isValidPort( port_start_4.value+":"+port_end_4.value) ) {
+				AlertOpen('The port range 4 is invalid.');
+				return false;
+			}
+		}
+		else if( port_quantity.value == "5" ){
+			port_start_6.value = "";
+			port_end_6.value = "";
+
+			if( port_protocol_1.value != "GRE" && port_end_1.value == "" ){
+				port_end_1.value = port_start_1.value;
+			}
+			if ( port_protocol_1.value != "GRE" && !isValidPort( port_start_1.value+":"+port_end_1.value) ) {
+				AlertOpen('The port range 1 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_2.value != "GRE" && port_end_2.value == "" ){
+				port_end_2.value = port_start_2.value;
+			}
+			if ( port_protocol_2.value != "GRE" && !isValidPort( port_start_2.value+":"+port_end_2.value) ) {
+				AlertOpen('The port range 2 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_3.value != "GRE" && port_end_3.value == "" ){
+				port_end_3.value = port_start_3.value;
+			}
+			if ( port_protocol_3.value != "GRE" && !isValidPort( port_start_3.value+":"+port_end_3.value) ) {
+				AlertOpen('The port range 3 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_4.value != "GRE" && port_end_4.value == "" ){
+				port_end_4.value = port_start_4.value;
+			}
+			if ( port_protocol_4.value != "GRE" && !isValidPort( port_start_4.value+":"+port_end_4.value) ) {
+				AlertOpen('The port range 4 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_5.value != "GRE" && port_end_5.value == "" ){
+				port_end_5.value = port_start_5.value;
+			}
+			if ( port_protocol_5.value != "GRE" && !isValidPort( port_start_5.value+":"+port_end_5.value) ) {
+				AlertOpen('The port range 5 is invalid.');
+				return false;
+			}
+		}
+		else if( port_quantity.value == "6" ){
+			if( port_protocol_1.value != "GRE" && port_end_1.value == "" ){
+				port_end_1.value = port_start_1.value;
+			}
+			if ( port_protocol_1.value != "GRE" && !isValidPort( port_start_1.value+":"+port_end_1.value) ) {
+				AlertOpen('The port range 1 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_2.value != "GRE" && port_end_2.value == "" ){
+				port_end_2.value = port_start_2.value;
+			}
+			if ( port_protocol_2.value != "GRE" && !isValidPort( port_start_2.value+":"+port_end_2.value) ) {
+				AlertOpen('The port range 2 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_3.value != "GRE" && port_end_3.value == "" ){
+				port_end_3.value = port_start_3.value;
+			}
+			if ( port_protocol_3.value != "GRE" && !isValidPort( port_start_3.value+":"+port_end_3.value) ) {
+				AlertOpen('The port range 3 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_4.value != "GRE" && port_end_4.value == "" ){
+				port_end_4.value = port_start_4.value;
+			}
+			if ( port_protocol_4.value != "GRE" && !isValidPort( port_start_4.value+":"+port_end_4.value) ) {
+				AlertOpen('The port range 4 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_5.value != "GRE" && port_end_5.value == "" ){
+				port_end_5.value = port_start_5.value;
+			}
+			if ( port_protocol_5.value != "GRE" && !isValidPort( port_start_5.value+":"+port_end_5.value) ) {
+				AlertOpen('The port range 5 is invalid.');
+				return false;
+			}
+
+			if( port_protocol_6.value != "GRE" && port_end_6.value == "" ){
+				port_end_6.value = port_start_6.value;
+			}
+			if ( port_protocol_6.value != "GRE" && !isValidPort( port_start_6.value+":"+port_end_6.value) ) {
+				AlertOpen('The port range 6 is invalid.');
+				return false;
+			}
+		}
+
+		var FWname = allFWruleName.split('|');
+		if (FWname != '') 
+		{
+			for ( i = 0; i < FWname.length; i++ ) 
+			{
+				if (FWname[i] == '')
+					break;
+				if (service_name.value == FWname[i])
+				{
+					AlertOpen('The Service Name exits. Please enter another name.');
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+function btnApply()
+{
+	if( !checkBeforeApply() ){
+		return false;
+	}
+
+	with ( document.forms[0] )
+	{
+		submit_check.value = "1";
+		page_action.value = "add"
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+
+</SCRIPT>
+</head>
+<body id="advancedsetup_firewall_usernew">
+	<div id="wrapper">
+		<div id="masthead">
+			<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+			<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+			
+				<script language="javascript">
+					WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+				</script>
+			
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+			<div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+			</div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+		</div>
+    	<div class="clear_left"></div>
+		<div id="content_left">
+			<ul id="subnav">
+				<script language="javascript">
+					WriteAdvancedSetupMenuHeader('ipv4firewall');
+				</script>
+			</ul>
+			<div id="connectionstatus">
+				<h1>Connection Status</h1>
+				<div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+				</div>
+			</div>
+		</div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_applications">Firewall Custom Service</h1>
+				<form method="post" name="websIPv4Firewall_usernew" action="firewallusernew.cmd" onSubmit="return btnApply();">
+					<input type="hidden" name="page_action" id="page_action">
+					<input type="hidden" name="submit_check" id="submit_check">
+					<input type="hidden" name="security_Level" id="security_Level">
+					<input type="hidden" name="service_Name" id="service_Name">
+					<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+					<div class="stepWrapper">
+						<p><strong>1. Enter the service name.</strong></p>
+						<table>
+							<tr>
+								<td>Service Name: </td>
+								<td><input name="service_name" id="service_name" type="text" size="35" maxlength="20"/></td>
+							</tr>
+						</table>
+					</div>
+					<div class="stepWrapper">
+						<p><strong>2. Enter the service type.</strong></p>
+						<table>
+							<tr>
+								<td>Service Type: </td>
+								<td><input name="service_type" id="service_type" type="text" size="35" maxlength="20"/></td>
+							</tr>
+						</table>
+					</div>
+					<div class="stepWrapper">
+						<p><strong>3. Enter  port settings below.</strong></p>
+						<table>
+							<tr>
+								<td>Number of Port Rules:</td>
+								<td width="152">
+									<select name="port_quantity" id="port_quantity">
+										<option value="1">1</option>
+										<option value="2">2</option>
+										<option value="3">3</option>
+										<option value="4">4</option>
+										<option value="5">5</option>
+										<option value="6">6</option>
+									</select>
+								</td>
+								<td width="159">&nbsp;</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port Start 1: </td>
+								<td><input type="text" name="port_start_1" id="port_start_1" size="15" /></td>
+								<td>
+									<select name="port_protocol_1" id="port_protocol_1" onChange='checkProtocolType(port_protocol_1, port_start_1, port_end_1)'>
+										<option value="TCP" selected="selected">TCP</option>
+										<option value="UDP">UDP</option>
+										<option value="GRE">GRE</option>
+										<option value="TCP, UDP">TCP, UDP</option>
+									</select>
+								</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port End 1:</td>
+								<td colspan="2"><input type="text" name="port_end_1" id="port_end_1" size="15" /></td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port Start 2: </td>
+								<td><input type="text" name="port_start_2" id="port_start_2" size="15" /></td>
+								<td>
+									<select name="port_protocol_2" id="port_protocol_2" onChange='checkProtocolType(port_protocol_2, port_start_2, port_end_2)'>
+										<option value="TCP" selected="selected">TCP</option>
+										<option value="UDP">UDP</option>
+										<option value="GRE">GRE</option>
+										<option value="TCP, UDP">TCP, UDP</option>
+									</select>
+								</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port End 2:</td>
+								<td colspan="2"><input type="text" name="port_end_2" id="port_end_2" size="15" /></td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port Start 3: </td>
+								<td><input type="text" name="port_start_3" id="port_start_3" size="15" /></td>
+								<td>
+									<select name="port_protocol_3" id="port_protocol_3" onChange='checkProtocolType(port_protocol_3, port_start_3, port_end_3)'>
+										<option value="TCP" selected="selected">TCP</option>
+										<option value="UDP">UDP</option>
+										<option value="GRE">GRE</option>
+										<option value="TCP, UDP">TCP, UDP</option>
+									</select>
+								</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port End 3:</td>
+								<td colspan="2"><input type="text" name="port_end_3" id="port_end_3" size="15" /></td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port Start 4: </td>
+								<td><input type="text" name="port_start_4" id="port_start_4" size="15" /></td>
+								<td>
+									<select name="port_protocol_4" id="port_protocol_4" onChange='checkProtocolType(port_protocol_4, port_start_4, port_end_4)'>
+										<option value="TCP" selected="selected">TCP</option>
+										<option value="UDP">UDP</option>
+										<option value="GRE">GRE</option>
+										<option value="TCP, UDP">TCP, UDP</option>
+									</select>
+								</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port End 4:</td>
+								<td colspan="2"><input type="text" name="port_end_4" id="port_end_4" size="15" /></td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port Start 5: </td>
+								<td><input type="text" name="port_start_5" id="port_start_5" size="15" /></td>
+								<td>
+									<select name="port_protocol_5" id="port_protocol_5" onChange='checkProtocolType(port_protocol_5, port_start_5, port_end_5)'>
+										<option value="TCP" selected="selected">TCP</option>
+										<option value="UDP">UDP</option>
+										<option value="GRE">GRE</option>
+										<option value="TCP, UDP">TCP, UDP</option>
+									</select>
+								</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port End 5:</td>
+								<td colspan="2"><input type="text" name="port_end_5" id="port_end_5" size="15" /></td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port Start 6: </td>
+								<td><input type="text" name="port_start_6" id="port_start_6" size="15" /></td>
+								<td>
+									<select name="port_protocol_6" id="port_protocol_6" onChange='checkProtocolType(port_protocol_6, port_start_6, port_end_6)'>
+										<option value="TCP" selected="selected">TCP</option>
+										<option value="UDP">UDP</option>
+										<option value="GRE">GRE</option>
+										<option value="TCP, UDP">TCP, UDP</option>
+									</select>
+								</td>
+							</tr>
+							<tr class="port_fields">
+								<td>Port End 6:</td>
+								<td colspan="2"><input type="text" name="port_end_6" id="port_end_6" size="15" /></td>
+							</tr>
+						</table>
+					</div>
+					<div class="stepWrapper">
+						<p><strong>4. Click &quot;Apply&quot; to save changes. </strong></p>
+						<a href="#" class="btn apply_btn" onClick="btnApply();">Apply</a>
+					</div>
+					<div class="stepWrapperdark">
+						<table>
+							<tr>
+								<th colspan="4" class="tableTitle">Firewall Custom Service List</th>
+							</tr>
+							<tr>
+								<th width="93">Name</th>
+								<th width="99">Type</th>
+								<th width="188">Port Settings</th>
+								<th width="85">Edit</th>
+							</tr>
+							<%ejGetOtherBig(fwCustomRulelist)%>
+						</table>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+	</div>
+</body>
+</html>

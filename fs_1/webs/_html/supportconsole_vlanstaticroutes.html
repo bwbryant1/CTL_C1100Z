@@ -1,0 +1,295 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+function isValidIpv6Address (ipv6_addr){ 
+  if(/^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$/.test(ipv6_addr)){ 
+	 return true;
+  }else{   
+	 return false;
+  }
+}
+
+function isValidIPv6SubnetMask(ipv6_mask) {
+     var ip6mask = 0;
+     
+    ip6mask = parseInt(ipv6_mask,10);
+    if(ip6mask <0 || ip6mask > 128){
+      return false;
+    }
+    return true;
+}
+
+function removeClick(rml) {
+
+	with ( document.forms[0] ) {
+		action.value="remove";
+		rmLst.value=rml;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	return;
+}
+
+function checkIP() {
+	with ( document.forms[0] ) {
+		var ipAddr = dstAddr.value;
+		var subnet = dstMask.value;
+		
+		var ipCol = ipAddr.split('.');
+		var maskCol = subnet.split('.');		
+		
+		for (i = 0; i <= 3; i++){
+			var ret = parseInt(ipCol[i]) & ~parseInt(maskCol[i]);
+			if (ret != 0){
+				AlertOpen("Netmask and route address conflict.");
+				return false;
+			}			
+		}
+		return true;
+	}
+}
+
+function btnApply() {
+	var entry = '<%ejGetOtherBig(stRouteEntry)%>';
+	var staticEntry = entry.split('|');
+	var entry6 = '<%ejGetOtherBig(stRouteEntry6)%>';
+	var staticEntry6 = entry6.split('|');
+	
+	with ( document.forms[0] ) {
+		action.value="add";
+
+		if (dstWanIf.value == '') {
+			AlertOpen('Please select an interface.');
+			return false;
+		}
+		
+		if (ipver.value == 4){ //ipv4
+		
+			if ( isValidIpAddress(dstAddr.value) == false ) {
+				AlertOpen('The destination IP Address is invalid.');
+				return false;
+			}
+			
+			if ( isValidIpAddress(dstMask.value) == false &&  dstMask.value != '255.255.255.255') {
+				AlertOpen('The subnet mask is invalid.');
+				return false;
+			}
+
+			if ( isValidIpAddress(dstGtwy.value) == false &&  dstGtwy.value != '') {
+				AlertOpen('The gateway IP Address is invalid.');
+				return false;
+			}
+
+			if (checkIP() == false){
+				return false;
+			}
+		
+// check duplicate case here
+			for (i=0;i<staticEntry.length;i++){
+				if (staticEntry[i].indexOf('/') < 0)
+					break;
+				else{
+					var tmp = staticEntry[i].split('/');
+					if (tmp[0] == dstAddr.value && tmp[1] == dstMask.value){
+						AlertOpen('The Static Route entry is duplicated.');
+						return false;
+					}
+				}
+			}
+		}
+		else{ //ipv6
+			if ( isValidIpv6Address(dstAddr.value) == false ) {
+				AlertOpen('The destination IPv6 Address is invalid.');
+				return false;
+			}
+			
+			if ( isValidIpv6Address(dstGtwy.value) == false ) {
+				AlertOpen('The gateway IPv6 Address is invalid.');
+				return false;
+			}
+
+			if (isValidIPv6SubnetMask(prefixlen.value) == false){
+				AlertOpen('The Prefix length is invalid.');
+				return false;
+			}
+			// check duplicate case here
+			for (i=0;i<staticEntry6.length;i++){
+				if (staticEntry6[i].indexOf('/') < 0)
+					break;
+				else{
+					var tmp = staticEntry6[i].split('/');
+					if (tmp[0] == dstAddr.value && tmp[1] == prefixlen.value){
+						AlertOpen('The IPv6 Static Route entry is duplicated.');
+						return false;
+					}
+				}
+			}
+		}
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	//Return false to avoid do submit twice.
+	return false;
+}
+
+function highlight(field) {
+       field.focus();
+       field.select();
+}
+
+function IPtypeChange() {
+	with ( document.forms[0]) {
+		if (iptypetmp[0].checked){
+			$('.ip_type4').show();
+			$('.ip_type6').hide();
+			ipver.value = 4;
+		} else {
+			$('.ip_type4').hide();
+			$('.ip_type6').show();
+			ipver.value = 6;
+		}
+	}
+
+}
+$(document).ready(function() {
+	IPtypeChange();
+});
+
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+<div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+        <div class="clear_left"></div>
+    <div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('vlanstaticroutes', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+       </ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header"></div>
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_routing">VLAN Static Routes <span>Adding routers manually to the routing table is considered static routing. If a change or a failure occurs between two statically defined nodes, traffic will not be rerouted and must wait for the failure to be resolved by the administrator.</span></h1>
+            <form action="rtroutecfg.cmd" method="post" onSubmit="return btnApply();">
+					<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+					<input type="hidden" name="action" id="action" value="">
+		  			<input type="hidden" name="rmLst" id="rmLst" value="">
+		  			<input type="hidden" name="vlanStRoute" id="vlanStRoute" value="vlanStRoute">
+					<input type="hidden" name="ipver" id="ipver" value="4">
+					<div class="stepWrapper">
+          <p><strong>1. Select the WAN interface.</strong></p>
+              <table>
+                <tr>
+                  <td>WAN Interface:</td>
+                      <td>
+<select name='dstWanIf'>
+<script language="javascript">
+{
+   var i;
+   var intfInfo = '<%ejGetOther(wancfglist)%>';
+   var intf     = intfInfo.split('|');
+
+   for ( i = 0; i < intf.length; i++ ) {
+   		 var names = intf[i].split('&');
+         document.write("  <option value='" + names[1] + "'>");
+         document.writeln(names[0]);
+   } 
+}
+</script>
+</select>
+                      </td>
+                </tr>
+             </table>
+             </div>
+			<div class="stepWrapper">
+                <p><strong>2. Set the IP addressing type.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"> IP Type: </td>
+                                <td width="138"><input name="iptypetmp" type="radio" id="iptype" value="on" checked="checked" onclick="IPtypeChange()"/>IPv4</td>
+			        <td width="181"><input name="iptypetmp" type="radio" id="iptype" value="off" onclick="IPtypeChange()"/>IPv6</td>
+                    </tr>
+                </table>
+                </div>
+            <div class="stepWrapper">
+              <p><strong>3. Enter the static routing information below.</strong></p>
+                <table>
+                    <tr>
+                  <td width="209"> Destination IP: </td>
+                        <td width="264"><input type="text" name="dstAddr" id="dstAddr" value="" onClick='highlight(this);'/></td>
+                    </tr>
+                    <tr class="ip_type4">
+                  <td width="209"> Subnetmask: </td>
+                  <td><input type="text" name="dstMask" id="dstMask" value="" onClick='highlight(this);'/></td>
+                    </tr>
+		    <tr class="ip_type6">
+                  <td width="209"> Prefix length: </td>
+                  <td><input type="text" name="prefixlen" id="prefixlen" value="" onClick='highlight(this);'/></td>
+                    </tr>
+					<tr>
+                    <td> Gateway IP: </td>
+                        <td><input type="text" name="dstGtwy" id="dstGtwy" value="" onClick='highlight(this);'/></td>
+                    </tr>
+                </table>
+                </div>
+                 <div class="stepWrapper">
+              <p><strong>4. Click &quot;Apply save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a></div>
+                 <div class="stepWrapperdark">
+                <table>
+		    <tr><th colspan="6" class="tableTitle">WAN VLAN Static Routes</th></tr>
+                    <tr>
+			<th width="91">IP Type</th>
+                        <th width="91">Destination IP</th>
+                        <th width="102">Subnet-Prefix</th>
+                        <th width="95">Gateway IP</th>
+                  	<th width="92">WAN Interface</th>
+                        <th width="92">Edit</th>
+                    </tr>
+			<%ejGetOtherBig(stRouteView, 2)%>
+                </table>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

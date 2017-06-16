@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="/_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+	var loc = '<%ejGet(currPage)%>';
+	var submited = 0;
+	if ( loc != '' ) {
+		var redirect = loc.split('|');
+		if ( redirect[0] == 1 ) {
+			if ( redirect[1] != '' && redirect.length == 2)  {
+				window.location=redirect[1];
+			}
+			else {
+				window.location="/inde.html";
+			}
+		}
+	}
+
+function showPass() {
+   with ( document.forms[0] ) {
+      if (showpass.checked == true)
+	{
+		$('.PasswordConfirmID').hide();
+		admin_password.type = "text";
+	}
+      else
+      {
+        	 $('.PasswordConfirmID').show();
+ 		admin_password.type = "password";
+       }
+   }
+}
+
+function keypressed(event) {
+	with ( document.forms[0] ) {
+		var e;
+		if ( event ) {
+			e = event;
+		}
+		else {
+			e = window.event;
+		}
+		if(!e) return;
+	 
+		var key = 0; 
+		if (e.keyCode) { key = e.keyCode; }
+		else if (typeof(e.which)!= 'undefined') { key = e.which; } 
+		if (key == 13 && submited == 0) {
+			submited = 1;
+			document.forms[0].submit();
+		}
+	}
+}
+
+function btnApply()
+{
+	 with ( document.forms[0] ) {
+		if ( submited == 0 ) {
+			submited = 1;
+			fake_password.value="";
+			document.forms[0].submit();
+		}
+	}
+}
+//-->
+</SCRIPT>
+</head>
+<style type="text/css">
+   input {
+       font-family: sans-serif;
+   }
+</style>
+<body id="login">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+	<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+        <script language="javascript">
+		WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+        </div>	
+
+</div>
+    <div class="clear_left"></div>
+  <div id="content_left">
+	<ul id="subnav">
+			<li><a href="#" class="selected">Login</a></li>
+    </ul>
+  </div>
+	<div id="content_right">
+	  
+		<div id="content_right_contentarea">
+			<h1 class="advancedsetup_security">Support Console Login<span class="advancedsetup_firewallsettings"><span> The support console is password protected and for support personal use only.</span></span></h1>			
+		    <form action="/supportconsole_login.cgi" method="post" autocomplete="off">
+           <div class="stepWrapper">
+                 <p><strong>1. Enter the administrator username and password below.</strong></p>
+             <table>
+                   <tr>
+                     <td width="150">Administrator Username: </td>
+                     <td><input name="admin_username" type="text" id="admin_username" size="30" class="textinput" onkeypress="keypressed(event)"/></td>
+                   </tr>
+                   <tr>
+                     <td>Administrator Password: </td>
+                     <td style="display: none"><input type="text" value="" /></td>
+                     <td style="display: none"><input type="password" id="fake_password" name="admin_password" value="" /></td>
+                     <td><input name="admin_password" type="password" id="admin_password" size="30" class="textinput" onkeypress="keypressed(event)" autocomplete="off"/></td>
+                   </tr>
+                   <tr>
+                     <td><input name="show_password" type="checkbox" id="show_password" />
+                       Show Password </td>
+                     <td>&nbsp;</td>
+                   </tr>
+             </table>
+           </div>
+            <div class="stepWrapper">
+		    <p><strong> 2. Click &quot;Apply&quot; to log in.</strong></p>
+		    <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+            </div>
+		    </form>
+		</div>
+		
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

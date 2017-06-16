@@ -1,0 +1,422 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--hide
+var syncNvram = '<%ejGetWl(wlSyncNvram)%>';
+var ssid = '<%ejGetWl(wlSsid_wl0v0)%>';
+var ssidArray = new Array('<%ejGetWl(wlSsid_wl0v0)%>','<%ejGetWl(wlSsid_wl0v1)%>','<%ejGetWl(wlSsid_wl0v2)%>','<%ejGetWl(wlSsid_wl0v3)%>');
+var ssidIdx = parseInt('<%ejGetWl(wlSsidIdx_wl0v0)%>');
+var enbl = '<%ejGetWl(wlEnblSsid_wl0v0)%>';
+var authMode = '<%ejGetWl(wlAuthMode_wl0v0)%>'; // "open" / "shared" / "wpa" / "wpa2" /.. 
+var wep = '<%ejGetWl(wlWep_wl0v0)%>'; 	//"enabled" / "disabled" 
+var keyBit = '<%ejGetWl(wlKeyBit_wl0v0)%>'; // 1: Bit-64  0: Bit-128 
+var wlWpa = '<%ejGetWl(wlWpa_wl0v0)%>';
+var enblRadio = '<%ejGetWl(wlEnbl_wl0v0)%>';;
+//wlAuthMode + wlWep + wlKeyBit
+//WEP Key
+var wlKeyIndex=parseInt('<%ejGetWl(wlKeyIndex_wl0v0)%>');
+var wlKey1='<%ejGetWl(wlKey1_wl0v0)%>';
+var wlKey2='<%ejGetWl(wlKey2_wl0v0)%>';
+var wlKey3='<%ejGetWl(wlKey3_wl0v0)%>';
+var wlKey4='<%ejGetWl(wlKey4_wl0v0)%>';
+//Pre-Shared Key
+var wlWpaPsk='<%ejGetWl(wlWpaPsk_wl0v0)%>';
+var wlWpaGTKRekey='<%ejGetWl(wlWpaGTKRekey_wl0v0)%>';
+var wlWpa='<%ejGetWl(wlWpa_wl0v0)%>';
+//RadiusKey
+var wlRadiusKey='<%ejGetWl(wlRadiusKey_wl0v0)%>';
+var wlRadiusServerIP='<%ejGetWl(wlRadiusServerIP_wl0v0)%>';
+var wlRadiusPort='<%ejGetWl(wlRadiusPort_wl0v0)%>';
+var divMode =0;
+var wlModemIP='<%ejGetWl(wlModemIP)%>';
+//wps
+var WscMode    = '<%ejGetWl(wlWscMode_wl0v0)%>';
+var WscAPMode  = '<%ejGetWl(wlWscAPMode_wl0v0)%>';
+var WscPin = '<%ejGetWl(wlWscDevPin_wl0v0)%>';
+var WscLockState = '<%ejGetWl(wlLockState_wl0v0)%>';
+//scheduler
+var enblSchedule = parseInt('<%ejGetWl(wlScheduleEnable)%>');
+var workingSchedule = parseInt('<%ejGetWl(wlScheduleWorking)%>');
+
+function RadioChange () {
+	with ( document.forms[0] ) {
+		if (wlEnbl[0].checked ){
+			document.getElementById("radioenabled").style.display = 'block';
+			document.getElementById("radiodisabled").style.display = 'none';
+		}
+		else{
+			document.getElementById("radioenabled").style.display = 'none';
+			document.getElementById("radiodisabled").style.display = 'block';
+		}
+	}
+}
+
+function btnPrint() {
+	//window.open("wirelesssetup_print.html","print_wirelesssettings");
+	location.href = 'print_wirelesssettings2.wl';
+}
+
+function btnApply() {
+/*
+    var loc = 'wirelesssetup_basicsettings.wl?';
+	
+	with ( document.forms[0] ) {
+		loc += 'wlSsidIdx='+ssidIdx;
+		if ( wlEnbl[0].checked ) {
+			loc += '&wlEnbl=1';
+		}else if (wlEnbl[1].checked){
+			loc += '&wlEnbl=0';
+		}
+		
+		// basic settings
+		if ( wlSsid.value == '' ) {
+			alert('SSID should not be empty.');
+			return;
+		}
+
+		var str = new String();
+		str = wlSsid.value;
+		if (str ==''){
+			alert("The SSID must contain letters and/or numbers only with no spaces");
+			return;
+		}else if ( str.length > 32 ) {
+			alert('SSID "' + wlSsid.value + '" should not be longer than 32 characters.');
+			return;
+		}
+		
+		loc += '&wlSsid=' + encodeUrl(wlSsid.value);
+		
+		var code = 'location="' + loc + '"'; 
+		eval(code);		
+	}	  	
+	*/
+
+	with ( document.forms[0] ) {
+		// basic settings
+		var str = new String();
+		str = wlSsid.value;
+		if (str =='' || isValidSSID(str)==false){
+			clearInvalidSSID("single_ssid_name");
+			AlertOpen("An unsupported character is included in the SSID.  Please rename the SSID.");
+			return;
+		}
+		for(var j = 1; j < 4; j++) {
+		  var tmp = decodeSpecialChars(ssidArray[j]);
+		  if (str == tmp) { 
+		     AlertOpen("The SSID name entered is in use with another SSID.  Please enter a unique SSID name.");
+			 return;
+		  }                     
+		}
+		
+		if ((WscMode=='enabled') && (WscAPMode=='0')) {
+			wsc_config_state.disabled = false;
+			wsc_config_state.value = 1;
+		}else{
+			wsc_config_state.disabled = true;		
+		}
+		if(wlEnbl[0].checked)
+			wlScheduleOldWlanEnable.value = 1;
+		else
+			wlScheduleOldWlanEnable.value = 0;		
+		
+		sessionKey.value='<%ejGetOther(sessionKey)%>';
+	}	
+	document.forms[0].submit();
+}
+
+
+function frmLoad() {		
+	with (document.forms[0]) {
+	
+		if (enbl==1) {
+			//setCheck(wlEnbl[0],1);
+			wlEnbl[0].checked = true; 
+		}else{
+			//setCheck(wlEnbl[1],1);		
+			wlEnbl[1].checked = true;
+		}
+		if(enblRadio==1){
+			raioEnbl = "ON";				
+		}else{
+			if((workingSchedule==1) && (enbl==1))			
+				raioEnbl = "<font color=\"#F87806\">Disabled by Wireless Schedule</font>";									
+			else
+				raioEnbl="OFF";						
+		}					
+
+		var tmpSsid = decodeSpecialChars(ssid);
+		wlSsid.value = tmpSsid;			
+		
+		document.getElementById("lb_wlRadio").innerHTML=raioEnbl;
+		document.getElementById("lb_wlSsid").innerHTML=ssid;
+		
+		//test--lb_wlAuthMode.innerHTML= authModeDisplay("wpa","enabled",0);
+		//var temp_securityType=authModeDisplay("open","enabled",0);		
+		var temp_securityType=authModeDisplay(authMode,wep,keyBit);		
+		document.getElementById("lb_wlAuthMode").innerHTML=cutPrefixIntToGetStr(temp_securityType);
+		//test--lb_wlAuthMode.innerHTML= cutPrefixIntToGetStr(temp_securityType);
+		
+		//test--lb_Key.innerHTML= "test";
+		var temp_wlWpa = wlWpa;
+		lb_wlEncryptionType.value = temp_wlWpa.toUpperCase(); //AES / TKIP
+		lb_wlMobileIP.value = wlModemIP;
+	}
+    RadioChange();	
+}
+
+function strWarp(inStr,lineWord){
+		var i = 0;
+		var outStr = "";
+		var bound = 0;
+		var idx = 0;
+		var tmpStr = "";
+		for(i = 0;i < inStr.length;i+=lineWord){			
+			if(i+lineWord<inStr.length){
+				outStr= outStr+inStr.substring(i,i+lineWord);
+				tmpStr = inStr.substring(i+lineWord, inStr.length);
+				idx = tmpStr.indexOf(";");
+				if (idx <= 5 && idx > -1){
+					outStr=outStr+inStr.substring(i+lineWord, i+lineWord+idx+1)+"<br>";
+					i+=idx+1;
+				}else{
+					outStr=outStr+"<br>";
+				}
+			}else{
+				outStr= outStr+inStr.substring(i,inStr.length);
+			}
+		}
+		return outStr;
+}
+// done hiding -->
+
+</script>
+
+</head>
+<body id="wirelesssetup_basicsettings">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+        <a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">        	
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>          
+		</div>  
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>		 
+    <div class="clear_left"> </div>
+    <div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('basic', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+        </ul>
+                <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="wirelesssetup_basic">Basic Settings <span>Basic Settings is used to enable or disable the wireless radio or change the network name.</span></h1>
+                    <!--onkeypress="return handleEnter(this,event) ;"-->
+            <form name="form1" action="wirelesssetup_basicsettings.wl" method="post" onkeypress="return handleEnter(this,event) ;">
+               	<input type="hidden" name="wlSsidIdx" value="0"> 
+				<input type="hidden" name="wlSyncNvram" value="1">  
+		        <input type="hidden" name="wlScheduleOldWlanEnable" id="wlScheduleOldWlanEnable" value="">				             	
+				<input type="hidden" name="sessionKey" value="">               					
+                <div class="stepWrapper">
+                <p><strong>1. Set the wireless radio state.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Wireless Radio:</td>
+                        <td><input name="wlEnbl" id="enabled" type="radio" value="1" checked="checked" onClick="RadioChange();"/>Enable </td>
+                        <td><input name="wlEnbl" id="disabled" type="radio" value="0" onClick="RadioChange();"/>Disable </td>
+                    </tr>
+                </table>
+                </div>
+<div id="radioenabled">
+                <div class="stepWrapper">
+                <p><strong>2. Change the network name (optional).</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Network Name:</td>
+                        <td>
+                                <input name="wlSsid" type="text" id="single_ssid_name" value="" size="32" maxlength='32'/>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                    <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+</div>
+<div id="radiodisabled">
+                <div class="stepWrapper">
+		        <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+                <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+</div>    
+            <div class="stepWrapperdark">
+                <table>
+                    <tr>
+                        <th colspan="7" class="tableTitle">Wireless Settings Table</th>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Wireless Parameter</th>
+                        <th>Setting</th>
+                    </tr>
+                    <tr>
+                       <td><img src="../_images/h_wirelesssetup_basic.png" width="45" height="45" /></td>
+                        <td> Wireless Radio: </td>
+						<td>
+                               <Label id=lb_wlRadio></Label>
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><img src="../_images/h_wirelesssetup_channel.png" width="45" height="45" /></td>
+                        <td> Network Name:</td>
+                        <td>
+                                <Label id=lb_wlSsid></Label>
+                            </td>
+                    </tr>
+                    <tr>
+                        <td width='57'><img src="../_images/h_wirelesssetup_wep.png" width="45" height="45" /></td>
+                        <td> Security Type:</td>
+                        <td  width='245'>
+                                <Label id=lb_wlAuthMode></Label>
+                            </td>
+                    </tr>
+<script language="javascript">
+<!--hide
+document.write(" <tr>");
+document.write(" <td ><img src='../_images/h_wirelesssetup_wep.png' width='45' height='45' /></td>");
+document.write(" <td>");
+
+	var wlFltMacMode='<%ejGetWl(wlFltMacMode)%>';
+//	var	divMode=parseInt(authModeDisplay("psk","enabled",1)); 
+	var	divMode=parseInt(authModeDisplay(authMode,wep,keyBit)); //-->parse int   0:off 1-5:key 6-7:802.1x >8:radius
+	//alert("divMode--"+divMode);
+	var wepKey=1;
+
+	switch (wlKeyIndex){
+					case 1:	wepKey=wlKey1;break;
+					case 2:	wepKey=wlKey2;break;
+					case 3:	wepKey=wlKey3;break;
+					case 4:	wepKey=wlKey4;break;
+				}	
+	if(divMode<=5){
+		document.write("            Security Key/Passphrase:                                                                       ");
+		document.write("        </td>                                                                                   ");
+		document.write("    <td >                                                                            ");
+		if(divMode==1 || divMode==2){
+					document.write(" </a><Label id=lb_wlKey>"+wepKey+"</Label>");
+		}else if(divMode==3 || divMode==4 || divMode==5){
+							var wlWpaPskWarp=strWarp(wlWpaPsk,32);
+							document.write("         </a><Label id=lb_wlKey>"+wlWpaPskWarp);
+		}
+		else if(divMode==0)document.write(" </a><Label id=lb_wlKey>N/A");								
+	}else if(divMode<=7){	
+      var tmpKey = wlRadiusKey.replace(/>/ig, "&gt;");
+      tmpKey = tmpKey.replace(/</ig, "&lt;");
+		document.write("            Security Key/Passphrase:                                                                       ");
+		document.write("        </td>                                                                                   ");
+		document.write("    <td >                                                                            ");
+		document.write("            </a><Label id=lb_wlKey>Server IP:"+wlRadiusServerIP+"<br> \
+									Port:"+wlRadiusPort+"<br> \
+									Secret:"+tmpKey+"<br> \
+									Group Key Interval:"+wlWpaGTKRekey);									
+	}else{
+      var tmpKey = wlRadiusKey.replace(/>/ig, "&gt;");
+      tmpKey = tmpKey.replace(/</ig, "&lt;");
+		document.write("            Security Key/Passphrase:                                                                       ");
+		document.write("        </td>                                                                                   ");
+		document.write("    <td >                                                                            ");
+		document.write("            </a><Label id=lb_wlKey>Group Key Interval:"+wlWpaGTKRekey+"<br> \
+									802.1x:Enabled<br> \
+									Server IP:"+wlRadiusServerIP+"<br> \
+									Port:"+wlRadiusPort+"<br> \
+									Secret:"+tmpKey);									
+	}
+document.write(" </Label></td>");	
+document.write(" </tr>");	
+	if(wlFltMacMode!='disabled'){
+document.write(" <tr>");
+document.write(" <td ><img src='../_images/h_wirelesssetup_wep.png' width='45' height='45' /></td>");
+document.write(" <td>MAC Authentication:</td>");
+document.write(" <td>Enabled</td></tr>");
+	}
+   if(WscMode == 'enabled'){
+	  if(WscLockState=='1'){
+	      document.write(" <tr>");
+	      document.write(" <td ><img src='../_images/h_wirelesssetup_wep.png' width='45' height='45' /></td>");
+		  document.write(" <td colspan='2'><font color='red'>AP PIN DISABLED for WPS Protection </font></td>");				  
+		  document.write(" </tr>");		  
+	  }else{
+	      document.write(" <tr>");
+	      document.write(" <td ><img src='../_images/h_wirelesssetup_wep.png' width='45' height='45' /></td>");
+		  document.write(" <td>WPS PIN</td>");
+		  document.write(" <td >" + WscPin + "</td>");	  
+		  document.write(" </tr>");		  
+	  }
+   }
+
+// done hiding-->
+</script>					                   
+                    <tr>	                    
+                    	<td colspan="3"><a href="#" class="btn print_btn float_right" onclick="btnPrint()">Print</a>
+                    	<input type="hidden" value="" id="lb_wlEncryptionType">
+   	                    <input type="hidden" value="" id="lb_wlMobileIP">
+   	                    <input type="hidden" name="wsc_config_state">
+                        </td>                                            
+                    </tr>    
+                </table>
+                </div>
+            </form>
+        </div>        
+    </div>
+    <div class="clear_left"></div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+<script language="JavaScript">    
+<!--
+frmLoad();
+//showFullPath('Network > Wireless LAN > General');
+//-->
+
+</script>
+</html>
+

@@ -1,0 +1,758 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var ssidArray = new Array(<%ejGetOther(SSIDinfo)%>);
+var GREInfssidArray = new Array(<%ejGetOther(GREInfSSIDinfo)%>);
+var DefaultWANVLANID = "<%ejGetOther(DefaultWANVLANID)%>";
+var isGREenable = 0;
+
+function isVlanUsed(vlanId)
+{
+   var vlan = vlanUsed.split(',');
+
+   for (j = 0; j < vlan.length; j++)	
+   {
+      if (vlanId == parseInt(vlan[j]))
+      {
+         if (j == 0)
+         AlertOpen('VLAN ID '+vlanId+' is used for default PTM WAN interface.');
+      else
+         AlertOpen('VLAN ID '+vlanId+' is already used.');
+      return false;
+      }
+   }
+   return true;
+}
+
+function Op82sub2change () {
+   with ( document.forms[0] ) {
+      if (op82parameter.value=="0" ){
+         $('.op82sub2String').hide();
+         op82String.disabled = true;
+      }
+      else{
+         $('.op82sub2String').show();
+         op82String.disabled = false;
+      }
+   }
+}
+
+function getGREinfo()
+{
+   var GREinfo = "<%ejGetOther(GREinfo)%>";
+   var info = GREinfo.split('|');
+   with ( document.forms[0] ) {
+      //Enable/Disable
+      isGREenable = info[0];
+      if (info[0] == 0)
+         cwifienable[1].checked = true;         
+      else
+         cwifienable[0].checked = true;
+      //Tunnel IP
+      tunnelip.value = info[1];
+      
+/*
+      //Enable/Disable
+      if (info[15] == 0)
+         bakenable[1].checked = true;
+      else
+         bakenable[0].checked = true;
+      //Tunnel IP
+      tunnelbakip.value = info[16];
+*/
+      //SSID wl0.4
+      var wlMaxAssoc = ssidArray[4].split('|');
+      MaxClient.value = wlMaxAssoc[1];
+      //NetworkSSID.selectedIndex = 0;
+      
+      //vlanID
+      if(info[3] != -1 && info[3] != 0 && info[3] != 201)
+         vlanMuxId.value = info[3];
+      else
+         vlanMuxId.value = "Default VLAN";
+      
+      //8021p
+      vlanMuxPr.value = info[4];
+      
+      //op82sub1
+      if( info[5] == 1)
+         op82APMAC.checked = true;
+      else
+         op82APMAC.checked = false;
+      if( info[6] == 1)
+         op82SSID.checked = true;
+      else
+         op82SSID.checked = false;
+      if( info[7] == 1)
+         op82SType.checked = true;
+      else
+         op82SType.checked = false;	
+
+      //op82sub2
+      op82parameter.value = info[8];
+      Op82sub2change ();
+
+      if (info[9] != '')
+         op82String.value = info[9];
+      
+      //SSID enable
+      if (info[21] == 0)
+         SSIDenable[1].checked = true;
+      else
+         SSIDenable[0].checked = true;
+      
+      //Sec Type
+       SecType.value = info[19];
+      
+      //Qos enable
+      if (info[20] == 0)
+         cwifiQosenable[1].checked = true;
+      else
+         cwifiQosenable[0].checked = true;
+   }
+}
+
+function frmLoad(){
+   with ( document.forms[0] ) {
+      getGREinfo();
+   }
+   if(isGREenable)
+      setTimeout('updateGREValue_take()', 5000);
+}
+
+function btnApply() {
+
+   with ( document.forms[0] ) {
+
+      var tunnel_ip = tunnelip.value;
+      if(cwifienable.value == 1)
+      {
+         if ((isValidUrl(tunnel_ip)==false) || (tunnel_ip=='') || (tunnel_ip.length > 255)) {
+            AlertOpen('The Tunnel IP Address is invalid.');
+            return false;
+         }
+      }
+      else if(tunnel_ip != '')
+      {
+         if (isValidUrl(tunnel_ip) == false || (tunnel_ip.length > 255)) {
+            AlertOpen('The Tunnel IP Address is invalid.');
+            return false;
+         }
+      }
+/*
+      var baktunnel_ip = tunnelbakip.value;
+      if(bakenable.value == 1)
+      {
+         if ((isValidIpAddress(baktunnel_ip)==false) || (baktunnel_ip=='')) {
+            AlertOpen('The Backup Tunnel IP Address is invalid.');
+            return false;
+         }
+      }
+      else if(baktunnel_ip != '')
+      {
+         if (isValidIpAddress(baktunnel_ip) == false ) {
+            AlertOpen('The Backup IP Address is invalid.');
+            return false;
+         }
+      }
+*/
+      if (isNaN(parseInt(MaxClient.value)) == true)
+      {
+         AlertOpen("Maximum Number of Clients entered is invalid.  Please enter a valid Maximum Number of Clients.");
+         return false;
+      }
+      MaxClientInt = parseInt(MaxClient.value);
+      if (MaxClientInt  < 1 || MaxClientInt  > 16)
+      {
+         AlertOpen("Maximum Number of Clients should between 1 to 16");
+         return false;
+      }
+
+      if (isNaN(parseInt(vlanMuxPr.value)) == true)
+      {
+         AlertOpen("Priority should between 0 to 7");
+         return false;
+      }
+
+      vlmpr = parseInt(vlanMuxPr.value);
+
+      if (vlmpr < 0 || vlmpr > 7)
+      {
+         AlertOpen("Priority should between 0 to 7");
+         return false;
+      }
+
+//      var SSIDname = ssidArray[NetworkSSID.value].split('|');
+//      cSSIDname.value = SSIDname[0];
+
+      cSSIDname.value = GREInfssidArray[NetworkSSID.value];
+
+      if(op82parameter.value == 1 || op82parameter.value == 2)
+      {
+         if(op82String.value == "")
+         {
+            AlertOpen("The Unique String entered is empty.");
+            return false;
+         }
+      }
+
+      if(vlanMuxId.value == "Default VLAN")
+      {
+         vlanMuxId.value = DefaultWANVLANID;
+      }
+      else
+      {
+         if (isNaN(parseInt(vlanMuxId.value)) == true)
+         {
+            AlertOpen("The VLAN ID entered is invalid.  Please enter a valid VLAN ID.");
+            return false;
+         }
+         vlmid = parseInt(vlanMuxId.value);
+         if (vlmid  < 1 || vlmid  > 4094)
+         {	
+            AlertOpen("VLAN ID should between 1 to 4094");
+            return false;
+         }
+      }
+
+      var str = new String();
+      str = NetworkName.value;
+      if (str !='')
+      {
+         if ( str.length > 32 ) {
+            AlertOpen('SSID "' + NetworkName.value + '" should not be longer than 32 characters.');
+            return false;
+         }
+         if (isValidSSID(str)==false)
+         {
+            clearInvalidSSID("single_ssid_name");
+            AlertOpen("An unsupported character is included in the SSID.  Please rename the SSID.");
+            return false;
+         }
+         for(var j = 0; j < 4; j++) 
+         {
+            if(NetworkSSID.value == j)
+               continue;
+            var tmp = decodeSpecialChars(GREInfssidArray[j]);
+            if (str == tmp) 
+            { 
+               AlertOpen("The SSID name entered is in use with another SSID.  Please enter a unique SSID name.");
+               return false;
+            }
+         }
+      }
+   }
+
+   document.forms[0].sessionKey.value = gblsessionKey;
+   document.forms[0].submit();
+
+   //Return false to avoid do submit twice.
+   return false;
+}
+
+function updateGREinfo (req)
+{
+   var GREInfo=req.responseText;
+   if ( GREInfo != "" && GREInfo != null ) 
+   {
+      GREInfos = GREInfo.split('|');
+      if(GREInfos[17] == 0)
+      {
+         if(GREInfos[13] == "Up")
+         {
+            document.getElementById("PriGRETunState").innerHTML = '<font color=\"#009900\"><strong>CONNECTED</strong></font>';
+         }
+         else if(GREInfos[13] == "Dormant")
+         {
+            document.getElementById("PriGRETunState").innerHTML = '<font color=\"#E08800\"><strong>CONNECTING</strong></font>';
+         }
+         else if(GREInfos[13] == "Error")
+         {
+            document.getElementById("PriGRETunState").innerHTML = '<font color=\"#FF0000\"><strong>CONNECTION FAILED</strong></font>';
+         }
+         else //NotPresent, Unknown, Down(GRE disable + Dormant || Error)
+         {
+            document.getElementById("PriGRETunState").innerHTML = '<font color=\"#FF6319\"><strong>STANDBY</strong></font>';
+         }
+
+         if(GREInfos[14] == "0")
+         {
+            document.getElementById("PriGRETunUptime").innerHTML = 'N/A';
+         }
+         else
+         {
+            document.getElementById("PriGRETunUptime").innerHTML = GREInfos[14];
+         }
+/*
+         if(GREInfos[15] == 1)
+         {
+            document.getElementById("BakGRETunState").innerHTML = '<font color=\"#FF6319\"><strong>STANDBY</strong></font>';
+         }
+         else
+         {
+            document.getElementById("BakGRETunState").innerHTML = 'N/A';
+         }
+         document.getElementById("BakGRETunUptime").innerHTML = 'N/A';
+*/
+      }
+/*
+      else
+      {
+         if(GREInfos[15] == 1)
+         {
+            if(GREInfos[13] == "Error" || GREInfos[18] == 0)
+            {
+               document.getElementById("BakGRETunState").innerHTML = '<font color=\"#FF0000\"><strong>CONNECTION FAILED</strong></font>';
+            }
+            else if(GREInfos[13] == "Up")
+            {
+               document.getElementById("BakGRETunState").innerHTML = '<font color=\"#009900\"><strong>CONNECTED</strong></font>';
+            }
+            else if(GREInfos[13] == "Dormant")
+            {
+               document.getElementById("BakGRETunState").innerHTML = '<font color=\"#E08800\"><strong>CONNECTING</strong></font>';
+            }
+            else //NotPresent, Unknown, Down(GRE disable + Dormant || Error)
+            {
+               document.getElementById("BakGRETunState").innerHTML = '<font color=\"#FF6319\"><strong>STANDBY</strong></font>';
+            }
+            
+            if(GREInfos[14] == "0")
+            {
+               document.getElementById("BakGRETunUptime").innerHTML = 'N/A';
+            }
+            else
+            {
+               document.getElementById("BakGRETunUptime").innerHTML = GREInfos[14];
+            }
+         }
+         else
+         {
+            document.getElementById("BakGRETunState").innerHTML = 'N/A';
+            document.getElementById("BakGRETunUptime").innerHTML = 'N/A';
+         }
+         document.getElementById("PriGRETunState").innerHTML = '<font color=\"#FF0000\"><strong>CONNECTION FAILED</strong></font>';
+         document.getElementById("PriGRETunUptime").innerHTML = 'N/A'; 
+      }
+*/
+      if(GREInfos[18] != 0)
+      {
+         document.getElementById("NumConnUsers").innerHTML = GREInfos[10];
+      }
+      else
+      {
+         document.getElementById("NumConnUsers").innerHTML = 'N/A';
+      }
+      if(GREInfos[21] != 0 && statusInfo[0] == 1)
+      {
+         document.getElementById("Prx").innerHTML = GREInfos[12];
+         document.getElementById("Ptx").innerHTML = GREInfos[11];
+      }
+      else
+      {
+         document.getElementById("Prx").innerHTML = 'N/A';
+         document.getElementById("Ptx").innerHTML = 'N/A';
+      }
+
+   }
+   else
+   {
+      document.getElementById("PriGRETunState").innerHTML = 'N/A';
+      document.getElementById("PriGRETunUptime").innerHTML = 'N/A'; 
+/*
+      document.getElementById("BakGRETunState").innerHTML = 'N/A';
+      document.getElementById("BakGRETunUptime").innerHTML = 'N/A';
+*/
+      document.getElementById("NumConnUsers").innerHTML = 'N/A';
+      document.getElementById("Prx").innerHTML = 'N/A';
+      document.getElementById("Ptx").innerHTML = 'N/A';
+      
+   }
+   setTimeout('updateGREValue_take()', 5000);
+}
+
+function updateGREValue_take()
+{
+   var objXMLHTTP = null; 
+
+   if (window.XMLHttpRequest)  { 
+      objXMLHTTP=new XMLHttpRequest(); 
+   }// code for IE 
+      else if (window.ActiveXObject)  { 
+      objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+   }
+
+   if ( objXMLHTTP != null ) {
+      objXMLHTTP.open("GET","./GetGREinfStatus.html",true);
+      objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+      objXMLHTTP.send(null);
+      objXMLHTTP.onreadystatechange = function() 
+      {
+         if(objXMLHTTP.readyState == 4)
+         updateGREinfo(objXMLHTTP);
+      }
+   }
+}
+
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+      WriteMenuHeader('supportconsole', '');
+</script>
+        
+      <a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="javascript">
+        WriteLogout('<% getLogin(); %>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+   <div id="content_left">
+         <div id="subnav_header"></div>
+         <ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('communitywifi', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+         <div id="subnav_footer"></div>
+         <div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!--
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>', '<%ejGetOther(sysInfo, l2Intf)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+  </div>
+      <div id="content_right">
+        
+         <div id="content_right_contentarea">
+           <h1 class="supportconsole_communitywifi">Community Wi-Fi<span>Enables or disables the community Wi-Fi feature</span></h1>
+         <form id="form1" name="form1" method="post" action="communitywifi.cmd" onSubmit="return btnApply();">
+         <input type="hidden" name="sessionKey" id="sessionKey" value="">
+         <input type="hidden" name="cSSIDname" id="cSSIDname" value="">
+            <div class="stepWrapper">
+                <p><strong>1. Set the Community Wi-Fi state.</strong></p>
+                <table>
+                    <tbody><tr>
+                        <td width="150">Community Wi-Fi:</td>
+                                <td width="138"><input type="radio" checked="checked" value="1" id="cwifienable" name="cwifienable" >Enable</td>
+                 <td width="181"><input type="radio" value="0" id="cwifienable" name="cwifienable" >Disable</td>
+                    </tr>
+                </tbody></table>
+                </div>
+              
+                      <div class="stepWrapper">
+                 <p><strong>2. Enter the GRE tunnel destination address.</strong>
+                 </p>
+                 <table>
+                        <tr>
+                          <td width="150">Tunnel IP:</td>
+                          <td><input name="tunnelip" type="text" id="tunnelip" maxlength="255" /></td>
+                        </tr>
+                      </table>
+                      </div>
+<!--
+         <div class="stepWrapper">
+                 <p><strong>3. Set the Backup GRE tunnel state and destination address.</strong> 
+                 </p><table>
+                 <tr>
+                        <td width="160">Backup GRE Tunnel:</td>
+                                <td width="138"><input type="radio" value="1" id="bakenable" name="bakenable" >Enable</td>
+                 <td width="181"><input type="radio" checked="checked" value="0" id="bakenable" name="bakenable" >Disable</td>
+                    </tr> 
+                  <tr>
+                          <td width="150">Tunnel IP:</td>
+                          <td colspan=2><input name="tunnelbakip" type="text" id="tunnelbakip" /></td>
+                        </tr>
+                      </table>
+                      </div>
+-->
+         <div class="stepWrapper">
+                 <p><strong>3. Enter the wireless network name and client limit.</strong> 
+                 </p><table>
+                        <tr>
+                          <td width="150">Network:</td>
+                          <td colspan=2><select name="NetworkSSID" id="NetworkSSID" >
+                                <!-- <option value="0" selected="selected" disabled >CenturyLinkCommunity</option> -->
+                        <%ejGetOther(SsidList)%>
+                              </select>
+                          </td>
+                        </tr>
+                  <tr>
+                          <td width="150">Network Name:</td>
+                          <td colspan=2><input name="NetworkName" type="text" id="NetworkName" /></td>
+                        </tr>
+                        <tr>
+                        <td width="160">SSID State:</td>
+                                <td width="138"><input type="radio" value="1" checked="checked" id="SSIDenable" name="SSIDenable" >Enable</td>
+                 <td width="181"><input type="radio" value="0" id="SSIDenable" name="SSIDenable" >Disable</td>
+                    </tr> 
+                        <tr>
+                          <td width="150">Maximum Number of Clients:</td>
+                          <td colspan=2><input name="MaxClient" type="text" id="MaxClient" /></td>
+                        </tr>
+                      </table>
+                      </div>
+         <div class="stepWrapper">
+                 <p><strong>4. Select security type.</strong> 
+                 </p><table>
+                        <tr>
+                          <td width="150">Security type:</td>
+                          <td><select name="SecType" id="SecType" >
+                                <option value="open" selected="selected" >Security Off</option>
+                              </select>
+                          </td>
+                        </tr>
+                      </table>
+                      </div>
+                      <div class="stepWrapper">
+                 <p><strong>5. Enter the VLAN value for the selected SSID.</strong> 
+                 </p><table>
+                        <tr>
+                          <td width="150">VLAN ID:</td>
+                          <td><input name="vlanMuxId" type="text" id="vlanMuxId" /></td>
+                        </tr>
+                      </table>
+                      </div>
+                 <div class="stepWrapper">
+                <p><strong>6. Select the Option 82 sub option 1 value for AP identification.</strong></p>
+                <table>
+                    <tbody><tr>
+                        <td width="43"><label for="op82APMAC">AP MAC:</label>
+                        </td>
+                        <td width="64"><input type="checkbox" value="1" id="op82APMAC" name="op82APMAC"  >
+                        </td>
+                        <td width="73"><label for="op82SSID">SSID:</label></td>
+                        <td width="65"><input type="checkbox" value="1" id="op82SSID" name="op82SSID"  >
+                        </td>
+                        <td width="64"><label for="op82SType">SSID Type:</label>
+                        </td>
+                        <td width="71"><input type="checkbox" value="1" id="op82SType" name="op82SType" >
+                        </td>
+                    </tr>
+                </tbody></table>
+                </div>
+            <div class="stepWrapper">
+                 <p><strong>7. Set the Option 82 sub option 2 value for user identification.</strong> 
+                 </p><table>
+                        <tr>
+                          <td width="150">Parameter:</td>
+                          <td><select name="op82parameter" id="op82parameter" onChange='Op82sub2change()'>
+                                <option value="0" >User Mac</option>
+                        <option value="1" >Unique String</option>
+                        <option value="2" selected="selected" >User MAC with Unique String</option>
+                              </select>
+                          </td>
+                        </tr>
+
+                  <tr class="op82sub2String">
+                          <td width="150">Unique String:</td>
+                          <td><input name="op82String" type="text" id="op82String" maxlength="12" /></td>
+                        </tr>
+
+                      </table>
+                      </div>
+                 <div class="stepWrapper">
+                <p><strong>8. Set the community Wi-Fi QoS state.</strong></p>
+                <table>
+                    <tbody><tr>
+                        <td width="150">Community Wi-Fi QoS:</td>
+                                <td width="138"><input type="radio" checked="checked" value="1" id="cwifiQosenable" name="cwifiQosenable" >Enable</td>
+                 <td width="181"><input type="radio" value="0" id="cwifiQosenable" name="cwifiQosenable" >Disable</td>
+                    </tr>
+                </tbody></table>
+                </div>
+                      <div class="stepWrapper">
+                <p><strong>9. Select the QoS parameter for the selected SSID.</strong></p>
+                <table>
+                    <tbody><tr>
+                        <td width="150">P-Bit:</td>
+                        <td><select name="vlanMuxPr" id="vlanMuxPr" >
+                                <option value="0" selected="selected">0 </option>
+                                <option value="1">1 </option>
+                                <option value="2">2 </option>
+                                <option value="3">3 </option>
+                                <option value="4">4 </option>
+                                <option value="5">5 </option>
+                                <option value="6">6 </option>
+                                <option value="7">7 </option>
+                              </select>
+                          </td>
+                    </tr>
+                </tbody></table>
+                </div>
+
+                      <div class="stepWrapper">
+                 <p><strong>10. Click &quot;Apply&quot; to save your changes. </strong></p>
+                 <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+                 </div>
+            </form>
+            <p>&nbsp;</p>
+            <div class="stepWrapperdark">
+               <table border="0" align="center" cellpadding="2" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                  <tr>
+                     <th colspan="2" class="tableTitle">Community Wi-Fi status</th>
+                  </tr>
+                  <tr>
+                     <th width="90">Parameter</th>
+                     <th width="90">Value</th>
+                  </tr>
+        
+<script language="javascript">
+<!--
+{
+   var GREstatus = "<%ejGetOther(GREinfo)%>";
+   var statusInfo = GREstatus.split('|');
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Primary GRE Tunnel State:</td>");
+   if(statusInfo[0] == 1)
+   {
+      if(statusInfo[17] == 0)
+      {
+         if(statusInfo[13] == "Up")
+         {
+            document.writeln("<td id='PriGRETunState'><font color=\"#009900\"><strong>CONNECTED</strong></font></td>");
+         }
+         else if(statusInfo[13] == "Dormant")
+         {
+            document.writeln("<td id='PriGRETunState'><font color=\"#E08800\"><strong>CONNECTING</strong></font></td>");
+         }
+         else if(statusInfo[13] == "Error")
+         {
+            document.writeln("<td id='PriGRETunState'><font color=\"#FF0000\"><strong>CONNECTION FAILED</strong></font></td>");
+         }
+         else //NotPresent, Unknown, Down(GRE disable + Dormant || Error)
+         {
+            document.writeln("<td id='PriGRETunState'><font color=\"#FF6319\"><strong>STANDBY</strong></font></td>");
+         }
+      }
+      else
+      {
+         document.writeln("<td id='PriGRETunState'><font color=\"#FF0000\"><strong>CONNECTION FAILED</strong></font></td>");
+      }
+   }
+   else
+   {
+      document.writeln("<td id='PriGRETunState'>N/A</td>");
+   }
+   document.writeln("</tr>");
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Primary GRE Tunnel Uptime:</td>");
+   if(statusInfo[0] == 1 && statusInfo[17] == 0 && statusInfo[14] != "0")
+   {
+      document.writeln("<td id='PriGRETunUptime'>" + statusInfo[14] + "</td>");
+   }
+   else
+   {
+      document.writeln("<td id='PriGRETunUptime'>N/A</td>");
+   }
+   document.writeln("</tr>");
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Number of Connected Users:</td>");
+   if(statusInfo[0] == 1 && statusInfo[18] != 0)
+   {
+      document.writeln("<td id='NumConnUsers'>" + statusInfo[10] + "</td>");
+   }
+   else
+   {
+      document.writeln("<td id='NumConnUsers'>N/A</td>");
+   }
+   document.writeln("</tr>");
+/*
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Backup GRE Tunnel State:</td>");
+   if(statusInfo[0] == 1 && statusInfo[15] == 1)
+   {
+      if(statusInfo[17] == 1)
+      {
+         if(statusInfo[13] == "Error" || statusInfo[18] == 0)
+         {
+            document.writeln("<td id='BakGRETunState'><font color=\"#FF0000\"><strong>CONNECTION FAILED</strong></font></td>");
+         }
+         else if(statusInfo[13] == "Up")
+         {
+            document.writeln("<td id='BakGRETunState'><font color=\"#009900\"><strong>CONNECTED</strong></font></td>");
+         }
+         else if(statusInfo[13] == "Dormant")
+         {
+            document.writeln("<td id='BakGRETunState'><font color=\"#E08800\"><strong>CONNECTING</strong></font></td>");
+         }
+         else //NotPresent, Unknown, Down(GRE disable + Dormant || Error)
+         {
+            document.writeln("<td id='BakGRETunState'><font color=\"#FF6319\"><strong>STANDBY</strong></font></td>");
+         }
+      }
+      else
+      {
+         document.writeln("<td id='BakGRETunState'><font color=\"#FF6319\"><strong>STANDBY</strong></font></td>");
+      }
+   }
+   else
+   {
+      document.writeln("<td id='BakGRETunState'>N/A</td>");
+   }
+
+   document.writeln("</tr>");
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Backup GRE Tunnel Uptime:</td>");
+   //enable / backup enable / backup action / counter != 0 /SSID enable
+   if(statusInfo[0] == 1 && statusInfo[15] == 1 && statusInfo[17] == 1 && statusInfo[14] != "0" && statusInfo[18] == 1)
+   {
+      document.writeln("<td id='BakGRETunUptime'>" + statusInfo[14] + "</td>");
+   }
+   else
+   {
+      document.writeln("<td id='BakGRETunUptime'>N/A</td>");
+   }
+   document.writeln("</tr>");
+*/
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Packet Rx:</td>");
+   if(statusInfo[21] != 0 && statusInfo[0] == 1)
+      document.writeln("<td id='Prx'>" + statusInfo[12] + "</td>");
+   else
+      document.writeln("<td id='Prx'>N/A</td>");
+   document.writeln("</tr>");
+   document.writeln("<tr align='center'>");
+   document.writeln("<td>Packet Tx:</td>");
+   if(statusInfo[21] != 0 && statusInfo[0] == 1)
+      document.writeln("<td id='Ptx'>" + statusInfo[11] + "</td>");
+   else
+      document.writeln("<td id='Ptx'>N/A</td>");
+   document.writeln("</tr>");
+}
+// done hiding -->
+</script>
+               </table>
+            </div>
+               <div class="clear_left"></div>
+        </div>
+   </div>
+      <div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Communications International Inc., All Rights Reserved.</div>	
+</div>
+</body>
+</html>

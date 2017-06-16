@@ -1,0 +1,409 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';//ATM:1, PTM:2
+var vlanUsed = '<%ejGetOther(sysInfo, vlanUsed)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var numVlan = '<%ejGet(numVlan)%>';
+
+var isACSWanMode = '<%ejGetOther(sysInfo, isACSWanMode)%>';
+
+function isVlanUsed(vlanId)
+{
+   var vlan = vlanUsed.split(',');
+
+   for (j = 0; j < vlan.length; j++)	
+   {
+	   if (vlanId == parseInt(vlan[j]))
+	   {
+	   	if (j == 0)
+		   AlertOpen('VLAN ID '+vlanId+' is used for default PTM WAN interface.');
+		else
+		   AlertOpen('VLAN ID '+vlanId+' is already used.');
+		return false;
+	   }
+   }
+   return true;
+}
+
+function encapChange() {
+	var loc;
+	with ( document.forms[0] ) {
+		if (dslType.value == 'PTM')
+			loc = 'supportconsole_wanvlans.html'
+		else if(dslType.value == 'ATM')
+			loc = 'supportconsole_wanvlans_atm.html'
+		else {
+			AlertOpen('Internal Error!');
+			return;
+		}
+	}
+	var code = 'location="'+loc+'"';
+	eval(code);
+}
+
+
+function prtclChange(){
+	with ( document.forms[0] ) {
+	    if (prtcl_sel.selectedIndex == 0){ //PPPoE
+			pppUserName.value = '<%ejGet(defPppUserName)%>';
+			wanIpAddress.value = "0.0.0.0";
+			wanIntfGateway.value = "0.0.0.0";
+			wanSubnetMask.value = "0.0.0.0";
+			wanFilterOp60.value= "";
+			pppPassword.value = "**********";
+			$('.ptmPoE').show();
+			$('.ptmStatic').hide();
+			$('.ptmBr').hide();
+		}else if (prtcl_sel.selectedIndex == 1){//Br
+			wanIpAddress.value = "0.0.0.0";
+			wanIntfGateway.value = "0.0.0.0";			
+			wanSubnetMask.value = "0.0.0.0";
+			pppPassword.value = "";
+			$('.ptmPoE').hide();
+			$('.ptmStatic').hide();
+			$('.ptmBr').show();
+		}else if (prtcl_sel.selectedIndex == 2){//DHCP
+			wanIpAddress.value = "0.0.0.0";
+			wanIntfGateway.value = "0.0.0.0";			
+			wanSubnetMask.value = "0.0.0.0";
+			pppPassword.value = "";
+			wanFilterOp60.value= "";
+			$('.ptmPoE').hide();
+			$('.ptmStatic').hide();
+			$('.ptmBr').hide();
+		}else{//Static
+			pppPassword.value = "";
+			wanFilterOp60.value= "";
+			$('.ptmPoE').hide();
+			$('.ptmStatic').show();
+			$('.ptmBr').hide();
+		}
+	}
+}
+
+function frmLoad(){
+	with ( document.forms[0] ) {
+		$("#prtcl_sel").attr("value","2");//Default IPoE
+		prtclChange();
+	}
+}
+
+function btnRemove(rml) {
+	with ( document.forms[1] ) {
+		rmLst.value=rml;
+	}
+	document.forms[1].sessionKey.value = gblsessionKey;
+	document.forms[1].submit();
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+
+		var srvName = serviceName.value;
+		if ((srvName=='') || (srvName=='Default')) {
+			AlertOpen('The connection name entered in step 2 is not valid.  Please enter a name containing 2 to 20 characters.\n');
+			return false;
+		}
+
+		if(isACSWanMode == '1')
+		{		   
+		   if ((l2Intf == 2 && numVlan > 2) || (l2Intf != 2 && numVlan >0))
+		   {
+			   AlertOpen('Only support one PTM WAN interface.\n');
+			   return false;
+		   }
+		}
+		else
+		{
+		   if ((l2Intf == 2 && numVlan > 1) || (l2Intf != 2 && numVlan >0))
+		   {
+			   AlertOpen('Only support one PTM WAN interface.\n');
+			   return false;
+		   }
+		}
+		if (prtcl_sel.selectedIndex == 0) { //PPPoE
+			ntwkPrtcl.value = 0;
+			// validate user name
+			var len = pppUserName.value.length;
+			if ( len > 64 ) {
+				msg = 'The length of user name (' + len + ') is too long [0-64].';
+				AlertOpen(msg);
+				return false;
+			}
+			// validate password
+			len = pppPassword.value.length;
+			if ( len > 64 ) {
+				msg = 'The length of password (' + len + ') is too long [0-64].';
+				AlertOpen(msg);
+				return false;
+			}
+
+			pppUserName.value = encodeUrl(pppUserName.value);
+			pppPassword.value = encodePassword(pppPassword.value);
+			pppPassword.value = decodePassword(pppPassword.value);
+			mtuSize.value = "1492";
+		} else if (prtcl_sel.selectedIndex == 1) { // Br
+			ntwkPrtcl.value = 3;
+			enblIgmp.value = 0;
+			mtuSize.value = "1500";
+		} else if (prtcl_sel.selectedIndex == 2) { // DHCP
+			ntwkPrtcl.value = 2;
+			enblDhcpClnt.value = 1;
+			useStaticIpAddress.value = 0;
+			mtuSize.value = "1500";
+		} else { // Static
+			if (isValidSubnetMask(wanSubnetMask.value) == false) {
+				AlertOpen("The Subnetmask is invalid");
+				return false;
+			}
+			ntwkPrtcl.value = 2;
+			enblDhcpClnt.value = 0;
+			useStaticIpAddress.value = 1;
+			mtuSize.value = "1500";
+		}
+
+		if (isNaN(parseInt(vlanMuxId.value)) == true)
+		{
+			AlertOpen("The VLAN ID entered is invalid.  Please enter a valid VLAN ID.");
+			return false;
+		}
+		
+		if (isNaN(parseInt(vlanMuxPr.value)) == true)
+		{
+			AlertOpen("Priority should between 0 to 7");
+			return false;
+		}
+
+		
+		vlmid = parseInt(vlanMuxId.value);
+		vlmpr = parseInt(vlanMuxPr.value);
+		
+		if (vlmid  < 1 || vlmid  > 4094)
+		{
+			AlertOpen("VLAN ID should between 1 to 4094");
+			return false;
+		}
+		
+		if (vlmpr < 0 || vlmpr > 7)
+		{
+			AlertOpen("Priority should between 0 to 7");
+			return false;
+		}
+
+		if (isVlanUsed(vlmid) == false)
+		{
+			return false;
+		}
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+
+	//Return false to avoid do submit twice.
+	return false;
+}
+
+
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('wanvlans', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+  </div>
+		<div id="content_right">
+		  
+			<div id="content_right_contentarea">
+			  <h1 class="supportconsole_wanvlans">WAN VLANs/PVCs <span>WAN VLANs/PVCs allow the service operator to set additional network
+                  paths for enhanced services.</span></h1>
+			<form id="form1" name="form1" method="post" action="supportconsole_wanvlans.cgi" onSubmit="return btnApply();">
+ 			<input type="hidden" name="enblOnDemand" id="enblOnDemand" value="0">
+			<input type="hidden" name="pppTimeOut" id="pppTimeOut" value="0">
+			<input type="hidden" name="useStaticIpAddress" id="useStaticIpAddress" value="0">
+			<input type="hidden" name="pppLocalIpAddress" id="pppLocalIpAddress" value="0.0.0.0">
+			<input type="hidden" name="pppIpExtension" id="pppIpExtension" value="0">
+			<input type="hidden" name="enblFirewall" id="enblFirewall" value="1">
+			<input type="hidden" name="enblNat" id="enblNat" value="1">
+			<input type="hidden" name="enblFullcone" id="enblFullcone" value="0">
+			<input type="hidden" name="pppAuthErrorRetry" id="pppAuthErrorRetry" value="1">
+			<input type="hidden" name="pppAuthErrorRetryInterval" id="pppAuthErrorRetryInterval" value="120">
+			<input type="hidden" name="enblPppDebug" id="enblPppDebug" value="0">
+			<input type="hidden" name="enblIgmp" id="enblIgmp" value="1">
+			<input type="hidden" name="ntwkPrtcl" id="ntwkPrtcl" value="3">
+			<input type="hidden" name="wanAdd" id="wanAdd" value="1">
+			<input type="hidden" name="isAtm" id="isAtm" value="0">
+			<input type="hidden" name="enblDhcpClnt" id="enblDhcpClnt" value="1">
+			<input type="hidden" name="enblLan2" id="enblLan2" value="0">
+			<input type="hidden" name="usePublicIP" id="usePublicIP" value="0">
+			<input type="hidden" name="mtuSize" id="mtuSize" value="1500">
+			<input type="hidden" name="wanIpv6Mode" id="wanIpv6Mode" value="0">
+			<input type="hidden" name="enblv6" id="enblv6" value="0">
+			<input type="hidden" name="tunnel6rd" id="tunnel6rd" value="0">
+			<input type="hidden" name="enblMld" id="enblMld" value="0">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="">
+                <div class="stepWrapper">
+                <p><strong>1. Select the encapsulation type.</strong>
+					  </p><table>
+                        <tr>
+                          <td width="150">Encapsulation:</td>
+                          <td><select name="dslType" id="dslType" onChange="encapChange()">
+                                <option value="PTM" selected="selected">PTM</option>
+                                <option value="ATM" >ATM</option>
+                              </select>
+							</td>
+                        </tr>
+                      </table>
+                      </div>
+				  
+                      <div class="stepWrapper">
+					  <p><strong>2. Enter connection name.</strong>
+					  </p>
+					  <table>
+                        <tr>
+                          <td width="150">Connection Name:</td>
+                          <td><input name="serviceName" type="text" id="serviceName" maxlength="20" /></td>
+                        </tr>
+                      </table>
+                      </div>
+
+             <div class="stepWrapper">
+					  <p><strong>3. Select protocol.</strong></p><table>
+					    <tr>
+                          <td width="150">Protocol:</td>
+                          <td>
+					<select name="prtcl_sel" id="prtcl_sel" onChange="prtclChange()">
+	                                <option value='0'>PPPoE </option>
+	                                <option value='1'>Transparent Bridging </option>
+	                                <option value='2' >IPoE </option>
+                                </select>
+                           </td>
+				 </tr>
+                    <tr class="ptmPoE">
+                        <td width="135" style="padding-left:15px;"><label for="username">Username:</label></td>
+                        <td><input name="pppUserName" type="text" id="pppUserName" value="connect@qwest.com" />
+                        </td>
+                    </tr>
+                    <tr class="ptmPoE">
+                        <td width="135" style="padding-left:15px;"><label for="password">Password:</label></td>
+                        <td><input name="pppPassword" type="password" id="pppPassword" value="**********" />
+                        </td>
+                    </tr>	
+                        <tr class="ptmStatic">
+                            <td width="135" style="padding-left:15px;"><label for="pppoe_ip_single_static">Single Static IP:</label></td>
+                            <td><input name="wanIpAddress" id="wanIpAddress" type="text" size="35" /></td>
+                        </tr>
+                        <tr class="ptmStatic">
+                            <td width="135" style="padding-left:15px;"><label for="pppoe_ip_gateway">Gateway Address:</label></td>
+                            <td><input name="wanIntfGateway" id="wanIntfGateway" type="text" size="35" /></td>
+                        </tr>
+                        <tr class="ptmStatic">
+                            <td width="135" style="padding-left:15px;"><label for="pppoe_subnet_mask">Subnet Mask:</label></td>
+                            <td><input name="wanSubnetMask" id="wanSubnetMask" type="text" size="35" /></td>
+                        </tr>
+			     <tr class="ptmBr">
+                              <td width="150">DHCP Option 60:</td>
+                              <td><input name="wanFilterOp60" type="text" id="wanFilterOp60" />                              </td>
+			    </tr>
+					
+                      </table>
+                      </div>
+
+                      <div class="stepWrapper">
+					  <p><strong>4. Enter VLAN values.</strong> 
+					  </p><table>
+                        <tr>
+                          <td width="150">VLAN ID:</td>
+                          <td><input name="vlanMuxId" type="text" id="vlanMuxId" /></td>
+                        </tr>
+                        <tr>
+                          <td width="150">Priority:</td>
+                          <td><select name="vlanMuxPr" id="vlanMuxPr">
+                                <option value="0" selected="selected">0 </option>
+                                <option value="1">1 </option>
+                                <option value="2">2 </option>
+                                <option value="3">3 </option>
+                                <option value="4">4 </option>
+                                <option value="5">5 </option>
+                                <option value="6">6 </option>
+                                <option value="7">7 </option>
+                              </select>
+                          </td>
+                        </tr>
+                      </table>
+                      </div>
+                      <div class="stepWrapper">
+					  <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+					  <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+					  </div>
+			   </form>
+                      <p>&nbsp;</p>
+                      <div class="stepWrapperdark">
+                      <p align="center"><strong>WAN VLANs </strong></p>
+				<form id="form2" name="form2" method="post" action="wancfg.cmd">
+						<input type="hidden" name="action" id="action" value="remove">
+						<input type="hidden" name="rmLst" id="rmLst" value="">
+						<input type="hidden" name="isAtm" id="isAtm" value="0">
+						<input type="hidden" name="sessionKey" id="sessionKey" value="">
+			          <table>
+                        <tr>
+                          <th height="45" width="20%">Name</th>
+                          <th width="25%">Protocol</th>
+                          <th width="13%">VLAN ID</th>
+                          <th width="13%">Priority</th>
+                          <th width="10%">Edit</th>
+                        </tr>
+					<%ejGetOther(wanShow, ptm)%>
+                      </table>
+             </form>
+					  </div>
+					<div class="clear_left"></div>
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

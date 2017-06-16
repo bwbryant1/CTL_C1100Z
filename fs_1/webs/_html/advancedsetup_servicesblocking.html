@@ -1,0 +1,772 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+<!-- hide
+var lanInfo= "<%ejGetOtherBig(dhcpLeasesinfo)%>";
+var SrvInfo= "<%ejGetOtherBig(sblist)%>";
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var ipaddress;
+var dev_name;
+var j;
+function userRule()
+{
+	var ruleinfo = '<%ejGetOtherBig(srBkRule)%>';
+	var i=0;
+	var rinfo = ruleinfo.split('|');
+	if (rinfo != '') {
+		for ( i = 0; i < rinfo.length; i++ ) 
+		{
+			if (rinfo[i] == '')
+				break;
+			var names = rinfo[i].split('/');	
+			$("#servicename").append($('<option></option>').val(names[0]).text(names[0]));			
+		}
+	}
+}
+function frmLoad() 
+{
+  userRule();
+  with ( document.forms[0] )
+  {
+     srcaddr.value = '';
+     dev_name = '';
+  }
+  encapChange();
+}
+
+function btnApply() {
+   var loc = 'srvcblk.cmd?action=add';
+   var Srvitems= SrvInfo.split("|");
+   var SrvNames;
+   var found=0;
+   var err_msg='';
+   var set=0;
+   var its= lanInfo.split("|");
+   
+   with ( document.forms[0] ) {
+    
+      if(isValidIpAddress(srcaddr.value)!=true)
+      { 
+         AlertOpen('The IP address entered in step 1 is invalid.  Please enter a valid IP address.');
+	  srcaddr.value='';
+	  return false;	 
+      	}
+	  
+      //loc += '&srcAddr=' + srcaddr.value;
+      action.value = "add";
+      srcAddr.value = srcaddr.value;
+      var serviceValue = servicename.value;
+      servicecheck = parseInt(serviceValue);
+	  
+      if (servicecheck == 1)
+      {
+         SrvNames=srcaddr.value+'IM';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {         
+		blkim.value ='1';  
+		  set=1;
+		 }
+		 else
+		  err_msg+=' Instant Messaging'; 	
+      }
+           
+	  found=0;
+      if (servicecheck == 2)
+      {
+         SrvNames=srcaddr.value+'FTP';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+           blkftp.value ='1';  
+		   set=1;
+		 }
+		 else
+		   err_msg+=' FTP';
+      }
+
+	  found=0;
+      if (servicecheck == 3)
+      {
+         SrvNames=srcaddr.value+'Newsgroups';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+           blknewsgroups.value='1';
+		   set=1;
+		 }
+		 else
+		   err_msg+=' Newsgroups';	
+      }
+
+	  found=0;
+      if ( servicecheck == 4 )
+      {
+         SrvNames=srcaddr.value+'Email';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+           blkemail.value='1';
+		   set=1; 
+		 }
+		 else
+		   err_msg+=' Email';	
+      }
+      
+
+	  found=0;
+      if (servicecheck == 5)
+      {
+         SrvNames=srcaddr.value+'HTTP';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkhttp.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' HTTP'; 	
+      }
+     
+
+        found=0;
+      if (servicecheck == 6)
+      {
+         SrvNames=srcaddr.value+'IPSec';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkipsec.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' IPSec'; 	
+      }
+	 
+
+       found=0;
+      if (servicecheck == 7)
+      {
+         SrvNames=srcaddr.value+'L2TP';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkl2tp.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' L2TP'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 8)
+      {
+         SrvNames=srcaddr.value+'PPTP';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkpptp.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' PPTP'; 	
+      }
+	 
+        found=0;
+      if (servicecheck == 9)
+      {
+         SrvNames=srcaddr.value+'PS2-PS3';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkps2.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' PS2-PS3'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 10)
+      {
+         SrvNames=srcaddr.value+'Xbox 360';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkxbox.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' Xbox 360'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 11)
+      {
+         SrvNames=srcaddr.value+'Real A/V';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkrealav.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' Real A/V'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 12)
+      {
+         SrvNames=srcaddr.value+'Telnet';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+         blktelent.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' Telnet'; 	
+      }
+	 
+
+       found=0;
+      if (servicecheck == 13)
+      {
+         SrvNames=srcaddr.value+'H.323';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+         blkh323.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' H.323'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 14)
+      {
+         SrvNames=srcaddr.value+'MSN Gaming Zone';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkmsn.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' MSN Gaming Zone'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 15)
+      {
+         SrvNames=srcaddr.value+'Doom I/II/III';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+         blkdoom.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' Doom I/II/III'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 16)
+      {
+         SrvNames=srcaddr.value+'World of Warcraft';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkwow.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' World of Warcraft'; 	
+      }
+	  
+       found=0;
+      if (servicecheck == 17)
+      {
+         SrvNames=srcaddr.value+'Call of Duty 2';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+          blkcod2.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' Call of Duty 2'; 	
+      }
+	  
+
+       found=0;
+      if (servicecheck == 18)
+      {
+         SrvNames=srcaddr.value+'NetMeeting';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+         blkmeeting.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' NetMeeting'; 	
+      }
+	  if (servicecheck == 19)
+      {
+         SrvNames=srcaddr.value+'BITtorrent';
+		 for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==0)
+		 {
+         blkbt.value='1';
+		  set=1;
+		 }
+		 else
+		  err_msg+=' BITtorrent'; 	
+      }
+	  else
+	  {
+		SrvNames=srcaddr.value+servicename.value;
+		for (j = 0 ; j < Srvitems.length ; j++) 
+		 {
+	       if(Srvitems[j]==SrvNames)
+	       {
+             found=1;
+			 break;
+	       }
+         }
+		 if(found==1)
+		 {
+		  err_msg+=servicename.value; 	
+		 }
+	  }
+
+	  if(err_msg!='')
+	  {
+	  	//AlertOpen('Service blocking of'+err_msg+' already exists');
+                AlertOpen('The rule defined currently exists for the selected IP address.');
+		if(set==0)
+			return false;
+	  }
+      if (dev_name == '')
+      {
+         device_name.value = "unknown"; 
+         //loc += '&dev_name='+ srcaddr.value;
+	 for (i = 0 ; i < its.length ; i++) 
+       {
+        var names = its[i].split("/");		
+        if (names.length > 2) 
+        {	 
+           if(srcAddr.value == names[2])
+	    {
+		dev_name=names[0];
+		device_name.value = dev_name; 
+	       break;
+	    }  //else
+         } // if name.length
+       } // for	 	  
+      }
+      else
+      	{
+	  //loc += '&dev_name='+ dev_name;
+	  device_name.value = dev_name; 
+      	}
+		if (set == 1){
+			servicename.value = "";
+		}
+		document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();  
+
+	//Return false to avoid do submit twice.
+	return false;
+   }  //end with
+   //var code = 'location="' + loc + '"';
+   //eval(code);  
+}  //end function
+
+function encapChange() {
+  var loc;
+with ( document.forms[0] ) 
+{
+  var its= lanInfo.split("|");
+
+  if(mode.value=="Manually Enter IP Address")
+  {
+       srcaddr.value = '';
+	dev_name = '';
+	$('.manual_ip_address').show();
+	srcaddr.disabled = false;
+       srcaddr.style.background = "#FFF";
+  }
+  else 
+  {
+	$('.manual_ip_address').hide();
+	srcaddr.disabled = true;
+       srcaddr.style.background = "#999";
+
+      for (i = 0 ; i < its.length ; i++) 
+     {
+        var names = its[i].split("/");
+        if (names.length > 2) 
+        {
+         
+           if((mode.value==names[1])||(mode.value==names[2]))
+	    {
+	       srcaddr.value=names[2];
+	       if(mode.value==names[1])
+	          dev_name=names[0];
+		else
+		   dev_name=names[2];
+	       break;
+	      }  //else
+         } // if name.length
+       } // for	
+     }// else
+  } //with
+}
+
+function removeClick(rml, ip) {
+	
+	with ( document.forms[0] ) {
+		action.value="remove";
+		rmLst.value=rml;
+		srcAddr.value=ip;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	
+}    
+// done hiding -->
+</script>
+</head>
+<body  id="advancedsetup_servicesblocking">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left">
+    </div>
+<div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('servicesblocking');
+</script>
+		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+  </div>
+    </div>
+	</div>
+    <div id="content_right">
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_blocking">Service Blocking <span>Service blocking provides the ability to block specific Internet services per device.</span></h1>
+              <form action="srvcblk.cmd" method="post" onSubmit="return btnApply();">
+			<input type="hidden" name="action" id="action" value="">
+			<input type="hidden" name="srcAddr" id="srcAddr" value="">
+			<input type="hidden" name="blkim" id="blkim" value="0">
+			<input type="hidden" name="blkftp" id="blkftp" value="0">
+			<input type="hidden" name="blknewsgroups" id="blknewsgroups" value="0">
+			<input type="hidden" name="blkemail" id="blkemail" value="0"/>
+			<input type="hidden" name="blkhttp" id="blkhttp" value="0">
+			<input type="hidden" name="blkipsec" id="blkipsec" value="0">
+			<input type="hidden" name="blkl2tp" id="blkl2tp" value="0">
+			<input type="hidden" name="blkpptp" id="blkpptp" value="0"/>
+			<input type="hidden" name="blkps2" id="blkps2" value="0">
+			<input type="hidden" name="blkxbox" id="blkxbox" value="0">
+			<input type="hidden" name="blkrealav" id="blkrealav" value="0"/>
+			<input type="hidden" name="blktelent" id="blktelent" value="0">
+			<input type="hidden" name="blkh323" id="blkh323" value="0">
+			<input type="hidden" name="blkmsn" id="blkmsn" value="0">
+			<input type="hidden" name="blkdoom" id="blkdoom" value="0"/>
+			<input type="hidden" name="blkwow" id="blkwow" value="0">
+			<input type="hidden" name="blkcod2" id="blkcod2" value="0">
+			<input type="hidden" name="blkmeeting" id="blkmeeting" value="0">
+			<input type="hidden" name="blkbt" id="blkbt" value="0">
+			<input type="hidden" name="device_name" id="device_name" value="">
+			<input type="hidden" name="rmLst" id="rmLst" value="">
+			<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+                <div class="stepWrapper">
+                    <p><strong>1. Select Device, or manually enter an IP address.</strong></p>
+                    
+                    <table>
+                        <tr>
+                            <td width="150">Select Device: </td>
+                            <td><select name="mode" id="mode" onChange="encapChange()">
+                                    <option value="Manually Enter IP Address" selected="selected">Manually Enter IP Address </option>
+<script language="javascript">
+<!-- hide
+	{
+		var i=0;
+		var hinfo = lanInfo.split('|');
+		var hostname = '';
+		if (hinfo != '') {
+			for ( i = 0; i < hinfo.length; i++ ) 
+			{
+				if (hinfo[i] == '')
+					break;
+				var names = hinfo[i].split('/');
+				if ( names[0] != 'unknown' ) {
+					hostname = names[0];
+				}
+				else if ( names[2] != '' ) {
+					hostname = names[2];
+				}
+				else {
+					hostname = names[1];
+				}
+				document.writeln("<option value=\""+names[1]+"\">"+names[0]+" - "+names[2]+" </option>");
+			}
+		}
+	}
+//-->
+</script>  
+                                </select>
+                            </td>
+                        </tr>
+                        <tr class="manual_ip_address">
+                            <td width="150">Enter IP Address:</td>
+                            <td><input name="srcaddr" id="srcaddr" type="text" size="25" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="stepWrapper">
+                    <p><strong>2. Select service to block.</strong></p>
+                    <table border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                        <tr>
+                            <td width="150">Service:</td>
+                            <td><select name="servicename" id="servicename">
+                                    <option value="1" selected="selected">Instant Messaging </option>
+                                    <option value="2">FTP </option>
+                                    <option value="3">Newsgroups </option>
+                                    <option value="4">Email </option>
+                                    <option value="5">HTTP </option>
+                                    <option value="6">IPSec </option>
+                                    <option value="7">L2TP </option>
+                                    <option value="8">PPTP </option>
+                                    <option value="9">PS2 - PS3 </option>
+                                    <option value="10">Xbox 360 </option>
+                                    <option value="11">Real A/V </option>
+                                    <option value="12">Telnet </option>
+                                    <option value="13">H.323 </option>
+                                    <option value="14">MSN Gaming Zone </option>
+                                    <option value="15">Doom I/II/III </option>
+                                    <option value="16">World of Warcraft </option>
+                                    <option value="17">Call of Duty 2 </option>
+                                    <option value="18">NetMeeting </option>
+									<option value="19">BITtorrent </option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+					<a href="advancedsetup_serviceblocking_usernew.html" class="btn createrule_btn">Create New Rule</a>
+                </div>
+                <div class="stepWrapper">
+                    <p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+                    <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                    </div>
+                    <p>&nbsp;</p>
+                    <div class="stepWrapperdark">
+                    <table border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+<tr>
+							<th colspan="5" class="tableTitle">Service Blocking List</th>
+						</tr>
+                        <tr>
+                            <th width="39" align="center">&nbsp;</th>
+                            <th width="60">Device<br />
+                                Name</th>
+                            <th width="80">IP &nbsp;Address</th>
+                            <th width="129">Service Blocked</th>
+                            <th width="92">Edit</th>
+                        </tr>
+                        <%ejGetOtherBig(srvblktable)%>
+                    </table>
+                </div>
+            </form>
+<script language='JavaScript'>
+<!--
+$(document).ready(function() {
+
+	frmLoad();
+});
+//-->
+</script>            
+        </div>
+    </div>
+</div>
+</div>
+<div class="clear_left">
+</div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Qwest Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+
+var percent=0;
+function frmLoad()
+{
+       setTimeout("blink()", 500);
+	setInterval("changealpha()", 1000);
+	setTimeout("doReboot();",1000);
+	isInProgress();
+}
+
+function doReboot() 
+{
+	BackgroundUrl("upload_fw_done_write_flash.cgi");
+}
+
+function goHome(){
+	var enblPopWin = '<%ejGet(enblPopWin)%>';
+	var loc = 'supportutilities_upgradeimage.html';
+	var code = 'location="' + loc + '"';
+	
+	eval(code);
+}
+
+var showimage=0;
+function blink() {
+		if (showimage == 0)
+		{
+	  	document.getElementById("wait").style.color = "#ff0000";
+	  	showimage =1;
+	  }
+	  else
+   	{
+   		document.getElementById("wait").style.color = "";
+   		showimage=0;
+  	}
+   	setTimeout("blink()", 500);
+}
+
+var counter = 0;
+function changealpha(){
+/*
+if(fred.filters.alpha.opacity == 100){
+fred.filters.alpha.opacity = 0;
+}
+else{
+fred.filters.alpha.opacity = 100;
+}*/
+if(percent<100){
+if(counter%3 == 1){
+document.getElementById('myshowProccess').style.visibility="hidden";
+}
+else{
+document.getElementById('myshowProccess').style.visibility="visible";
+}
+counter++;
+}else{
+	document.getElementById('myshowProccess').style.visibility="visible";
+}
+}
+
+var imagetime = 8300;
+var wimagetimeadd = 28000;
+
+function increasePer(){
+	var imageType = '<%ejGet(ImageType)%>';
+	var addsec = 0;
+    percent +=10;
+    if ( imageType == 2 ) {
+    	addsec = wimagetimeadd;
+    } 
+    
+    if(percent<100)
+    {
+			document.getElementById("myshowProccess").innerHTML ="<font color='#EDAB12'><strong>Upgrading Firmware please wait... "+percent+"% </strong></font>";
+			setTimeout("increasePer();", imagetime+addsec); 
+    }
+    else{
+			document.getElementById("myshowProccess").innerHTML="<font color='#EDAB12'><strong>Firmware Upgrade Completed Successfully!</strong></font>";
+			setTimeout("document.getElementById(\"myshowProccess\").innerHTML=\"<font color='#EDAB12'><strong>Rebooting Modem Please Wait!</strong></font>\";",3000);	
+			setTimeout("goHome();",80000);
+    }
+}
+function isInProgress() {
+		var imageType = '<%ejGet(ImageType)%>';
+		var addsec = 0;
+    if ( imageType == 2 ) {
+    	addsec = wimagetimeadd;
+    } 
+    document.getElementById("myshowProccess").innerHTML="<font color='#EDAB12'><strong>Upgrading Firmware please wait... "+percent+"% </strong></font>";
+    setTimeout("increasePer();", 1000+imagetime+addsec);	
+}
+
+// done hiding -->
+</script>
+</head>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+	<div id="masthead">
+        <h1 id="modem_type">Qwest&reg; Modem Configuration ZyXEL Q1000Z</h1>
+        <a href="http://www.qwest.com" id="qwest_link" target="_blank">Qwest.com</a>
+        <ul id="navigation_left">
+            <li class="modemstatus"><a href="modemstatus_home.html">Modem Status</a></li>
+            <li class="quicksetup"><a href="quicksetup.html">Quick Setup</a></li>
+            <li class="wirelesssetup"><a href="wirelesssetup_basicsettings.html">Wireless Setup</a></li>
+            <li class="utilities"><a href="utilities_reboot.html">Utilities</a></li>
+            <li class="advancedsetup"><a href="advancedsetup_accessscheduler.html">Advanced Setup</a></li>
+        </ul>
+        <ul id="navigation_right">
+            <li class="helplink"><a href="help.html" title="Click here to launch">help</a></li>
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </ul>
+    </div>
+    <div class="clear_left">
+    </div>
+	<div id="content_left">
+		<div id="subnav_header"></div>
+		<ul id="subnav">
+			<li></li>
+			<hr />
+			<li><a href="#" id="wait" class="link">PLEASE WAIT</a></li>
+			<hr />
+			<li></li>
+		</ul>
+		<div id="subnav_footer"></div>
+		<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+	<div id="content_right">
+		
+		<div id="content_right_contentarea">
+			<h1 class="thankyou">Upgrading Firmware<strong>&nbsp;&nbsp;</strong></h1>
+		  <form onSubmit="return false;">
+          <div class="stepWrapper">
+			<p class="thankyou"><strong>Please wait while the firmware on your modem is
+			    upgraded.</strong></p>
+			<table width="67%" border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+              <tr align="center">
+                <th style="text-align:center">Upgrade Status</th>
+              </tr>
+              <tr align="center">
+                <td><div id='myshowProccess' style="text-align:center"></div></td>
+              </tr>
+            </table>
+            </div>
+            <div id="vendor_logo_footer"><a href="http://us.zyxel.com" id="vendor_logo" target="_blank"></a></div>
+			<p>&nbsp;</p>
+			</form>
+		</div>
+		
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">All trademarks are property of their respective owners.<br > Copyright &copy; 2010 Qwest. All Rights Reserved.</div>
+</div>
+</body>
+</html>

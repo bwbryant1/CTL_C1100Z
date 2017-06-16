@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+</SCRIPT>
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>        
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+        <a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>	
+	<div id="content_left">
+        <div id="subnav_header">
+        </div>
+        <ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('firewallstatus','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+        </ul>       
+        <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+    </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_firewallstatus">Firewall Status <span>The list below displays all modified firewall settings from the factory default state.</span></h1>
+		<div class="stepWrapper">
+        <table>
+<tr align="center">
+						<th width="61">&nbsp;</th>
+						<th width="94">Firewall<br /> Feature  </th>
+						<th width="87">LAN IP </th>
+						<th width="181">Applied Rule </th>
+		</tr>
+<script language="javascript">
+<!-- hide
+var hostinfo = '<%ejGetOtherBig(dhcpLeasesinfo)%>';
+// done hiding -->
+</script>
+		<%ejGetOtherLarge(firewallstatus)%>
+		 <!--
+					<tr align="center">
+						<td><img src="../_images/icon_firewall_applications.png" width="45" height="45" /></td>
+						<td>Applications</td>
+						<td>N/A</td>
+						<td>Default Feature Setting</td>
+					</tr>
+					<tr align="center">
+						<td><img src="../_images/icon_firewall_advancedportforwarding.png" width="45" height="45" /></td>
+						<td> Port Forwarding </td>
+						<td>192.168.0.3</td>
+						<td>Forwarded Inbound TCP Ports 1234 to 34567</td>
+					</tr>
+					<tr align="center">
+                      <td><img src="../_images/icon_firewall_advancedportforwarding.png" width="45" height="45" /></td>
+                      <td>Port Forwarding </td>
+                      <td>192.168.0.34</td>
+                      <td>TR-069: Forwarded Inbound TCP Ports 4567 to 8000</td>
+	    </tr>
+					<tr align="center">
+						<td><img src="../_images/icon_firewall_dmzhosting.png" width="45" height="45" /></td>
+						<td>DMZ Hosting </td>
+						<td>N/A</td>
+						<td>Default Feature Setting</td>
+					</tr>
+					<tr align="center">
+						<td><img src="../_images/icon_firewall_dynamicip.png" width="45" height="45" /></td>
+						<td>Firewall Settings Dynamic IP </td>
+						<td>N/A</td>
+						<td>Default Feature Setting</td>
+					</tr>
+					<tr align="center">
+						<td><img src="../_images/icon_firewall_staticip.png" width="45" height="45" /></td>
+						<td>Firewall Settings Static IP </td>
+						<td>N/A</td>
+						<td>Default Feature Setting</td>
+					</tr>
+					<tr align="center">
+						<td><img src="../_images/icon_firewall_nat.png" width="45" height="45" /></td>
+						<td>NAT</td>
+						<td>N/A</td>
+						<td>NAT  Enabled</td>
+					</tr>
+					<tr align="center">
+                      <td><img src="../_images/icon_firewall_upnp.png" width="45" height="45" /></td>
+                      <td>UPnP</td>
+                      <td>N/A</td>
+                      <td>No UPnP NAT-T Rules Defined</td>
+	    </tr>
+	    -->
+<script language="javascript">
+<!-- hide
+{
+	var i = 0;
+	var j = 0;
+       var upnpinfo = '<%ejGetOtherBig(portMap, upnp)%>';
+	var hinfo = hostinfo.split('|');
+	var uinfo = upnpinfo.split('|');
+       var enblUpnp = '<%ejGetOther(sysInfo, enblUpnp)%>';
+	var enblUpnpNATT = '<%ejGetOther(sysInfo, enblUpnpNATT)%>';
+   if((enblUpnp==1)&&(enblUpnpNATT==1))
+   {
+	if ( uinfo != '' ) {
+		for ( i = 0; i < uinfo.length; i++ ) {
+			var hostname = 'unknown';
+			var htype = 'computer';
+			if (uinfo[i] == '')
+				break;
+			var names = uinfo[i].split('/');
+			
+			if (hinfo != '') {
+				for ( j = 0; j < hinfo.length; j++ ) 
+				{
+					if (hinfo[j] == '')
+						break;
+					var hnames = hinfo[j].split('/');
+					if ( hnames[2] == names[4] ) {
+						if ( hnames[0] != '' ) {
+							hostname = processLongName( hnames[0], 13 );
+						}
+						if ( hnames[3] != '' ) {
+							htype =  hnames[3];
+						}
+					}
+				}
+			}
+			document.writeln("<tr align=\"center\">");
+			document.writeln("<td><img src='../_images/icon_firewall_upnp.png' width='45' height='45' /></td>");
+			document.writeln("<td>UPnP</td>");
+			document.writeln("<td>"+names[4]+"</td>");
+			if(names[1]==names[2])
+			   document.writeln("<td>UPnP Forwarded Inbound "+names[3]+" Port "+names[1]+"</td>");
+			else
+			   document.writeln("<td>UPnP Forwarded Inbound "+names[3]+" Port "+names[1]+" to "+names[2]+"</td>");	
+			document.writeln("</tr>"); 
+			
+		}
+	}
+	if (i == 0 ) {
+		document.writeln("<tr align=\"center\">");
+	       document.writeln("<td><img src='../_images/icon_firewall_upnp.png' width='45' height='45' /></td>");
+	       document.writeln("<td>UPnP</td>");
+	       document.writeln("<td>N/A</td>");
+		document.writeln("<td>No UPnP NAT-T Rules Defined</td>");
+		document.writeln("</tr>");
+	 } 
+   }
+   else if((enblUpnp==1)&&(enblUpnpNATT==0))
+   {
+       document.writeln("<tr align=\"center\">");
+	document.writeln("<td><img src='../_images/icon_firewall_upnp.png' width='45' height='45' /></td>");
+	document.writeln("<td>UPnP</td>");
+	document.writeln("<td>N/A</td>");
+	document.writeln("<td>UPnP NAT Transversal Not Supported</td>");
+	document.writeln("</tr>");
+   }
+   else
+   {
+       document.writeln("<tr align=\"center\">");
+	document.writeln("<td><img src='../_images/icon_firewall_upnp.png' width='45' height='45' /></td>");
+	document.writeln("<td>UPnP</td>");
+	document.writeln("<td>N/A</td>");
+	document.writeln("<td>No UPnP NAT-T Rules Defined</td>");
+	document.writeln("</tr>");
+   }
+}
+//-->
+</script>	    
+			  </table>
+			  </div>
+			</div>
+  </div>
+</div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</body>
+</html>

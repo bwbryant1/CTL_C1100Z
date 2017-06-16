@@ -1,0 +1,419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+var dydnsentry = '<%ejGetOther(dynamicdnsentry)%>';
+var userpasswd = '*********';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var timeValue;
+
+function getRefresh()
+{	
+   var objXMLHTTP = null;
+
+   if (window.XMLHttpRequest)
+   { 
+      objXMLHTTP=new XMLHttpRequest(); 
+   }// code for IE 
+   else if (window.ActiveXObject)
+   { 
+      objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+   }
+
+   if (objXMLHTTP != null) {
+      objXMLHTTP.open("GET", "./advancedsetup_dynamicdnsupdate.html", false);
+	  objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+      objXMLHTTP.onreadystatechange = function()
+		{
+			if (objXMLHTTP.readyState == 4) {
+				document.getElementById('dynamicDNSinfo').innerHTML=objXMLHTTP.responseText;
+				timeValue = setTimeout('getRefresh()',5000);
+			}
+		}
+		objXMLHTTP.send(null);
+	}
+}
+
+function checkServer() {
+   with ( document.forms[0] ) {
+      var i = 0;
+      var provider = server.value;
+      var supportList = ["freedns.afraid.org",  "dynamic.zoneedit.com",  "members.easydns.com",
+                         "rh.tzo.com",          "members.3322.org",      "updates.dnsomatic.com",
+                         "dyn.dns.he.net",      "ipv4.tunnelbroker.net", "dynsip.org",
+                         "www.sitelutions.com", "update.dnsexit.com",    "nic.changeip.com",
+                         "update.zerigo.com",   "is.dhis.org",           "ipv4.nsupdate.info",
+                         "www.duckdns.org",     "dns.loopia.se",         "domains.google.com",
+                         "www.ovh.com",         "www.dtdns.com",         "homeserver.gira.de",
+                         "ipv4.duia.ro",        "ddnss.de",              "ipv4.dynv6.com",
+                         "update.spdyn.de",     "dyndns.strato.com"];
+
+      for ( i = 0; i < supportList.length; i++ ) {
+         if ( provider == supportList[i] ) {
+            req.disabled = true;
+            return;
+         }
+      }
+      req.disabled = false;
+   }
+}
+
+function btnSave() {
+   with ( document.forms[0] ) {
+      var msg = "";
+      var ddnsstatichostname= hostname.value;
+      var httpurl, serverurl;
+      var checkname;
+
+      if ( service.selectedIndex == 3 ) {
+         if ( server.value.length == 0 || server.value.indexOf('.') == -1 || isValidUrl(server.value) == false || 
+              (server.value.indexOf(':') != -1 && server.value.indexOf('http://') == -1) ) {
+
+            msg = 'The Dynamic DNS Server is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+         if ( server.value.indexOf('http://') != -1 ) {
+            if ( server.value.charAt(server.value.length - 1) == '/' ) {
+               serverurl = server.value.substring(7,server.value.length -1);
+            } else {
+               serverurl = server.value.substring(7,server.value.length);
+            }
+            server.value = serverurl;
+         }
+         checkServer();
+         if ( req.disabled == false && (req.value.length == 0 || isValidUrl(req.value) == false) ) {
+            msg = 'The Request is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+      }
+
+      if ( username.value.length == 0 ) {
+         msg = 'Empty Username.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      checkname = username.value.replace(/[@.]+/g, function(word){
+         return word.substring(1);}
+      );
+      if ( isValidName(checkname) == false ) {
+         msg = 'The Username is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( ddnsPassword.value.length == 0 ) {
+         msg = 'Empty Password.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( isValidPasswordDDNS(ddnsPassword.value) == false ) {
+         msg = 'The Password is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( hostname.value.length == 0 ) {
+         msg = 'The Hostname is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( hostname.value.indexOf('.') == -1 ) {
+         msg = 'The Hostname is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( isValidUrl(hostname.value) == false ) {
+         msg = 'The Hostname is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( hostname.value.indexOf(':') != -1 && hostname.value.indexOf('http://') == -1 ) {
+         msg = 'The Hostname is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( hostname.value.indexOf('http://') != -1 ) {
+         if(hostname.value.charAt(hostname.value.length - 1) == '/'){
+            httpurl = ddnsstatichostname.substring(7,ddnsstatichostname.length -1);
+         }else{
+            httpurl = ddnsstatichostname.substring(7,ddnsstatichostname.length);
+         }
+         hostname.value = httpurl;
+      }
+
+      ddnsEnable.value = "1";
+      password.value = ddnsPassword.value;
+      ddnsPassword.disabled = true;
+      return true;
+   }
+}
+
+function btnApply() {
+   if (btnSave()) {
+      document.forms[0].sessionKey.value = gblsessionKey;
+      document.forms[0].submit();
+   }
+}
+
+function doApply () {
+	with(document.forms[0]){
+		action.value="disable";
+		ddnsEnable.value="0";
+
+		iface.disabled = true;
+		username.disabled = true;
+		password.disabled = true;
+		ddnsPassword.disabled = true;
+		hostname.disabled = true;
+		server.disabled = true;
+		req.disabled = true;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+}
+
+function ddnsChange() {
+   with ( document.forms[0] ) {
+
+      switch( service.selectedIndex ) {
+      case 0: // Disabled
+         document.getElementById("enabled").style.display = 'none';
+         document.getElementById("disabled").style.display = '';
+         break;
+      case 1: // DynDNS
+         document.getElementById("step2").innerHTML = '2. Enter your www.dyndns.com username and password.';
+         document.getElementById("step3").innerHTML = '3. Enter the dynamic DNS host name.';
+         document.getElementById("enabled").style.display = '';
+         document.getElementById("disabled").style.display = 'none';
+         document.getElementById("custom1").style.display = 'none';
+         document.getElementById("custom2").style.display = 'none';
+         break;
+      case 2: // No-IP
+         document.getElementById("step2").innerHTML = '2. Enter your username and password.';
+         document.getElementById("step3").innerHTML = '3. Enter the host name.';
+         document.getElementById("enabled").style.display = '';
+         document.getElementById("disabled").style.display = 'none';
+         document.getElementById("custom1").style.display = 'none';
+         document.getElementById("custom2").style.display = 'none';
+         break;
+      case 3: // Custom
+         document.getElementById("step2").innerHTML = '2. Enter the account information.';
+         document.getElementById("step3").innerHTML = '3. Enter the host name.';
+         document.getElementById("enabled").style.display = '';
+         document.getElementById("disabled").style.display = 'none';
+         document.getElementById("custom1").style.display = '';
+         document.getElementById("custom2").style.display = '';
+         break;
+      }
+   }
+}
+
+function frmLoad() {
+   with (document.forms[0]) {
+      var i = 0;
+      var interfaceInfo = '<%ejGetOther(wanInterfaceInfo, route)%>';
+      var interfaces = interfaceInfo.split('|');
+ 
+      if (interfaceInfo != '') {
+         if (dydnsentry != '') {
+            var info = dydnsentry.split(',');
+            hostname.value = info[0];
+            username.value = info[1];
+            ddnsPassword.value = userpasswd;
+            iface.value = info[2];
+            if (info[5] != 'noip')
+               server.value = info[5];
+            else
+               server.value = '';
+            req.value = info[6];
+            checkServer();
+            if(info[4] == '1'){
+               timeValue = setTimeout('getRefresh()', 5000);
+               if (info[5] == 'noip') {
+                  service.selectedIndex = 2;
+               } else if (info[5].length > 0) {
+                  service.selectedIndex = 3;
+               } else if (info[3] == 'dyndns') {
+                  service.selectedIndex = 1;
+               }
+            }
+			else{
+               clearTimeout(timeValue);
+            }
+         } else {
+            for ( i = 0 ; i < interfaces.length ; i++ ) {
+               var names = interfaces[i].split('/');
+               if (names[0] == 'Default') {
+                  break;
+               }
+            }
+
+            iface.value = names[1];
+            clearTimeout(timeValue);
+         }
+      } else {
+         hostname.disabled = true;
+         username.disabled = true;
+         password.disabled = true;
+         server.disabled = true;
+         req.disabled = true;
+      }
+      ddnsChange();
+   }
+}
+// done hiding -->
+</script>
+</head>
+<body id="advancedsetup_dynamicdns" onLoad='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('dynamicdns');
+</script>
+      </ul>
+      <div id="subnav_footer"></div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+         </div>
+      </div>
+   </div>
+   <div id="content_right">
+      <div id="content_right_header"></div>
+      <div id="content_right_contentarea">
+         <h1 class="advancedsetup_dynamic_dns">Dynamic DNS<span>Dynamic DNS associates the WAN IP address of your router with a host name. Dynamic DNS automatically updates DNS servers upon WAN IP address change. Dynamic DNS (DDNS) is provided thru <a href="http://www.dyndns.com" target="_blank">www.dyndns.com.</a></span></h1>
+         <form action="ddnsmngr.cmd" method="post" onSubmit="return btnSave();">
+            <input type="hidden" name="action" value="update"/>
+            <input type="hidden" name="iface"/>
+            <input type="hidden" name="password"/>
+            <input type="hidden" name="ddnsEnable"/>
+            <input name="sessionKey" type="hidden" id="sessionKey" value=""/>
+            <div class="stepWrapper">
+               <p><strong>1. Select the Dynamic DNS type. </strong> </p>
+               <table>
+                  <tr>
+                     <td width="150">Dynamic DNS:</td>
+                     <td><select name="service" id="service" onChange='ddnsChange()'>
+                             <option value="0" selected="selected">Disabled </option>
+                             <option value="1">DynDNS </option>
+                             <option value="2">No-IP </option>
+                             <option value="3">Custom </option>
+                         </select>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+
+<div id="enabled">
+            <div class="stepWrapper">
+               <p><strong id="step2">2. Enter your www.dyndns.com username and password.</strong></p>
+               <table>
+                  <tr id="custom1">
+                     <td width="150">Dynamic DNS Server: </td>
+                     <td><input class="textInput2" name="server" type="text" size="25" maxlength="127" onChange='checkServer()' /></td>
+                  </tr>
+                  <tr id="custom2">
+                     <td width="150">Request: </label></td>
+                     <td><input class="textInput2" name="req" type="text" size="25" maxlength="63" /></td>
+                  </tr>
+                  <tr>
+                     <td width="150">Username: </td>
+                     <td><input class="textInput2" name="username" type="text" size="25" maxlength="64" /></td>
+                  </tr>
+                  <tr>
+                     <td width="150">Password: </label></td>
+                     <td><input class="textInput2" name="ddnsPassword" id="ddnsPassword" type="password" size="25" maxlength="32" /></td>
+                  </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong id="step3">3. Enter the dynamic DNS host name.</strong></p>
+               <table>
+                  <tr>
+                     <td width="150"><label for="hostname">Host Name:</label> </td>
+                     <td><input class="textInput2" name="hostname" type="text" size="35" maxlength="128" /></td>
+                  </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>4. Click &quot;Apply&quot; to save your changes.</strong></p>
+               <a href="#" class="btn apply_btn" onClick='btnApply();'>Apply</a>
+            </div>
+            <div class="stepWrapperdark">
+              <div id="dynamicDNSinfo">
+               <table>
+                  <tr>
+                     <th colspan="4" class="tableTitle">Dynamic DNS Reporting</th>
+                  </tr>
+                  <tr>
+                     <th width="134">Reported Address</th>                
+                     <th width="141">Date</th>                
+                     <th width="77">Time</th>                
+                     <th width="113"> Report Status</th>
+                  </tr>
+                     <%ejGetOther(getddnsinfo)%>
+               </table>
+              </div>
+            </div>
+</div>
+
+<div id="disabled">
+            <div class="stepWrapper">
+               <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+               <a href="#" class="btn apply_btn" onClick="doApply()" id="apply_btn">Apply</a>
+            </div>
+</div>
+
+         </form>
+      </div>
+
+   </div>
+   &nbsp;
+   <p></p>
+   <div class="clear_left"></div>
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

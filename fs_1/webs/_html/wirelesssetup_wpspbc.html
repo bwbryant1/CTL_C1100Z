@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Wireless Setup - WPS</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">Qwest&reg; Modem Configuration ZyXEL C1000Z</h1>
+        <a href="http://www.qwest.com" id="qwest_link" target="_blank">Qwest.com</a>
+		<ul id="navigation_left">
+			<li class="modemstatus"><a href="modemstatus_home.html">Modem Status</a></li>
+			<li class="quicksetup"><a href="quicksetup.html">Quick Setup</a></li>
+			<li class="wirelesssetup"><a href="wirelesssetup_basicsettings.html" id="selected">Wireless Setup</a></li>
+			<li class="utilities"><a href="utilities_reboot.html">Utilities</a></li>
+			<li class="advancedsetup"><a href="advancedsetup_accessscheduler.html">Advanced Setup</a></li>
+		</ul>
+		<ul id="navigation_right">
+            <li class="helplink"><a href="help.html" title="Click here to launch">help</a></li>
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>  
+        </ul>	
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+		<div id="subnav_header"></div>
+		<ul id="subnav">
+			<li><a href="wirelesssetup_basicsettings.html" class="link">Basic Settings</a></li>
+			<hr />
+            <li><a href="wirelesssetup_wirelesssecurity.html" class="link">Wireless
+                Security</a></li>
+            <hr />
+            <li><a href="wirelesssetup_radiosetup.html" class="link">Radio Setup</a></li>
+            <hr />
+            <li><a href="wirelesssetup_ssidsetup.html" class="link">SSID Setup</a></li>
+            <hr />
+            <li><a href="wirelesssetup_wirelessmacauthentication.html" class="link">MAC
+                Authentication</a></li>
+            <hr />
+            <li><a href="wirelesssetup_wps.html" class="link" id="selected">WPS</a></li>
+            <hr />
+            <li><a href="wirelesssetup_wmm.html" class="link">WMM</a></li>
+            <hr />
+            <li><a href="wirelesssetup_8021x.html" class="link">802.1x</a></li>
+		</ul>
+		<div id="subnav_footer"></div>
+		<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!--hide
+WriteConnectionStatus();
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+	<div id="content_right">
+		
+		<div id="content_right_contentarea">
+			<h1 class="wirelesssetup_wps">WPS (Wi-Fi Protected Setup) <span>WPS provides an easy and secure way to establish a wireless 
+				  network by sharing the wireless key between the modem and wireless
+				  client.</span></h1>
+			<form>
+				 <div class="stepWrapper">
+				<p><strong>1. Set the WPS state. </strong> </p>
+				<table>
+                    <tr>
+                        <td width="150">WPS:
+                    </td>
+                    <td>
+                        <label><input name="wps_state" id="wps_state_enable" type="radio" value="enable" checked="checked" />
+        Enable</label>
+                    </td>
+                    <td>
+                        <label><input name="wps_state" id="wps_state_disable" type="radio" value="disable" />
+        Disable</label>
+                    </td>
+                  </tr>
+                </table>
+				</div>
+                 <div class="stepWrapper">
+				<p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+				<p><a href="#" class="btn apply_btn"></a></p>
+				<h2 class="inlineheader">Connecting a device with WPS </h2>
+				<p><strong>1. Select the WPS security type. </strong> </p>
+				<table>
+                    <tr>
+                        <td width="150"><label for="wps_type">WPS Type:</label></td>
+                        <td><select name="wps_type" id="wps_type">
+                                <option value="Push Button" selected="selected">Push Button (PBC)</option>
+                                <option value="AP Pin">AP PIN</option>
+                                <option value="End Device Pin">End Device PIN</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+				</div>
+                 <div class="stepWrapper">
+				<p><strong>2. Select connect below to initiate a WPS connection in the modem. </strong> </p>
+				<div align="justify"><a href="#" id="connect_btn" class="btn" style="margin:0 auto; float:none;"></a>
+                </div>
+			  </div>
+               <div class="stepWrapper">
+                <p align="left"><strong>3. Select connect on your device. The
+                    device will show up in the &nbsp;&nbsp;&nbsp;&nbsp;WPS device
+                    list below when connected.</strong> </p>
+                <p align="center"><strong>W</strong><strong>PS Device List: </strong></p>
+                <table>
+                    <tr>
+						<th>Name</th>
+						<th>IP Address</th>
+						<th>WPS Type</th>
+						<th>WPS State</th>
+						<th>Edit</th>
+                    </tr>
+					<tr>
+						<td>Motorola Cell </td>
+						<td>192.168.0.67</td>
+						<td>PBC</td>
+						<td>Connected</td>
+						<td width="80"><a href="#" class="btn remove_btn"></a></td>
+					</tr>
+					<tr>
+						<td>Paul Laptop </td>
+						<td>N/A</td>
+						<td>AP PIN</td>
+						<td class="greentext">Associating</td>
+						<td width="80"><a href="#" class="btn remove_btn"></a></td>
+					</tr>
+					<tr>
+						<td>Desktop</td>
+						<td>N/A</td>
+						<td>END DEVICE PIN</td>
+						<td class="redtext">Incorrect PIN</td>
+						<td width="80"><a href="#" class="btn remove_btn"></a></td>
+					</tr>
+				</table>
+				</div>
+			</form>
+		</div>
+		
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">All trademarks are property of their respective owners.<br > Copyright &copy; 2010 Qwest. All Rights Reserved.</div>
+</div>
+</body>
+</html>

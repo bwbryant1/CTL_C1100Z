@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script>
+
+var oldHighBytes = 0;
+var oldBestBytes = 0;
+
+function updateQostableInfo (req, init)
+{
+	if (init == 1)
+		var QostableInfo=req;
+	else
+		var QostableInfo=req.responseText;
+        
+	if ( QostableInfo != "" && QostableInfo != null ) {
+		QostableInfos = QostableInfo.split('|');
+		if ( QostableInfos.length == 8 ) {
+			if (init == 1) {
+				oldHighBytes = parseInt(QostableInfos[1]);
+				oldBestBytes = parseInt(QostableInfos[5]);
+				document.getElementById("uprate1").innerHTML = "0 Kbps";
+				document.getElementById("bestuprate").innerHTML = "0 Kbps";
+			} else {
+				var uprate = (parseInt(QostableInfos[1]) - oldHighBytes) / 5000;
+				document.getElementById("uprate1").innerHTML = parseInt(uprate) + " Kbps";
+				var bestuprate = (parseInt(QostableInfos[5]) - oldBestBytes) / 5000;
+				document.getElementById("bestuprate").innerHTML = parseInt(bestuprate) + " Kbps";
+			}
+
+			document.getElementById("upsend1").innerHTML = QostableInfos[0];
+			document.getElementById("downsend1").innerHTML = QostableInfos[2];
+			document.getElementById("updrop1").innerHTML = "0";
+			document.getElementById("bestupsend").innerHTML = QostableInfos[4];
+			document.getElementById("bestdownsend").innerHTML = QostableInfos[6];
+			oldHighBytes = parseInt(QostableInfos[1]);
+			oldBestBytes = parseInt(QostableInfos[5]);
+			//document.getElementById("uprate1").innerHTML = QostableInfos[0];
+			//document.getElementById("upsend1").innerHTML = QostableInfos[1];
+			//document.getElementById("updrop1").innerHTML = QostableInfos[2];
+			//document.getElementById("uprate2").innerHTML = QostableInfos[3];	
+			//document.getElementById("upsend2").innerHTML = QostableInfos[4];
+			//document.getElementById("updrop2").innerHTML = QostableInfos[5];	
+			//document.getElementById("uprate3").innerHTML = QostableInfos[6];
+			//document.getElementById("upsend3").innerHTML = QostableInfos[7];
+			//document.getElementById("updrop3").innerHTML = QostableInfos[8];
+			//document.getElementById("uprate4").innerHTML = QostableInfos[9];
+			//document.getElementById("upsend4").innerHTML = QostableInfos[10];			
+			//document.getElementById("updrop4").innerHTML = QostableInfos[11];		
+			//document.getElementById("downrate1").innerHTML = QostableInfos[12];			
+			//document.getElementById("downsend1").innerHTML = QostableInfos[13];			
+			//document.getElementById("downdrop1").innerHTML = QostableInfos[14];
+			//document.getElementById("downrate2").innerHTML = QostableInfos[15];
+			//document.getElementById("downsend2").innerHTML = QostableInfos[16];
+			//document.getElementById("downdrop2").innerHTML = QostableInfos[17];
+			//document.getElementById("downrate3").innerHTML = QostableInfos[18];
+			//document.getElementById("downsend3").innerHTML = QostableInfos[19];
+			//document.getElementById("downdrop3").innerHTML = QostableInfos[20];
+			//document.getElementById("downrate4").innerHTML = QostableInfos[21];
+			//document.getElementById("downsend4").innerHTML = QostableInfos[22];
+			//document.getElementById("downdrop4").innerHTML = QostableInfos[23];      
+// done hiding -->
+		}
+	}
+	//__QWEST__,peterwang, sync with ModemqostableStatus().
+	ItselfTimer = setTimeout('updateValue_take()', 5000);
+	isItselfTimerWork = true;
+}
+
+function updateValue_take()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)  { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+		else if (window.ActiveXObject)  { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("POST","./GetQosTableInfo.html",true);
+    objXMLHTTP.onreadystatechange = function() 
+    {
+			if(objXMLHTTP.readyState == 4)
+			      	updateQostableInfo(objXMLHTTP, 0);
+    }
+		objXMLHTTP.send(null);
+	}
+}
+
+function frmLoad() {
+	var qostable = '<%ejGetOther(QosTable, all)%>';
+	updateQostableInfo(qostable, 1);
+	updateValue_take();
+}
+
+function modifyRateFormat(rate)
+{
+	var tmp = rate;
+	if (tmp.indexOf("K") >= 0)
+		tmp = rate.replace("K", "&nbsp;K");
+	else if (tmp.indexOf("M") >= 0)
+		tmp = tmp.replace("M", "&nbsp;M");
+	else
+		tmp = tmp.concat("&nbsp;");
+	return tmp;
+}
+</script>
+</head>
+
+<body id="modemstatus_qostable" onload='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('qostable','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+      </ul>
+      <div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+   </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_iptrafficqos"> QoS Table <span> Displays traffic information on a queue basis.</span></h1>
+			  <div class="stepWrapper">
+				<p><strong>High Priority</strong></p>
+				<table>
+                  <tr>
+                    <th width="225"><strong>Parameter </strong></th>
+                    <th>
+                        <strong>Status</strong></th>
+                  </tr>
+                  <tr>
+                    <td>Real Time Queue Rate:</td>
+                    <td align="center"><span id="uprate1"></span>
+                   </td>
+                  </tr>
+                  <tr>
+                    <td width="225">Downstream Packets Sent:</td>
+                    <td align="center"><span id="downsend1"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="225">Upstream Packets Sent:</td>
+                    <td align="center"><span id="upsend1"></span>
+                   </td>
+                  </tr>
+                  <tr>
+                    <td width="225">High Priority Packets Blocked:</td>
+                    <td align="center"><span id="updrop1"></span>
+                   </td>
+                  </tr>
+                </table>
+			  </div>
+			  <div class="stepWrapper">
+				<p><strong>Best Effort</strong></p>
+				<table>
+                  <tr>
+                    <th width="225"><strong>Parameter </strong></th>
+                    <th>
+                        <strong>Status</strong></th>
+                  </tr>
+                  <tr>
+                    <td>Real Time Queue Rate:</td>
+                    <td align="center"><span id="bestuprate"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="225">Downstream Packets Sent:</td>
+                    <td align="center"><span id="bestdownsend"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="225">Upstream Packets Sent:</td>
+                    <td align="center"><span id="bestupsend"></span></td>
+                  </tr>
+                </table>
+			  </div>
+                <div class="stepWrapper" style="display:none">
+				<p><strong>Medium Priority</strong></p>
+				<table>
+                  <tr>
+                    <th width="225"><strong>Parameter </strong></th>
+                    <th><strong>Status</strong></th>
+                  </tr>
+                  <tr>
+                    <td>Real Time Queue Rate:</td>
+                    <td align="center"><span id="uprate2"></span>
+                   </td>
+                  </tr>
+                  <tr>
+		    <td>Downstream Packets Sent:</td>
+		    <td align="center"><span id="downsend2"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Upstream Packets Sent:</td>
+                    <td align="center"><span id="upsend2"></span>
+                   </td>
+                  </tr>
+                  <tr>
+                    <td>Medium Priority Packets Blocked:</td>
+                    <td align="center"><span id="updrop2"></span>
+                   </td>
+                  </tr>   
+                </table></div>
+                 <div class="stepWrapper" style="display:none">
+                 <p><strong>Low Priority</strong></p>
+                <table>
+                  <tr>
+                    <th width="225"><strong>Parameter </strong></th>
+                    <th><strong>Status</strong></th>
+                  </tr>
+                  <tr>
+                    <td>Real Time Queue Rate:</td>
+                    <td align="center"><span id="uprate3"></span>
+                   </td>
+                  </tr>
+		  <tr>
+		    <td>Downstream Packets Sent:</td>
+		    <td align="center"><span id="downsend3"></span></td>
+	          </tr>
+                  <tr>
+                    <td>Upstream Packets Sent:</td>
+                    <td align="center"><span id="upsend3"></span>
+                   </td>
+                  </tr>
+                  <tr>
+                    <td>Low Priority Packets Blocked:</td>
+                    <td align="center"><span id="updrop3"></span>
+                   </td>
+                  </tr>            
+                </table></div>
+			</div>
+			
+		</div>
+		<div class="clear_left">
+		  <p>&nbsp;</p>
+		  <p>&nbsp;</p>
+		</div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

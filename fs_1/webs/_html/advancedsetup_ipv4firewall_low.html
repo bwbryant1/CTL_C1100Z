@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var lanInfo= "<%ejGetOtherBig(unnumlistinfo)%>";
+var max_entry=50;
+var publiclanInfo= "<%ejGetOtherBig(publiclanList)%>";
+
+function frmLoad() 
+{
+  var stealthmode = '<%ejGetOther(sysInfo, enblFWStealth)%>';	
+  with ( document.forms[0] )
+  {
+     var type='<%ejGet(FirewallType)%>';
+     firewall_security_level.value = 'low';
+     if(type=='')
+	 	type= "Private";
+     select2.value=type;
+     if ( stealthmode == '1' ) {
+		stealth[0].checked = true;
+     }
+     else if ( stealthmode == '0' ) {
+		stealth[1].checked = true;
+     }
+     else {
+		stealth[0].checked = true;
+		stealth[0].disabled = true;
+		stealth[1].disabled = true;
+     } 	 
+  }
+}
+function btnApply() {
+ 
+  with ( document.forms[0] ) {
+  		var x=document.getElementById("FirewallPage");
+   		x.action= 'fwsetting.cmd';
+		fwlevel.value = 'Low'
+  }
+  document.forms[0].sessionKey.value = gblsessionKey;
+  document.forms[0].submit();  
+}
+function encapChange()
+{
+  with ( document.forms[0] ) 
+  {
+   FirewallType.value= select2.value;
+   FirewallLog.value='1';
+  }
+  document.forms[0].submit();
+}
+
+function radioChange()
+{
+   with ( document.forms[0] ) 
+   {
+      var x=document.getElementById("FirewallPage");  
+      if(firewall_security_level.value == 'low'){
+      	 	x.action= 'advancedsetup_ipv4firewall_low.cgi';
+		FirewallType.value= select2.value;
+      }else if(firewall_security_level.value == 'medium'){
+	 	x.action= 'advancedsetup_ipv4firewall_medium.cgi';
+		FirewallType.value= select2.value;
+      }else if(firewall_security_level.value == 'high'){
+        	x.action= 'advancedsetup_ipv4firewall_high.cgi';
+		FirewallType.value= select2.value;
+      }else{
+	 x.action= 'advancedsetup_ipv4firewall.cgi';
+	 FirewallType.value= select2.value;
+   	 FirewallLog.value='2';
+      }
+	 document.forms[0].submit();
+   }
+}
+function prebtnApply()
+{
+	with ( document.forms[0] )
+	{
+		if(FTP_in.checked == false)
+			tmpFTP_in.value = "1";
+		if(FTP_out.checked == false)
+			tmpFTP_out.value = "1";
+			
+		if( (firewall_security_level.value == 'low') || (firewall_security_level.value == 'medium') || (firewall_security_level.value == 'high') ){		
+			AlertOpen('Enabling the firewall blocks inbound and outbound traffic for certain applications.  Port forwarding rules can be configured to forward application traffic.', btnApply);
+			return
+		}
+		btnApply();
+	}
+}
+// done hiding -->
+</script>
+</head>
+<body onLoad='frmLoad()' id="advancedsetup_ipv4firewall">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+			<script language="javascript">
+				WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+			</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		<div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left">
+    </div>
+    <div id="content_left">
+        <ul id="subnav">
+			<script language="javascript">
+				WriteAdvancedSetupMenuHeader('ipv4firewall');
+			</script>
+		</ul>
+                <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_ipv4firewall">IPv4 Firewall<span> Activating the firewall is optional. When the firewall is activated, security is enhanced, but some network functionality will be lost. </span></h1>
+            <form id="FirewallPage" action="advancedsetup_ipv4firewall.cgi" method="post">
+			  	<input type="hidden" name="FirewallType" id="FirewallType">
+			  	<input type="hidden" name="FirewallLog" id="FirewallLog">
+			  	<input type="hidden" name="fwlevel" id="fwlevel">
+			  	<input type="hidden" name="inblklist" id="inblklist" value="">
+			  	<input type="hidden" name="outblklist" id="outblklist" value="">
+				<input type="hidden" name="tmpFTP_in" id="tmpFTP_in" value="0">
+				<input type="hidden" name="tmpFTP_out" id="tmpFTP_out" value="0">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+                <div class="stepWrapper">
+                <p><strong>1. Set the stealth mode state.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Stealth Mode: </td>
+                        <td><label>
+                            <input name="stealth" id="stealth" type="radio" value="1" />
+                            Enable</label>
+                        </td>
+                        <td><input name="stealth"  id="stealth" type="radio" value="0"/>
+                            Disable </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>2. Select the IP address or IP addressing type to which the firewall rules should apply.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Addressing Type: </td>
+                        <td><select name="select2" id="select2" onChange="encapChange()">
+                                <option value="Private">All Dynamic IP Addresses</option>
+                  		    <option value="Public">All Static IP Addresses</option>
+<script language="javascript">
+<!-- hide
+var items= lanInfo.split("|");
+for (i = 0 ; i < items.length ; i++) {
+	if((items[i]!="0.0.0.0")&&(items[i]!=""))
+         document.writeln("<option value="+items[i]+">"+items[i]);
+	
+    }
+/* Show up the public lan subnet */
+var item_public_lan= publiclanInfo.split("|");
+for (j = 0 ; j < item_public_lan.length ; j++) {
+	if((item_public_lan[j]!="0.0.0.0")&&(item_public_lan[j]!=""))
+         document.writeln("<option value="+item_public_lan[j]+">"+item_public_lan[j]);
+	
+}
+// done hiding -->
+</script>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>3. Select the Firewall Security Level.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Security Level: </td>
+                        <td><select name="firewall_security_level" id="firewall_security_level" onChange='radioChange()'>
+                                <option value="off">Disabled </option>
+                                <option value="low">Low </option>
+                                <option value="medium">Medium </option>
+                                <option value="high">High </option>
+                            </select></td>
+                        <td width="102">&nbsp;</td>
+                    </tr>
+                </table>
+                      <a href="advancedsetup_firewall_usernew.html" class="btn createrule_btn">Create Rule</a>
+                </div>
+                    <div class="stepWrapper">                    
+                    <p><strong>4. Set the firewall table below. Services checked are allowed. (optional)</strong></p>                    
+                    <table>
+                    		<tr>                            
+                    			<th>Service</th>                            
+                    			<th>Service Type </th>                            
+                    			<th>Service Port </th>                            
+                    			<th>Traffic In </th>                            
+                    			<th>Traffic Out </th>                        
+                    		</tr>
+                    		<%ejGetOtherBig(firewallTable,low)%>
+                    	</table>
+                    </div>	
+                    <div class="stepWrapper">
+                    <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+                    <a href="#" class="btn apply_btn" onclick="prebtnApply()">Apply</a>                    
+                </div>               
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

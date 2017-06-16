@@ -1,0 +1,764 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+
+var dhcpStart = '<%ejGet(dhcpEthStart)%>';
+var dhcpEnd = '<%ejGet(dhcpEthEnd)%>';
+var mode = '<%ejGet(usePublicIP)%>';
+var publicDhcpStart = '<%ejGet(publicDhcpEthStart)%>';
+var publicDhcpEnd = '<%ejGet(publicDhcpEthEnd)%>';
+var dhcpLease = '<%ejGet(dhcpLeasedTime)%>';
+var dhcpEnbl = '<%ejGet(enblDhcpSrv)%>';
+var oldSubnetMask = '<%ejGet(ethSubnetMask)%>';
+var ipAddress = '<%ejGet(ethIpAddress)%>';
+var oldEthIpAddress = '<%ejGet(ethIpAddress)%>';
+var lan2IpAddress = '<%ejGet(lan2IpAddress)%>';
+var lan2SubnetMask = '<%ejGet(lan2SubnetMask)%>';
+var proto = '<%ejGetOther(sysInfo, noBrPrtcl)%>';
+var dhcpReservation = '<%ejGet(enblDhcpReservation)%>';
+var dnsInfo = '<%ejGet(lanDnsServer)%>';
+var wlDomain = new Array( "<%ejGetWl(wlDomain1)%>", "<%ejGetWl(wlDomain2)%>", "<%ejGetWl(wlDomain3)%>" );
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var dns2 = '<%ejGetOther(sysInfo, dns2)%>';
+
+
+$(function(){
+	if(dhcpEnbl == '1'){
+		$('#enabled').attr("checked", "checked");
+
+	}else{
+		$('#disabled').attr("checked", "checked");
+	}
+		function EnableDisable(){
+		var checkAble = function(){
+			if($('input#enabled').is(':checked')){
+				$('.showenable').show();
+				$('.showdisable').hide();
+			} else {
+				$('.showenable').hide();
+				$('.showdisable').show();
+			}		
+		}
+		$('input#enabled, input#disabled').click(function(){
+			checkAble();
+		});
+		checkAble();
+	}
+	EnableDisable();
+});
+
+function highlight(field) {
+   field.focus();
+   field.select();
+}
+
+function setDhcpAddresses() {
+   var ipArr = [0, 0, 0, 0],  maskArr = [0, 0, 0, 0], startArr = [0, 0, 0, 0],  endArr = [0, 0, 0, 0];
+   
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+      
+      lanIp = ethIpAddress.value;
+      subnetMask = ethSubnetMask.value;
+      var msg = "";
+      if ( isValidIpAddress(lanIp) == false ) {
+         // alert('Address "' + lanIp + '" is invalid IP address.');
+         msg = 'The modem IP address entered in step 2 is invalid.';
+         AlertOpen(msg);
+         return;
+      }
+      if ( isValidIpAddress(subnetMask) == false ) {
+         // alert('Address "' + subnetMask + '" is invalid IP address.');
+         msg = 'The subnetmask entered in step 2 is invalid.';
+         AlertOpen(msg);
+         return;
+      }      
+      addrParts = lanIp.split('.');
+      maskParts = subnetMask.split('.');       
+      if ( addrParts.length != 4 || maskParts.length != 4) {
+         msg = 'The Modem IP Address or Modem Subnet Mask is invalid.';
+         AlertOpen(msg);
+         return;
+      }         
+      for (i = 0; i < 4; i++) {
+        ipArr[i] = parseInt(addrParts[i]);
+        startArr[i] = parseInt(addrParts[i]);
+        endArr[i] = parseInt(addrParts[i]);
+        maskArr[i] = parseInt(maskParts[i]);
+      }
+      m3 = maskArr[3];
+      bcast = 255;
+      n3 = 0;
+/*
+      if (maskArr[0] == 255 && maskArr[1] == 0 &&  maskArr[2] == 0 && maskArr[3] == 0) {
+        // 255.0.0.0 is only class A supported
+        endArr[1] = 255;
+        endArr[2] = 255;
+      }
+      else if (maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 0 && maskArr[3] == 0) 
+        // 255.255.0.0 is only class B supported
+        endArr[2] = 255;
+      else */ if ((maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 255 ) &&
+               (m3 == 0 || m3 == 128 || m3 == 192 || m3 == 224 || m3== 240 || m3 == 248 ||  m3 == 252)) {
+        // 255.255.255.0/128/192... class C supported
+        n3 = ipArr[3] & m3;
+        hosts = 255 - m3;
+        bcast = n3 + hosts;
+      }
+      else {
+        // alert("Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.");
+        // msg = "Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.";
+        msg = "Only support subnet mask: Class C: 255.255.255.0/255.255.255.128/<br>255.255.255.192/255.255.255.224/<br>255.255.255.240/255.255.255.248/<br>255.255.255.252.";
+        AlertOpen(msg);
+        return;         
+      }
+      if (ipArr[3] == bcast) {
+        // alert('Ip address cannot be same as the broadcast ip address.');
+        msg = 'The Modem IP Address cannot be same as the broadcast IP address.';
+        AlertOpen(msg);
+        return;
+      }
+      tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";      
+      for (i = 0; i < 3; i++) {
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[i] + ".";
+      }
+      if (ipArr[3] == (bcast-1)) {
+        startArr[3] = n3 + 1;
+        endArr[3] = bcast -2;
+      }
+      else {
+        startArr[3] = ipArr[3] + 1;
+        endArr[3] = bcast -1;
+      }      
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[3];
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[3];
+   }
+}
+
+function changeEthEnd(ip) {
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+
+      if ( isValidIpAddress(ip) == false ) {
+		 AlertOpen('The beginning DHCP IP address entered in step 2 is invalid.');
+         return;
+      }
+
+      if (ethIpAddress.value == ip) {
+		 AlertOpen('The Beginning IP Address cannot be the same as the modem IP address. Please enter a valid IP address.');
+         return;
+      }
+
+      addrParts = ip.split('.');
+      endParts = tmpDhcpEthEnd.value.split('.');
+      ipParts = ethIpAddress.value.split('.');
+
+      if ( addrParts.length != 4 )
+         return false;
+
+      t1 = parseInt(addrParts[3]);
+      t2 = parseInt(endParts[3]);
+      t3 = parseInt(ipParts[3]);
+
+      if (tmpDhcpEthStart.value != '' && t1 >= 255) {
+         AlertOpen("Last portion of IP Address has to be less than 254 for Enabled DHCP Server");
+         return false;
+      }
+
+      if (t3 > t1 && t3 < t2)
+      {
+         AlertOpen("Modem IP Address cannot be between Beginning IP Address and Ending IP Address.");
+         return false;
+      }
+
+      ethIpAddress.value = tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + addrParts[i] + ".";
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + addrParts[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + addrParts[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + t3;
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + t1;
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + t2;
+   }
+}
+
+function changeEthStart(ip) {
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+
+      if ( isValidIpAddress(ip) == false ) {
+		 AlertOpen('The ending DHCP IP address entered in step 2 is invalid.');
+         return;
+      }
+
+      if (ethIpAddress.value == ip) {
+         AlertOpen('The Ending IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+         return;
+      }
+
+      addrParts = ip.split('.');
+      startParts = tmpDhcpEthStart.value.split('.');
+      ipParts = ethIpAddress.value.split('.');
+
+      if ( addrParts.length != 4 )
+         return;
+      t1 = parseInt(addrParts[3]);
+      t2 = parseInt(startParts[3]);
+      t3 = parseInt(ipParts[3]);
+
+      if (tmpDhcpEthStart.value != '' && t1 >= 255) {
+         AlertOpen("Last portion of IP Address has to be less than 254 for Enabled DHCP Server");
+         return;
+      }
+
+      if (t3 > t2 && t3 < t1)
+      {
+         AlertOpen("Modem IP Address cannot be between Beginning IP Address and Ending IP Address.");
+         return false;
+      }
+
+      ethIpAddress.value = tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + addrParts[i] + ".";
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + addrParts[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + addrParts[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + t3;
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + t2;
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + t1;
+   }
+}
+
+function changeleasetime() {  
+   with ( document.forms[0] ) {
+
+	 var reg = /^[0-9]*$/;
+     if(reg.test(day.value) == false || reg.test(hour.value) == false || reg.test(minute.value) == false) {
+        AlertOpen('The DHCP lease time entered in step 3 is invalid.');
+        return false;
+	 }
+
+     var tmpDay = parseInt(day.value, 10);
+     var tmpHour = parseInt(hour.value, 10);
+     var tmpMinute = parseInt(minute.value, 10);
+
+     if (isNaN(tmpDay) || tmpDay > 365) {
+        AlertOpen('The DHCP lease time entered in step 3 is invalid.');
+        return false;
+     }
+     if (isNaN(tmpHour) || tmpHour > 23) {
+        AlertOpen('The DHCP lease time entered in step 3 is invalid.');
+        return false;
+     }
+     if (isNaN(tmpMinute) || tmpMinute > 59) {
+        AlertOpen('The DHCP lease time entered in step 3 is invalid.');
+        return false;
+     }
+
+     dhcpLeasedTime.value = ((((parseInt(day.value) * 24) + parseInt(hour.value)) * 60) + parseInt(minute.value)) * 60;
+     if (dhcpLeasedTime.value < 60) {
+        AlertOpen('The Lease Time is zero. Please enter a valid Lease Time.');
+        return false;
+     }
+
+   }
+}
+
+function dhcpTypeChange() {
+   with ( document.forms[0] ) {
+      if (enblDhcpSrv[0].checked == true) {
+         tmpDhcpEthStart.disabled = false;
+         tmpDhcpEthEnd.disabled = false;
+
+         if (mode == '1') {
+            minute.disabled = true;
+            hour.disabled = true;
+            day.disabled = true;
+         } else {
+            minute.disabled = false;
+            hour.disabled = false;
+            day.disabled = false;
+          }
+      } else {
+         tmpDhcpEthStart.disabled = true;
+         tmpDhcpEthEnd.disabled = true;
+         minute.disabled = true;
+         hour.disabled = true;
+         day.disabled = true;
+      }
+   }
+}
+
+function DNSTypeChange() {
+   with ( document.forms[0] ) {
+      if (dnsType[0].checked == true) {
+         dns_server_1.disabled = true;
+         dns_server_2.disabled = true;
+         $('.dns_group').hide();
+      } else {
+         dns_server_1.disabled = false;
+         dns_server_2.disabled = false;
+         $('.dns_group').show();
+      }
+   }
+}
+
+function frmLoad() {
+   with ( document.forms[0] ) {
+	  
+      if ( dhcpEnbl == '1' ) {
+         enblDhcpSrv[0].checked = true;
+         enblDhcpSrv[1].checked = false;
+      } else {
+         enblDhcpSrv[0].checked = false;
+         enblDhcpSrv[1].checked = true;
+      }
+
+      ethIpAddress.value = ipAddress;
+      if (mode == '1') {
+         ethIpAddress.disabled = true;
+         ethSubnetMask.disabled = true;
+         minute.disabled = true;
+         hour.disabled = true;
+         day.disabled = true;
+
+         tmpDhcpEthStart.value = publicDhcpStart;
+         tmpDhcpEthEnd.value = publicDhcpEnd;
+         ethSubnetMask.value = lan2SubnetMask;
+      } else {
+         tmpDhcpEthStart.value = dhcpStart;
+         tmpDhcpEthEnd.value = dhcpEnd;
+         ethSubnetMask.value = oldSubnetMask;
+
+         dhcpTypeChange();
+      }
+
+      var time = parseInt(dhcpLease);
+      time = time / 60;
+      minute.value = time % 60;
+      time = (time - (time % 60)) / 60;
+      hour.value = time % 24;
+      time = (time - (time % 24)) / 24;
+      day.value = time;
+
+      if (dhcpReservation == '1')
+         enblDhcpReservation[0].checked = true;
+      else
+         enblDhcpReservation[1].checked = true;
+
+      var dnsServer = dnsInfo.split(',');
+      if (dnsServer[0] == '0.0.0.0' && dnsServer[1] == '0.0.0.0') {
+         dnsType[1].checked = false;
+         dnsType[0].checked = true;
+		 dns_server_1.value = ipAddress;
+		 dns_server_2.value = dns2;
+      } else {
+         dnsType[1].checked = true;
+         dnsType[0].checked = false;
+		 dns_server_1.value = dnsServer[0];
+		 dns_server_2.value = dnsServer[1];
+      }
+      
+      DNSTypeChange();
+   }
+}
+
+function btnSave() {
+   with ( document.forms[0] ) {
+      /*if ( enblDhcpSrv[0].checked == true ) {
+         if (proto == 'Bridge') {
+            AlertOpen('There is only a bridged interface. Do not enable DHCP server.');
+            return false;
+         }
+      }*/
+	  
+//__MSTC__, Loujia 0909 divis "Default" and other group S_
+      brName.value="Default";
+//__MSTC__, Loujia 0909 divis "Default" and other group E_  
+
+      var msg = "";
+      if ( isValidIpAddress(ethIpAddress.value) == false ) {
+         msg = 'The modem IP address entered in step 2 is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if ( isValidSubnetMask(ethSubnetMask.value) == false ) {
+         msg = 'The subnetmask entered in step 2 is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      var lan_ip = ethIpAddress.value.split('.');
+      var lan_mask = ethSubnetMask.value.split('.');
+      var vip_ip = lan2IpAddress.split('.');
+      var vip_mask = lan2SubnetMask.split('.');
+      var lanDomain = new Array(2);
+
+      lanDomain[0] = "";
+      lanDomain[1] = "";
+      for (var i = 0 ; i < 4 ; i++) {
+         lanDomain[0] += lan_ip[i] & lan_mask[i];
+         lanDomain[1] += vip_ip[i] & vip_mask[i];
+         if (i != 3) {
+            lanDomain[0] += '.';
+            lanDomain[1] += '.';
+         }
+      }
+      if ((lanDomain[0] == wlDomain[0]) || (lanDomain[0] == wlDomain[1]) || lanDomain[0] == wlDomain[2] ||
+          (lanDomain[0] == lanDomain[1])) {
+         AlertOpen('The Modem IP address is used for other interface. Please enter a valid Modem IP Address.');
+         return false;
+      }
+
+      if (dnsType[1].checked == true) {
+         if ( isValidIpAddress(dns_server_1.value) == false ) {
+            msg = 'The Primary DNS IP Address is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+
+         if ( isValidIpAddress(dns_server_2.value) == false ) {
+            msg = 'The Secondary DNS IP Address is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+
+         if (dns_server_1.value == dns_server_2.value) {
+            AlertOpen('The Primary DNS IP is the same as the Secondary DNS IP Address.');
+            return false;
+         }
+
+         var dnsValue = dns_server_1.value + ',' + dns_server_2.value;
+         lanDnsServer.value = dnsValue;
+      } else {
+         lanDnsServer.value = "0.0.0.0,0.0.0.0";
+      }
+
+      if (mode == '0') {
+         if (isValidIpAddress(tmpDhcpEthStart.value) == false || 
+            !(isSameSubNet(ethIpAddress.value, ethSubnetMask.value, tmpDhcpEthStart.value, ethSubnetMask.value))) {
+            AlertOpen('The Beginning IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+         if (tmpDhcpEthStart.value == ethIpAddress.value) {
+            AlertOpen('The Beginning IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+            return false;
+         }
+
+         if ( isValidIpAddress(tmpDhcpEthEnd.value) == false ||
+            !(isSameSubNet(ethIpAddress.value, ethSubnetMask.value, tmpDhcpEthEnd.value, ethSubnetMask.value))) {
+            AlertOpen('The Ending IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+         if (tmpDhcpEthEnd.value == ethIpAddress.value) {
+            AlertOpen('The Ending IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+            return false;
+         }
+
+         var startAddr = tmpDhcpEthStart.value.split('.');
+         var endAddr = tmpDhcpEthEnd.value.split('.');
+         var startLast = parseInt(startAddr[3]);
+         var endLast = parseInt(endAddr[3]);
+         if (endLast < startLast) {
+            AlertOpen('The Ending IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+
+         var tmpDay = parseInt(day.value);
+         var tmpHour = parseInt(hour.value);
+         var tmpMinute = parseInt(minute.value);
+         if (isNaN(tmpDay) || tmpDay > 365) {
+            AlertOpen('The Day(s) is invalid. Please enter a valid Day(s) which is located from 0 to 365.');
+            return false;
+         }
+         if (isNaN(tmpHour) || tmpHour > 23) {
+            AlertOpen('The Hours is invalid. Please enter a valid Hours which is located from 0 to 23.');
+            return false;
+         }
+         if (isNaN(tmpMinute) || tmpMinute > 59) {
+            AlertOpen('The Minutes is invalid. Please enter a valid Minutes which is located from 0 to 59.');
+            return false;
+         }
+
+         dhcpLeasedTime.value = ((((parseInt(day.value) * 24) + parseInt(hour.value)) * 60) + parseInt(minute.value)) * 60;
+         if (dhcpLeasedTime.value < 60) {
+            AlertOpen('The Lease Time is zero. Please enter a valid Lease Time.');
+            return false;
+         }
+
+         dhcpEthStart.value = tmpDhcpEthStart.value;
+         dhcpEthEnd.value = tmpDhcpEthEnd.value;
+
+         if (!isSameSubNet(ethIpAddress.value, ethSubnetMask.value, oldEthIpAddress, oldSubnetMask) ||
+            ethIpAddress.value != oldEthIpAddress || ethSubnetMask.value != oldSubnetMask) {
+            comStr = "The Modem IP address or subnet mask is changed. Are you sure you want to apply?";
+            ConfirmOpen(comStr, goSubmit);
+            return false;
+         } else {
+            day.disabled = true;
+            hour.disabled = true;
+            minute.disabled = true;
+            tmpDhcpEthStart.disabled = true;
+            tmpDhcpEthEnd.disabled = true;
+            publicDhcpEthStart.disabled = true;
+            publicDhcpEthEnd.disabled = true;
+            dnsType[0].disabled = true;
+            dnsType[1].disabled = true;
+            dns_server_1.disabled = true;
+            dns_server_2.disabled = true;
+            return true;
+            // document.forms[0].submit();
+         }
+      } else {
+         if (isValidIpAddress(tmpDhcpEthStart.value) == false || 
+            !(isSameSubNet(lan2IpAddress, lan2SubnetMask, tmpDhcpEthStart.value, lan2SubnetMask))) {
+            AlertOpen('The Beginning IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+         if ( isValidIpAddress(tmpDhcpEthEnd.value) == false ||
+            !(isSameSubNet(lan2IpAddress, lan2SubnetMask, tmpDhcpEthEnd.value, lan2SubnetMask))) {
+            AlertOpen('The Ending IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+
+         var subnetParts = lan2SubnetMask.split('.');
+         var ipParts = lan2IpAddress.split('.');
+         var finalParts = 255 - parseInt(subnetParts[3]) + parseInt(ipParts[3]);
+         var broadcastIp = ipParts[0] + "." + ipParts[1] + "." + ipParts[2] + "." + finalParts;
+         finalParts = 255 - parseInt(subnetParts[3]) - 1 + parseInt(ipParts[3]);
+         var wanIp = ipParts[0] + "." + ipParts[1] + "." + ipParts[2] + "." + finalParts;
+         if (tmpDhcpEthStart.value == broadcastIp || tmpDhcpEthStart.value == wanIp) {
+            AlertOpen('The Beginning IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+
+         if (tmpDhcpEthEnd.value == broadcastIp || tmpDhcpEthEnd.value == wanIp) {
+            AlertOpen('The Ending IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+
+         var tmpStart = convertIPtoNumber(tmpDhcpEthStart.value);
+         var tmpEnd = convertIPtoNumber(tmpDhcpEthEnd.value);
+         if (tmpStart > tmpEnd) {
+            AlertOpen('The Beginning IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+
+         publicDhcpEthStart.value = tmpDhcpEthStart.value;
+         publicDhcpEthEnd.value = tmpDhcpEthEnd.value;
+         ethSubnetMask.disabled = true;
+         tmpDhcpEthStart.disabled = true;
+         tmpDhcpEthEnd.disabled = true;
+         dhcpEthStart.disabled = true;
+         dhcpEthEnd.disabled = true;
+         day.disabled = true;
+         hour.disabled = true;
+         minute.disabled = true;
+         dnsType[0].disabled = true;
+         dnsType[1].disabled = true;
+         dns_server_1.disabled = true;
+         dns_server_2.disabled = true;
+         return true;
+      	 // document.forms[0].submit();
+      }
+
+      return true;
+   }
+}
+
+
+function goSubmit() {
+   with ( document.forms[0] ) {
+      day.disabled = true;
+      hour.disabled = true;
+      minute.disabled = true;
+      tmpDhcpEthStart.disabled = true;
+      tmpDhcpEthEnd.disabled = true;
+      publicDhcpEthStart.disabled = true;
+      publicDhcpEthEnd.disabled = true;
+      dnsType[0].disabled = true;
+      dnsType[1].disabled = true;
+      dns_server_1.disabled = true;
+      dns_server_2.disabled = true;
+      brName.value="Default";
+   }
+
+   document.forms[0].sessionKey.value = gblsessionKey;
+   document.forms[0].submit();
+}
+
+function btnApply() {
+   if (btnSave()) {
+      document.forms[0].sessionKey.value = gblsessionKey;
+      document.forms[0].submit();
+   }
+}
+
+
+</SCRIPT>
+</head>
+<body id="advancedsetup_dhcpsettings" onLoad='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('dhcpsettings');
+</script>
+      </ul>
+      <div id="subnav_footer">
+      </div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+         </div>
+      </div>
+   </div>
+   <div id="content_right">
+      <div id="content_right_contentarea">
+         <h1 class="advancedsetup_ipaddressing">DHCP Settings <span>DHCP Settings define the LAN addressing parameters for your modem to allocate IP addresses to LAN devices. </span></h1>
+         <form action="advancedsetup_dhcpsettings.cgi" method="post" onSubmit="return btnSave();">
+            <input size="15" type="hidden" name="sessionKey" id="sessionKey" value="" />
+            <input size="15" type="hidden" name="dhcpLeasedTime" />
+            <input size="15" type="hidden" name="dhcpEthStart" />
+            <input size="15" type="hidden" name="dhcpEthEnd" />
+            <input size="15" type="hidden" name="publicDhcpEthStart" />
+            <input size="15" type="hidden" name="publicDhcpEthEnd" />
+            <input size="15" type="hidden" name="lanDnsServer" />
+<!--__MSTC__, Loujia 0909 divis "Default" and other group S_-->	
+			<input type="hidden" name="brName" id="brName" value="">
+<!--__MSTC__, Loujia 0909 divis "Default" and other group E_-->
+            <div class="stepWrapper">
+               <p><strong>1. Set the DHCP server state. </strong></p>
+               <table>
+                  <tr>
+                     <td width="150">DHCP Server: </td>
+                     <td><input name="enblDhcpSrv" id="enabled" type="radio" onclick="dhcpTypeChange()" value="1" /> Enable</td>
+                     <td><input name="enblDhcpSrv" id="disabled" type="radio" onclick="dhcpTypeChange()" value="0" /> Disable</td>
+                  </tr>
+               </table>
+            </div>
+<div class="showenable">
+            <div class="stepWrapper">
+               <p><strong>2. Enter the IP addressing values.</strong></p>
+               <table>
+                  <tr>
+                     <td width="165">Modem IP Address:</td>
+                     <td width="255"><input maxlength="15" size="18" name="ethIpAddress" onChange="setDhcpAddresses()" /></td>
+                  </tr>
+                  <tr>
+                     <td>Beginning DHCP Address:</td>
+                     <td><input maxlength="15" size="18" name="tmpDhcpEthStart" onChange="changeEthEnd(this.value)" /></td>
+                  </tr>
+                  <tr>
+                     <td>Ending DHCP Address: </td>
+                     <td><input maxlength="15" size="18" name="tmpDhcpEthEnd" onChange="changeEthStart(this.value)" /></td>
+                  </tr>
+                  <tr>
+                     <td>Subnetmask: </td>
+                     <td><input maxlength="15" size="18" name="ethSubnetMask" onChange='setDhcpAddresses()' /></td>
+                  </tr>
+               </table>
+            </div>
+            <div id="step3_disabled" class="greyed_out" style="display:none;">
+               <div class="stepWrapper">
+               </div>
+            </div>
+            <div id="step3_enabled">
+               <div class="stepWrapper">
+                  <p><strong>3. Enter the DHCP server lease time. </strong></p>
+                  <table>
+                     <tr>
+                        <td width="150"> DHCP Server Lease Time:</td>                                
+                        <td><input name="day" type="text" maxlength="3" size="5" onChange='changeleasetime()' /> Day(s)</td>
+                        <td><input name="hour" type="text" maxlength="2" size="5" onChange='changeleasetime()'/> Hours</td>
+                        <td><input name="minute" type="text" maxlength="2" size="5" onChange='changeleasetime()'/> Minutes</td>
+                     </tr>
+                  </table>
+               </div>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>4. Automatically set DHCP reservations on DHCP IP allocation.</strong></p>
+               <table>
+                  <tr>
+                     <td width="150"> DHCP Reservation:</td>
+                     <td width="181"><input name="enblDhcpReservation" type="radio" value="1" /> Enable</td>
+                     <td width="181"><input name="enblDhcpReservation" type="radio" value="0" /> Disable</td>
+                  </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>5. Set the DNS servers allocated with DHCP requests.</strong></p>
+               <table>
+                  <tr>
+                     <td width="150"> DHCP DNS Type:</td>
+                     <td><input name="dnsType" type="radio" onclick="DNSTypeChange()"/> Default Servers</td>
+                     <td width="181"><input name="dnsType" type="radio" onclick="DNSTypeChange()"/> Custom Servers</td>
+                  </tr>
+                  <tr class="dns_group">
+                     <td width="135">Primary DNS: </td>
+                     <td colspan="2"><input maxlength="15" size="35" name="dns_server_1" id="dns_server_1" onClick="highlight(this);"/></td>
+                  </tr>
+                  <tr class="dns_group">
+                     <td width="135">Secondary DNS: </td>
+                     <td colspan="2"><input maxlength="15" size="35" name="dns_server_2" id="dns_server_2" onClick="highlight(this);"/></td>
+                  </tr>
+               </table>
+            </div>
+
+            <div class="stepWrapper">
+               <p><strong>6. Click &quot;Apply&quot; to save your changes.</strong></p>
+               <a href="#" class="btn apply_btn" onClick="btnApply();">Apply</a>
+            </div>
+</div>         
+
+<div class="showdisable">  
+            <div class="stepWrapper">
+               <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>            
+               <a href="#" class="btn apply_btn" onClick="btnApply();">Apply</a>
+            </div>
+</div>
+
+         </form>
+      </div>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

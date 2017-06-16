@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var dmzaddr = '<%ejGetOther(dmzHost)%>';
+var update = '<%ejFncCmd(updatestatic)%>';
+var activeusers = '<%ejGetOtherBig(activeusers)%>';
+var activeItems = activeusers.split("|");
+var inactiveusers = '<%ejGetOtherBig(inactiveusers)%>';
+var inactiveItems = inactiveusers.split("|");
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+function DMZEnchange () {
+	with ( document.forms[0] ) {
+		if (DmzEnable[0].checked ){
+			showhide("enabled",1);
+			showhide("disabled",0);
+			DMZClick();
+		}
+		else{
+			showhide("enabled",0);
+			showhide("disabled",1);
+		}
+	}
+}
+
+function DMZClick () {
+	var info = dmzaddr.split('/');
+	if ( info[0] > 1 ) {
+		AlertOpen ( 'DMZ will function only when NAT is enabled.' );
+	}
+}
+
+function frmLoad() {
+	var info = dmzaddr.split('/');
+	with ( document.forms[0] ) {
+		if (info[0] == 0)
+			DmzEnable[1].checked = true;         
+		else if (info[0] == 1)
+			DmzEnable[0].checked = true;
+		else if (info[0] == 2) {
+			DmzEnable[1].checked = true;
+		}
+		else if (info[0] == 3) {
+			DmzEnable[0].checked = true;
+		}
+	}
+	ipChange();
+	DMZEnchange();
+}
+
+function removeClick() {
+	var loc = 'scdmz.cmd?action=remove';
+	with ( document.forms[0] ) {
+		action.value="remove";
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	return; 
+}
+
+function ipChange() {
+	with ( document.forms[0] ) {
+		if ( select_device.selectedIndex != 0 ) {
+			manual_ip_address.disabled = true;
+			$('.manual_ip_address').hide();
+			manual_ip_address.value=select_device.options[select_device.selectedIndex].value;
+		}
+		else {
+			manual_ip_address.disabled = false;
+			$('.manual_ip_address').show();
+			manual_ip_address.value='';
+		}
+	}
+}
+
+function btnDMZ(){
+	var info = dmzaddr.split('/');
+	
+	var tempDmzAddr='';
+	var tempDmzEnable=0;
+	with ( document.forms[0] ) {
+		action.value="active";
+		if ( DmzEnable[0].checked ) {
+			tempDmzEnable = 1;
+		}
+		else {
+			tempDmzEnable = 0;
+		}
+		
+		if ( info[1] != '' ) {
+			if ( select_device.options[select_device.selectedIndex].value != '' ) {
+				AlertOpen ( 'A device is already placed in the DMZ.\nRemove the current DMZ device to add a new device.' );
+				return false;
+			}
+			else if ( manual_ip_address.value != '' ) {
+				AlertOpen ( 'A device is already placed in the DMZ.\nRemove the current DMZ device to add a new device.' );
+				return false;
+			}
+		}
+		else {
+			if ( select_device.options[select_device.selectedIndex].value != '' 
+				&& isValidIpAddress(select_device.options[select_device.selectedIndex].value) ) {
+				DmzClientAddr.value = select_device.options[select_device.selectedIndex].value;				
+			}
+			else if ( manual_ip_address.value != '' && isValidIpAddress(manual_ip_address.value) ) {
+				DmzClientAddr.value = manual_ip_address.value;				
+			}
+			else {
+				if ( tempDmzEnable == 1 || manual_ip_address.value == '' ) {
+					AlertOpen('The DMZ Host IP Address is invalid.');
+					return false;
+				}
+				else if (select_device.options[select_device.selectedIndex].value != '' || manual_ip_address.value != '' ) {
+					AlertOpen('The DMZ Host IP Address is invalid.');
+					return false;
+				}
+			}
+		}
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+
+	//Return false to avoid do submit twice.
+  	return false;
+}
+</SCRIPT>
+</head>
+
+<body id="advancedsetup_dmzhosting" onLoad='frmLoad()'>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+        WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('dmzhosting');
+</script>
+		</ul>
+			<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>            
+			</div>
+			</div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_dmzhosting">DMZ Hosting <span>DMZ hosting enables a LAN device to use the modem WAN IP address as its
+					  own. DMZ places the LAN device outside the firewall.</span></h1>
+				<form action="scdmz.cmd" method="post" onSubmit="return btnDMZ();">
+					<input type="hidden" name="address" id="address" value="">
+					<input type="hidden" name="action" id="action" value="">
+					<input type="hidden" name="DmzClientAddr" id="DmzClientAddr" value="">
+					<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+					<div class="stepWrapper">
+					<p><strong>1. Set the DMZ state. </strong> </p>
+					<table>
+                      <tr>
+                          <td width="150">DMZ:</td>
+                          <td>                              <input name="DmzEnable" id="DmzEnable" type="radio" value="1" onClick="DMZEnchange();"/>
+                              Enable</td>
+                          <td>                              <input name="DmzEnable" type="radio" id="DmzEnable" value="0" onClick="DMZEnchange();"/>
+                              Disable</td>
+                      </tr>
+                    </table>
+					</div>
+<div id="enabled">
+                    <div class="stepWrapper">
+					<p><strong>2. Select  device, or manually enter an IP address.</strong></p>
+					<table>
+                      <tr>
+                        <td width="150">                            Select Device:                        </td>
+                        <td>                            
+                                <select name="select_device" id="select_device" onChange='ipChange()'>
+                                   <option value="" selected="selected">Manually Enter IP Address</option>
+<script language="javascript">
+<!-- hide
+	{
+		var i=0;
+		var hostname = '';
+		if (activeItems != '') {
+			for ( i = 0; i < activeItems.length; i++ ) 
+			{
+				if (activeItems[i] == '')
+					break;
+				var names = activeItems[i].split('/');
+				if ( names[1] != 'unknown' ) {
+					hostname = names[1];
+				}
+				else if ( names[2] != '' ) {
+					hostname = names[2];
+				}
+				else {
+					hostname = names[3];
+				}
+				document.writeln("<option value=\""+names[2]+"\">"+names[1]+" - "+names[2]+" </option>");
+			}
+		}
+	}
+//-->
+</script>                                   
+                        </select>                          </td></tr>
+                      <tr class="manual_ip_address">
+                        <td width="150">                            Enter IP Address:                        </td>
+                        <td>                                <input name="manual_ip_address" id="manual_ip_address" type="text" size="25" />                          </td></tr>
+                    </table>
+					</div>
+                    <div class="stepWrapper">
+					<p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+					<a href="#" class="btn apply_btn" onClick='btnDMZ()'>Apply</a>
+                    </div>
+                    <div class="stepWrapperdark">
+					<table>
+<tr>
+							<th colspan="4" class="tableTitle">DMZ Hosted Device</th>
+						</tr>
+                      <tr>
+                        <th width="39" height="28">&nbsp;</th>
+                        <th width="102">Device Name</th>
+                        <th width="101">IP &nbsp;Address</th>
+                        <th width="87">Edit</th>
+                      </tr>
+<script language="javascript">
+<!-- hide
+{
+	var i = 0;
+	var info = dmzaddr.split('/');
+	var hostname = 'unknown';
+	var htype = 'computer';
+
+	if (activeItems != '') {
+		for ( i = 0; i < activeItems.length; i++ ) 
+		{
+			if (activeItems[i] == '')
+				break;
+			var names = activeItems[i].split('/');
+			if ( names[2] == info[1] ) {
+				if ( names[1] != '' ) {
+					hostname = processLongName( names[1], 13 );
+				}
+				if ( names[0] != '' ) {
+					htype = names[0];
+				}
+			}
+		}
+	}
+
+	if (hostname == 'unknown' && inactiveItems != '') {
+		for ( i = 0; i < inactiveItems.length; i++ ) 
+		{
+			if (inactiveItems[i] == '')
+				break;
+			var names = inactiveItems[i].split('/');
+			if ( names[2] == info[1] ) {
+				if ( names[1] != '' ) {
+					hostname = processLongName( names[1], 13 );
+				}
+				if ( names[0] != '' ) {
+					htype = names[0];
+				}
+			}
+		}
+	}
+
+	if (info[1] != '') {
+		document.writeln("<tr>");
+		document.writeln("<td align='center'><img src=\"../_images/icon_"+htype+".png\" width=\"39\" height=\"39\" /></td>");
+		document.writeln("<td align='center'>"+hostname+"</td>");
+		document.writeln("<td align='center'>"+info[1]+"</td>");
+		document.writeln("<td align='center'><a href=\"#\" onClick='removeClick()' class='btn remove_btn'>Remove<a/></td>");
+		document.writeln("</tr>");
+		with (document.forms[0] ) {
+			address.value=info[1];
+		}
+	}
+	else {
+		document.writeln("<tr align=\"center\" class=\"nattable\">");
+		document.writeln("<td colspan=4 style=\"padding:10px;\">No Rules Defined</td>");
+		document.writeln("</tr>");
+	} 
+}           
+//-->
+</script>
+                    </table>
+					</div>
+</div>
+<div id="disabled">
+    <div class="stepWrapper">
+        <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+        <a href="#" class="btn apply_btn" onClick='btnDMZ()'>Apply</a>
+    </div>
+</div>
+				</form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

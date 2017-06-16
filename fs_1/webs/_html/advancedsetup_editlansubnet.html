@@ -1,0 +1,2339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+
+var notBindingLANIfname = "<%ejGetOther(DefaultBridgeLANList)%>";
+var lansubnetList = "<%ejGetOther(LansubnetList)%>";
+var lansubneinfo = lansubnetList.split("/");
+var bridgeNameList = "<%ejGetOther(sysInfo, bridgeList)%>";
+var bridgeName = bridgeNameList.split("|");
+
+//IPv4 Parts
+var dhcpStart = '<%ejGet(dhcpEthStart)%>';
+var dhcpEnd = '<%ejGet(dhcpEthEnd)%>';
+var mode = '<%ejGet(usePublicIP)%>';
+var dhcpLease = '<%ejGet(dhcpLeasedTime)%>';
+var dhcpEnbl = '<%ejGet(enblDhcpSrv)%>';
+var oldSubnetMask = '<%ejGet(ethSubnetMask)%>';
+var ipAddress = '<%ejGet(ethIpAddress)%>';
+var oldEthIpAddress = '<%ejGet(ethIpAddress)%>';
+var lan2IpAddress = '<%ejGet(lan2IpAddress)%>';
+var lan2SubnetMask = '<%ejGet(lan2SubnetMask)%>';
+var proto = '<%ejGetOther(sysInfo, noBrPrtcl)%>';
+var dhcpReservation = '<%ejGet(enblDhcpReservation)%>';
+var dnsInfo = '<%ejGet(lanDnsServer)%>'; if ( dnsInfo == '&nbsp' ) dnsInfo = '';
+var dnsAddress = dnsInfo.split(",");
+var wlDomain = new Array( "<%ejGetWl(wlDomain1)%>", "<%ejGetWl(wlDomain2)%>", "<%ejGetWl(wlDomain3)%>" );
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var dns2 = '<%ejGetOther(sysInfo, dns2)%>';
+
+//IPv6 Parts
+var ipv6IntfIDStartValue = '<%ejGet(ipv6IntfIDStart)%>';
+var ipv6IntfIDEndValue = '<%ejGet(ipv6IntfIDEnd)%>';
+var ipv6RaLifetimeValue = '<%ejGet(ipv6RaLifetime)%>';
+var radvdEnbl = '<%ejGet(enblRadvd)%>';
+var dhcpv6Enbl = '<%ejGet(enblDhcp6s)%>';
+var dhcpv6State = '<%ejGet(enblDhcp6sStateful)%>';
+var g_dns6type = '<%ejGetOther(sysInfo, dns6Type)%>'; if ( g_dns6type == '&nbsp' ) g_dns6type = '';
+var g_dns6pri = '<%ejGetOther(sysInfo, dns6Pri)%>'; if ( g_dns6pri == '&nbsp' ) g_dns6pri = '';
+var g_dns6sec = '<%ejGetOther(sysInfo, dns6Sec)%>'; if ( g_dns6sec == '&nbsp' ) g_dns6sec = '';
+var g_dns6pref = '<%ejGetOther(sysInfo, dns6Pref)%>'; if ( g_dns6pref == '&nbsp' ) g_dns6pref = '';
+var g_wanAddr6Type='<%ejGet(wanAddr6Type)%>';
+var g_defPrctlv6 = '<%ejGetOther(sysInfo, defaultIPv6Prctl)%>';
+var g_ulaprefix='<%ejGet(ipv6UlaPrefix)%>';
+var g_ulaaddr='<%ejGet(lanIntfAddr6)%>';
+var g_lanPDPrefix = '<%ejGet(lanIntfPrefix6)%>'; if( g_lanPDPrefix =='') g_lanPDPrefix = "::/64"
+var g_PDprefix = g_lanPDPrefix.slice(0,g_lanPDPrefix.lastIndexOf("/"));
+var g_PDplen = g_lanPDPrefix.slice(g_lanPDPrefix.lastIndexOf("/")+1);
+var g_lanPDSubnetPrefix = '<%ejGet(lanPDSubnetPrefix)%>'; if( g_lanPDSubnetPrefix =='') g_lanPDSubnetPrefix = "::/64"
+var g_lanprefix = g_lanPDSubnetPrefix.slice(0,g_lanPDSubnetPrefix.lastIndexOf("/"));
+var g_lanplen = g_lanPDSubnetPrefix.slice(g_lanPDSubnetPrefix.lastIndexOf("/")+1);
+var ULAPrefixList = "<%ejGetOther(ulapPrefixList)%>";
+var ULAPrefix = ULAPrefixList.split("|");
+var g_lanAdminAcess4 = '<%ejGet(lanSubnetAccess4)%>';
+var g_lanAdminAcess6 = '<%ejGet(lanSubnetAccess6)%>';
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';// 1:atm, 2 PTM, 3 Eth
+var dnsIfcvalue = '<%ejGetOther(sysInfo, dfltGwIfc)%>'; if ( dnsIfcvalue == '&nbsp' ) dnsIfcvalue = '';
+var SubnetIDList = "<%ejGetOther(sysInfo, SubnetIDList)%>";
+
+
+var SubnetBrName = '<%ejGet(brName)%>';
+var editAction = '<%ejGet(pmapaction)%>';
+
+
+var DomainList = "<%ejGetOther(sysInfo, DomainList)%>";
+var LanDomain = DomainList.split("|");
+
+var l_dns6type = '<%ejGetOther(sysInfo, localdns6Type)%>'; if ( l_dns6type == '&nbsp' ) l_dns6type = '';
+var l_dns6pri = '<%ejGetOther(sysInfo, localdns6Pri)%>'; if ( l_dns6pri == '&nbsp' ) l_dns6pri = '';
+var l_dns6sec = '<%ejGetOther(sysInfo, localdns6Sec)%>';  if ( l_dns6sec == '&nbsp' ) l_dns6sec = '';
+
+var Feature5G = '<%ejGet(wifi5GFeature)%>'; if ( Feature5G == '&nbsp' || Feature5G == '') Feature5G = '0';
+var FeatureHPNA = '<%ejGet(HpnaFeature)%>'; if ( FeatureHPNA == '&nbsp' || FeatureHPNA == '') FeatureHPNA = '0';
+var enableHPNA = '<%ejGet(hpnaEnable)%>'; if ( enableHPNA == '&nbsp' || enableHPNA == '') enableHPNA = '0';
+
+$(function(){
+   if(oldSubnetMask != '0.0.0.0' && ipAddress != '0.0.0.0'){
+      $('#enabled').attr("checked", "checked");
+
+   }else{
+      $('#disabled').attr("checked", "checked");
+   }
+   function EnableDisable(){
+      var checkAble = function(){
+         if($('input#enabled').is(':checked')){
+            $('.showenable').show();
+            DNSTypeChange();
+         } else {
+            $('.showenable').hide();
+         }		
+      }
+      $('input#enabled, input#disabled').click(function(){
+         checkAble();
+      });
+      checkAble();
+   }
+   EnableDisable();
+});
+
+
+function intfChange() {
+    with ( document.forms[0] )
+    {
+       if (All_Intf.checked == true)
+       {
+          if (ethernet1.disabled == false) {
+             ethernet1.disabled = true;
+             ethernet1.checked = true;
+          }
+          if (ethernet2.disabled == false) {
+             ethernet2.disabled = true;
+             ethernet2.checked = true;
+          }
+          if (ethernet3.disabled == false) {
+             ethernet3.disabled = true;
+             ethernet3.checked = true;
+          }
+          if (ethernet4.disabled == false) {
+             ethernet4.disabled = true;
+             ethernet4.checked = true;
+          }
+          if (ssid1.disabled == false) {
+             ssid1.disabled = true;
+             ssid1.checked = true;
+          }
+          if (ssid2.disabled == false) {
+             ssid2.disabled = true;
+             ssid2.checked = true;
+          }
+          if (ssid3.disabled == false) {
+             ssid3.disabled = true;
+             ssid3.checked = true;
+          }
+          if (ssid4.disabled == false) {
+             ssid4.disabled = true;
+             ssid4.checked = true;
+          }
+          if (lan_wan.disabled == false) {
+             lan_wan.disabled = true;
+             lan_wan.checked = true;
+          }
+          if (Feature5G == '1') {
+             if (SSID1_5G.disabled == false) {
+                SSID1_5G.disabled = true;
+                SSID1_5G.checked = true;
+             }
+             if (SSID2_5G.disabled == false) {
+                SSID2_5G.disabled = true;
+                SSID2_5G.checked = true;
+             }
+             if (SSID3_5G.disabled == false) {
+                SSID3_5G.disabled = true;
+                SSID3_5G.checked = true;
+             }
+             if (SSID4_5G.disabled == false) {
+                SSID4_5G.disabled = true;
+                SSID4_5G.checked = true;
+             }
+          }
+          if (FeatureHPNA == '1') {
+             if (hpna.disabled == false) {
+                hpna.disabled = true;
+                hpna.checked = true;
+             }
+          }
+       }
+       else
+       {
+          if (ethernet1.checked == true)
+             ethernet1.checked = false;
+          if (ethernet2.checked == true)
+             ethernet2.checked = false;
+          if (ethernet3.checked == true)
+             ethernet3.checked = false;
+          if (ethernet4.checked == true)
+             ethernet4.checked = false;
+          if (ssid1.checked == true)
+             ssid1.checked = false;
+          if (ssid2.checked == true)
+             ssid2.checked = false;
+          if (ssid3.checked == true)
+             ssid3.checked = false;
+          if (ssid4.checked == true)
+             ssid4.checked = false;
+          if (lan_wan.checked == true)
+             lan_wan.checked = false;
+          if (Feature5G == '1') {
+             if (SSID1_5G.checked == true)
+                SSID1_5G.checked = false;
+             if (SSID2_5G.checked == true)
+                SSID2_5G.checked = false;
+             if (SSID3_5G.checked == true)
+                SSID3_5G.checked = false;
+             if (SSID4_5G.checked == true)
+                SSID4_5G.checked = false;
+          }
+          if (FeatureHPNA == '1') {
+             if (hpna.checked == true)
+                hpna.checked = false;
+          }
+
+          DisableaAsociatedLan(0);
+       }
+    }
+}
+
+function DisableaAsociatedLan(type)
+{
+   with ( document.forms[0] ) {
+      var LANIfName = notBindingLANIfname.split('|');
+      for(var i = 0; i < LANIfName.length ; i++)
+      {
+         if(LANIfName[i] == 'eth0')
+            ethernet1.disabled = false;
+         else if(LANIfName[i] == 'eth1')
+            ethernet2.disabled = false;
+         else if(LANIfName[i] == 'eth2')
+            ethernet3.disabled = false;
+         else if(LANIfName[i] == 'eth3')
+            ethernet4.disabled = false;
+         else if(LANIfName[i] == 'wl0')
+            ssid1.disabled = false;
+         else if(LANIfName[i] == 'wl0.1')
+            ssid2.disabled = false;
+         else if(LANIfName[i] == 'wl0.2')
+            ssid3.disabled = false;
+         else if(LANIfName[i] == 'wl0.3')
+            ssid4.disabled = false;
+         else if(Feature5G == '1' && LANIfName[i] == 'eth4.1')
+            SSID1_5G.disabled = false;
+         else if(Feature5G == '1' && LANIfName[i] == 'eth4.2')
+            SSID2_5G.disabled = false;
+         else if(Feature5G == '1' && LANIfName[i] == 'eth4.3')
+            SSID3_5G.disabled = false;
+         else if(Feature5G == '1' && LANIfName[i] == 'eth4.4')
+            SSID4_5G.disabled = false;
+         else
+         {
+            DisableaAsociatedLANWAN_HPNA(LANIfName[i], Feature5G, FeatureHPNA);
+         }
+      }
+      currentselectlan(type);
+   }
+   return;
+}
+function currentselectlan(type)
+{
+   with ( document.forms[0] ) {
+      var tmplaninfo="";
+      for(var i=0 ;i < lansubneinfo.length; i++)
+      {
+         tmplaninfo=lansubneinfo[i].split("|");
+         if(tmplaninfo[0] == SubnetBrName)
+         {
+            for(var j=1 ;j < tmplaninfo.length; j++)
+            {
+               if(tmplaninfo[j] == 'eth0'){
+                  ethernet1.disabled = false;
+                  if(type == 1)
+                     ethernet1.checked=true;
+               }
+               else if(tmplaninfo[j] == 'eth1'){
+                  ethernet2.disabled = false;
+                  if(type == 1)
+                     ethernet2.checked=true;
+               }
+               else if(tmplaninfo[j] == 'eth2'){
+                  ethernet3.disabled = false;
+                  if(type == 1)
+                     ethernet3.checked=true;
+               }
+               else if(tmplaninfo[j] == 'eth3'){
+                  ethernet4.disabled = false;
+                  if(type == 1)
+                     ethernet4.checked=true;
+               }
+               else if(tmplaninfo[j] == 'wl0'){
+                  ssid1.disabled = false;
+                  if(type == 1)
+                     ssid1.checked=true;
+               }
+               else if(tmplaninfo[j] == 'wl0.1'){
+                  ssid2.disabled = false;
+                  if(type == 1)
+                     ssid2.checked=true;
+               }
+               else if(tmplaninfo[j] == 'wl0.2'){
+                  ssid3.disabled = false;
+                  if(type == 1)
+                     ssid3.checked=true;
+               }
+               else if(tmplaninfo[j] == 'wl0.3'){
+                  ssid4.disabled = false;
+                  if(type == 1)
+                     ssid4.checked=true;
+               }
+               else if(Feature5G == '1' && tmplaninfo[j] == 'eth4.1'){
+                  SSID1_5G.disabled = false;
+                  if(type == 1)
+                     SSID1_5G.checked=true;
+               }
+               else if(Feature5G == '1' && tmplaninfo[j] == 'eth4.2'){
+                  SSID2_5G.disabled = false;
+                  if(type == 1)
+                     SSID2_5G.checked=true;
+               }
+               else if(Feature5G == '1' && tmplaninfo[j] == 'eth4.3'){
+                  SSID3_5G.disabled = false;
+                  if(type == 1)
+                     SSID3_5G.checked=true;
+               }
+               else if(Feature5G == '1' && tmplaninfo[j] == 'eth4.4'){
+                  SSID4_5G.disabled = false;
+                  if(type == 1)
+                     SSID4_5G.checked=true;
+               }
+               else
+               {
+                  DisableaAsociatedLANWAN_HPNA(tmplaninfo[j], Feature5G, FeatureHPNA);
+               }
+            }
+         }
+      }
+   }
+   return;
+}
+function DisableaAsociatedLANWAN_HPNA(ifName, build5G, buildHPNA)
+{
+   with ( document.forms[0] )
+   {
+      if(build5G == '0' && buildHPNA == '0')
+      {
+         if(ifName == 'eth4')
+            lan_wan.disabled = false;
+      }
+      else if(build5G == '1' && buildHPNA == '0')
+      {
+         if(ifName == 'eth5')
+            lan_wan.disabled = false;
+      }
+      else if(build5G == '0' && buildHPNA == '1')
+      {
+         if(ifName == 'eth5' && enableHPNA == '1')
+            hpna.disabled = false;
+         else if(ifName == 'eth4')
+            lan_wan.disabled = false;
+      }
+      else if(build5G == '1' && buildHPNA == '1')
+      {
+         if(ifName == 'eth6' && enableHPNA == '1')
+            hpna.disabled = false;
+         else if(ifName == 'eth5')
+            lan_wan.disabled = false;
+      }
+   }
+}
+
+
+function highlight(field) {
+   field.focus();
+   field.select();
+}
+
+function CheckDuplicateDomain()
+{   
+   with ( document.forms[0] ) {
+      for(var i = 0; i < (LanDomain.length); i++)
+      {
+         /* No need to check itself */
+         if(LanDomain[i].split("/")[2] != SubnetBrName)
+         {
+            if(isSameSubNet(LanDomain[i].split("/")[0], LanDomain[i].split("/")[1], ethIpAddress.value, ethSubnetMask.value))
+            {
+               AlertOpen("Conflicting IP scheme to \"LAN Subnet Name: " + LanDomain[i].split("/")[2] + "\".");
+               return -1;
+            }
+         }
+      }
+   }
+   return 0;
+}
+function CheckDuplicatePrefix(subID)
+{
+   with ( document.forms[0] ) {
+      var SubnetID = SubnetIDList.split("|");
+      for(var i =0; i < SubnetID.length; i++)
+      {
+         if(SubnetID[i].split("/")[1] != SubnetBrName)
+         {
+            if(parseInt(subID,10) == parseInt(SubnetID[i].split("/")[0],10))
+            {
+               AlertOpen("The IPv6 network address range overlaps an existing address range.  Please enter an address range that does not overlap.");
+               return -1;
+            }
+         }
+      }
+   }
+   return 0;
+}
+function CheckDuplicateULAPrefix(userprefix)
+{
+   with ( document.forms[0] ) 
+   {
+      for(var i=0; i< (ULAPrefix.length); i++)
+      {
+         if(ULAPrefix[i].split("/")[2] != SubnetBrName)
+         {
+            /* No need to check itself */
+            if(userprefix.split("::")[0] == (ULAPrefix[i].split("::")[0]))
+            {
+               AlertOpen(" This ULA Prefix '" + userprefix + "' already is use.");
+               return -1;         
+            }
+         }
+      }
+   }
+   return 0;
+}
+function CheckDuplicateBrNAME()
+{
+   with ( document.forms[0] ) {
+      if(subnetname.value == SubnetBrName)
+         return 0;
+      for(var i = 0; i < (bridgeName.length); i++)
+      {
+         if(subnetname.value == bridgeName[i])
+            return -1;
+      }
+   }
+   return 0;
+}
+function AddZeroPrefxPadding(prefix, length)
+{
+   var inputPrefix = prefix.split("::");
+   var userprefix = inputPrefix[0];
+   var defaultPrefix = "0:0:0:0";
+   var prefixText = defaultPrefix.split(":");
+   var index;   
+   /* ex: "::" -> "0:0:0:0" */
+   if( userprefix == '')
+      return defaultPrefix;
+   
+   /* ex: "2001::" -> " 2001:0:0:0::*/
+   if(userprefix.search(":") == -1)
+      prefixText[0] = userprefix;
+   else
+   {
+      /* ex: "2001:2002::" --> "2001:2002:0:0" */
+      index = userprefix.split(":").length;
+      for(var i = 0; i < index; i++)
+         prefixText[i] = userprefix.split(":")[i];				
+   }
+   return (prefixText[0] + ":" + prefixText[1] + ":" + prefixText[2] + ":" + prefixText[3]);
+}
+
+function CheckAndGetPrefixSubnetID(uPrefix, uPlen, gPrefix, gPlen)
+{
+   if(gPrefix == '' || gPlen == '')
+   {
+      AlertOpen(" The global prefix is empty, please disbale IPv6.");
+      return -1;	
+   }
+   if (isValidIpAddress6(uPrefix) == false) 
+   {
+      AlertOpen(" The Network Address is invalid.  ");
+      return -1;
+   }
+   if ( parseInt(uPlen)< gPlen  || parseInt(uPlen)> 64)
+   {
+      AlertOpen(" The IPv6 network address entered is not valid.  Please enter an IPv6 network address greater than /64. ");
+      return -1;
+   }
+   /* Add Zero padding */
+   var userPrefix = AddZeroPrefxPadding(uPrefix, uPlen);
+   var globalPrefix = AddZeroPrefxPadding(gPrefix, gPlen);
+   /* check prefix range and get subnet ID*/
+   if(gPlen == 64)
+   {
+      /* Only have one prefix usable */
+      if(userPrefix != globalPrefix)
+      {
+         AlertOpen(" The IPv6 network address entered is not valid.  Please enter an IPv6 network address greater than /64. ");
+         return -1;
+      }
+   }
+   else
+   {
+      var NumberOfBlock = (3-Math.floor((63 - gPlen)/16));
+      var NumberOfBits = 16 - (gPlen %16); //((64 - gPlen)%16);
+      var subnetId = 0;
+      var uPrefixArray = userPrefix.split(":");
+      var gPrefixArray = globalPrefix.split(":");
+      /* check prfix 4 block */
+      for(var i = 3; i >= 0; i --)
+      {
+         if(i < NumberOfBlock)
+         {
+            if(uPrefixArray[i] != gPrefixArray[i])
+            {
+               AlertOpen(" The IPv6 network address entered is not valid.  Please enter an IPv6 network address greater than /64. ");
+               return -1;
+            }
+         }
+         else if(i == NumberOfBlock)
+         {
+            /* need check n bit */
+            var allOne = '1111111111111111';
+            var mask = (parseInt(allOne,2) << NumberOfBits) >>>0; //ex: NumberOfBits 4, mask = 1111111111110000
+            var prefixMask = (parseInt(gPrefixArray[i], 16) & mask);
+            if((parseInt(uPrefixArray[i], 16) & mask) != prefixMask)
+            {
+               AlertOpen("The IPv6 network address range is not within the IPv6 network block.  Please enter a valid network range value.");
+               return -1;		 
+            }
+            subnetId = ((parseInt(uPrefixArray[i], 16) ^ prefixMask)<<(16*(3-i))) + subnetId;
+         }
+         else
+         {
+            subnetId = (parseInt(uPrefixArray[i], 16)<<(16*(3-i))) + subnetId;
+         }
+      }
+   }
+   return subnetId;
+}
+function uddateNetworkAddress(addr, mask)
+{   
+   with ( document.forms[0] ) {	  
+      var lan1a = addr.split('.');
+      var lan1m = mask.split('.');
+      var domain = '';
+	  
+      for (i = 0; i < 4; i++) 
+      {
+         l1a_n = parseInt(lan1a[i]);
+         l1m_n = parseInt(lan1m[i]);
+         domain = domain + (l1a_n & l1m_n);
+         if(i != 3)
+         {
+            domain += '.';
+         }
+      }
+      ethDomainAddress.value = domain;
+   }
+}
+function setDhcpAddresses() {
+   var ipArr = [0, 0, 0, 0],  maskArr = [0, 0, 0, 0], startArr = [0, 0, 0, 0],  endArr = [0, 0, 0, 0]; 
+   with ( document.forms[0] ) {
+      
+      lanIp = ethIpAddress.value;
+      subnetMask = ethSubnetMask.value;
+      if(ethSubnetMask.value==""||ethIpAddress.value=="")
+         return;
+	  
+      var msg = "";
+      if ( isValidIpAddress(lanIp) == false ) {
+         msg = 'The modem IP address entered in step 1 is invalid.';
+         AlertOpen(msg);
+         return;
+      }
+ 
+      if ( isValidIpAddress(subnetMask) == false ) {
+         // alert('Address "' + subnetMask + '" is invalid IP address.');
+         msg = 'The subnetmask entered in step 1 is invalid.';
+         AlertOpen(msg);
+         return;
+      }      
+      addrParts = lanIp.split('.');
+      maskParts = subnetMask.split('.');
+
+      if ( addrParts.length != 4 || maskParts.length != 4) {
+         msg = 'The Modem IP Address or Modem Subnet Mask is invalid.';
+         AlertOpen(msg);
+         return;
+      }         
+	  
+      for (i = 0; i < 4; i++) {
+        ipArr[i] = parseInt(addrParts[i]);
+        startArr[i] = parseInt(addrParts[i]);
+        endArr[i] = parseInt(addrParts[i]);
+        maskArr[i] = parseInt(maskParts[i]);
+      }
+      m3 = maskArr[3];
+      bcast = 255;
+      n3 = 0;
+
+      if ((maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 255 ) &&
+          (m3 == 0 || m3 == 128 || m3 == 192 || m3 == 224 || m3== 240 || m3 == 248 ||  m3 == 252)) {
+        // 255.255.255.0/128/192... class C supported
+        n3 = ipArr[3] & m3;
+        hosts = 255 - m3;
+        bcast = n3 + hosts;
+      }
+      else {
+        // alert("Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.");
+        // msg = "Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.";
+        msg = "Only support subnet mask: Class C: 255.255.255.0/255.255.255.128/<br>255.255.255.192/255.255.255.224/<br>255.255.255.240/255.255.255.248/<br>255.255.255.252.";
+        AlertOpen(msg);
+        return;         
+      }
+      if (ipArr[3] == bcast) {
+        // alert('Ip address cannot be same as the broadcast ip address.');
+        msg = 'The Modem IP Address cannot be same as the broadcast IP address.';
+        AlertOpen(msg);
+        return;
+      }
+      tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";      
+      for (i = 0; i < 3; i++) {
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[i] + ".";
+      }
+      if (ipArr[3] == (bcast-1)) {
+        startArr[3] = n3 + 1;
+        endArr[3] = bcast -2;
+      }
+      else {
+        startArr[3] = ipArr[3] + 1;
+        endArr[3] = bcast -1;
+      }      
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[3];
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[3];
+      uddateNetworkAddress(ethIpAddress.value, ethSubnetMask.value);
+	  
+      /* Update DNS Server Address */
+      dns_server_1.value = ethIpAddress.value;
+   }
+}
+
+function setGatewayAddresses()
+{
+   var ipArr = [0, 0, 0, 0],  maskArr = [0, 0, 0, 0], startArr = [0, 0, 0, 0],  endArr = [0, 0, 0, 0];
+   with ( document.forms[0] ) {
+      var DomainAddr = ethDomainAddress.value;
+      var subnetMask = ethSubnetMask.value;
+      if(ethSubnetMask.value==""||ethDomainAddress.value=="")
+         return;
+	  
+      var msg = "";
+      if ( isValidIpAddress(DomainAddr) == false ) {
+         msg = 'The Network address entered is invalid.';
+         AlertOpen(msg);
+         return;
+      }
+ 
+      if ( isValidIpAddress(subnetMask) == false ) {
+         msg = 'The subnetmask entered is invalid.';
+         AlertOpen(msg);
+         return;
+      }      
+      addrParts = DomainAddr.split('.');
+      maskParts = subnetMask.split('.');
+	  
+      if ( addrParts.length != 4 || maskParts.length != 4) {
+         msg = 'The Modem IP Address or Modem Subnet Mask is invalid.';
+         AlertOpen(msg);
+         return;
+      }         
+	  
+      for (i = 0; i < 4; i++) {
+         ipArr[i] = parseInt(addrParts[i]);
+         startArr[i] = parseInt(addrParts[i]);
+         endArr[i] = parseInt(addrParts[i]);
+         maskArr[i] = parseInt(maskParts[i]);
+      }  
+      ipArr[3] = (ipArr[3] & maskArr[3]) + 1;
+      m3 = maskArr[3];
+      bcast = 255;
+      n3 = 0;
+
+      if ((maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 255 ) &&
+          (m3 == 0 || m3 == 128 || m3 == 192 || m3 == 224 || m3== 240 || m3 == 248 ||  m3 == 252)) {
+         // 255.255.255.0/128/192... class C supported
+         n3 = ipArr[3] & m3;
+         hosts = 255 - m3;
+         bcast = n3 + hosts;
+      }
+      else {
+         msg = "Only support subnet mask: Class C: 255.255.255.0/255.255.255.128/<br>255.255.255.192/255.255.255.224/<br>255.255.255.240/255.255.255.248/<br>255.255.255.252.";
+         AlertOpen(msg);
+         return;         
+      }
+	  
+      if (ipArr[3] == bcast) {
+         // alert('Ip address cannot be same as the broadcast ip address.');
+         msg = 'The Modem IP Address cannot be same as the broadcast IP address.';
+         AlertOpen(msg);
+         return;
+      }
+	  
+      ethIpAddress.value = "";  
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + ipArr[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + ipArr[3];	  
+      tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";      
+      for (i = 0; i < 3; i++) {
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[i] + ".";
+      }
+      if (ipArr[3] == (bcast-1)) {
+         startArr[3] = n3 + 1;
+         endArr[3] = bcast -2;
+      }
+      else {
+         startArr[3] = ipArr[3] + 1;
+         endArr[3] = bcast -1;
+      }      
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[3];
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[3];
+      uddateNetworkAddress(ethIpAddress.value, ethSubnetMask.value);
+	  
+      /* Update DNS Server Address */
+      dns_server_1.value = ethIpAddress.value;
+   }
+}
+function changeEthEnd(ip) {
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+
+      if ( isValidIpAddress(ip) == false ) {
+         AlertOpen('The beginning DHCP IP address entered in step 1 is invalid.');
+         return;
+      }
+
+      if (ethIpAddress.value == ip) {
+         AlertOpen('The Beginning IP Address cannot be the same as the modem IP address. Please enter a valid IP address.');
+         return;
+      }
+
+      addrParts = ip.split('.');
+      endParts = tmpDhcpEthEnd.value.split('.');
+      ipParts = ethIpAddress.value.split('.');
+
+      if ( addrParts.length != 4 )
+         return false;
+
+      t1 = parseInt(addrParts[3]);
+      t2 = parseInt(endParts[3]);
+      t3 = parseInt(ipParts[3]);
+
+      if (tmpDhcpEthStart.value != '' && t1 >= 255) {
+         AlertOpen("Last portion of IP Address has to be less than 254 for Enabled DHCP Server");
+         return false;
+      }
+
+      if (t3 > t1 && t3 < t2)
+      {
+         AlertOpen("Modem IP Address cannot be between Beginning IP Address and Ending IP Address.");
+         return false;
+      }
+
+      ethIpAddress.value = tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + addrParts[i] + ".";
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + addrParts[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + addrParts[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + t3;
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + t1;
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + t2;	  
+      uddateNetworkAddress(ethIpAddress.value, ethSubnetMask.value);
+   }
+}
+
+function changeEthStart(ip) {
+   with ( document.forms[0] ) {
+
+      if ( isValidIpAddress(ip) == false ) {
+         AlertOpen('The ending DHCP IP address entered in step 1 is invalid.');
+         return;
+      }
+
+      if (ethIpAddress.value == ip) {
+         AlertOpen('The Ending IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+         return;
+      }
+
+      addrParts = ip.split('.');
+      startParts = tmpDhcpEthStart.value.split('.');
+      ipParts = ethIpAddress.value.split('.');
+
+      if ( addrParts.length != 4 )
+         return;
+      t1 = parseInt(addrParts[3]);
+      t2 = parseInt(startParts[3]);
+      t3 = parseInt(ipParts[3]);
+
+      if (tmpDhcpEthStart.value != '' && t1 >= 255) {
+         AlertOpen("Last portion of IP Address has to be less than 254 for Enabled DHCP Server");
+         return;
+      }
+
+      if (t3 > t2 && t3 < t1)
+      {
+         AlertOpen("Modem IP Address cannot be between Beginning IP Address and Ending IP Address.");
+         return false;
+      }
+
+      ethIpAddress.value = tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + addrParts[i] + ".";
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + addrParts[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + addrParts[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + t3;
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + t2;
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + t1;	  
+      uddateNetworkAddress(ethIpAddress.value, ethSubnetMask.value);
+   }
+}
+
+function changeleasetime() {  
+   with ( document.forms[0] ) {
+      var reg = /^[0-9]*$/;
+      if(reg.test(day.value) == false || reg.test(hour.value) == false || reg.test(minute.value) == false) {
+         AlertOpen('The DHCP lease time entered in step 1 is invalid.');
+         return false;
+      }
+
+      var tmpDay = parseInt(day.value, 10);
+      var tmpHour = parseInt(hour.value, 10);
+      var tmpMinute = parseInt(minute.value, 10);
+
+      if (isNaN(tmpDay) || tmpDay > 365) {
+         AlertOpen('The DHCP lease time entered in step 1 is invalid.');
+         return false;
+      }
+      if (isNaN(tmpHour) || tmpHour > 23) {
+         AlertOpen('The DHCP lease time entered in step 1 is invalid.');
+         return false;
+      }
+      if (isNaN(tmpMinute) || tmpMinute > 59) {
+         AlertOpen('The DHCP lease time entered in step 1 is invalid.');
+         return false;
+      }
+
+      dhcpLeasedTime.value = ((((parseInt(day.value) * 24) + parseInt(hour.value)) * 60) + parseInt(minute.value)) * 60;
+      if (dhcpLeasedTime.value < 60) {
+         AlertOpen('The Lease Time is zero. Please enter a valid Lease Time.');
+         return false;
+      }
+   }
+}
+
+function dhcpSrvTypeChange() {
+   with ( document.forms[0] ) {
+      if (enblDhcpSrv[0].checked == true) {
+         $('.showenable2').show();
+         tmpDhcpEthStart.disabled = false;
+         tmpDhcpEthEnd.disabled = false;
+         minute.disabled = false;
+         hour.disabled = false;
+         day.disabled = false;
+      } else {
+         $('.showenable2').hide();
+         tmpDhcpEthStart.disabled = true;
+         tmpDhcpEthEnd.disabled = true;
+         minute.disabled = true;
+         hour.disabled = true;
+         day.disabled = true;
+         dnsType[0].checked = true
+         dnsType[1].checked = false;
+      }
+      DNSTypeChange();
+   }
+}
+function dhcpTypeChange(active) {
+   with ( document.forms[0] ) {
+      if (active == 1) {
+         tmpDhcpEthStart.disabled = false;
+         tmpDhcpEthEnd.disabled = false;
+         minute.disabled = false;
+         hour.disabled = false;
+         day.disabled = false;
+      } else {
+         enblDhcpSrv[0].checked = false;
+         enblDhcpSrv[1].checked = true;
+         tmpDhcpEthStart.disabled = true;
+         tmpDhcpEthEnd.disabled = true;
+         minute.disabled = true;
+         hour.disabled = true;
+         day.disabled = true;
+      }
+      dhcpSrvTypeChange();
+   }
+}
+
+function DNSTypeChange() {
+   with ( document.forms[0] ) {
+      if (dnsType[0].checked == true) {
+         dns_server_1.disabled = true;
+         dns_server_2.disabled = true;
+         $('.dns_group').hide();
+      } else {
+         dns_server_1.disabled = false;
+         dns_server_2.disabled = false;
+         $('.dns_group').show();
+      }
+   }
+}
+
+
+function checkIPv6(address)
+{
+   with ( document.forms[0] ) {      
+      if(isValidIpAddress6(address) == false)
+      {
+         return false;
+      }
+
+      var prefixaddress = address.split('::');
+      var block = prefixaddress[0].split(':');
+      var index = 0;  
+      for(index = 0; index < block.length; index++)
+      {
+         if(block[index] != '')
+         {
+            if(parseInt(block[index],16) <0 || parseInt(block[index],16) > 65535)
+            {
+               return false;
+            }
+         }
+      }
+   }
+}
+function updateULAAddress(value)
+{
+   with ( document.forms[0] ) {
+      if(value == 0)
+      {
+         if (isValidULAPrefix(v4v6_statelessulaprefix.value) == false) {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return;
+         }
+         if(checkIPv6(v4v6_statelessulaprefix.value) == false)
+         {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return;
+         }
+         var ula = v4v6_statelessulaprefix.value+"1";
+         $('#v4v6_statelessulaaddr').text(ula);
+      }
+      else
+      {
+         /* Update statful ULA Address */         
+         if (isValidULAPrefix(v4v6_statefululaprefix.value) == false) {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return;
+         }
+         if(checkIPv6(v4v6_statefululaprefix.value) == false)
+         {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return;
+         }
+         var ula = v4v6_statefululaprefix.value+"1";
+         $('#v4v6_statefululaaddr').text(ula);
+      }
+   }
+}
+
+function frmLoad () {
+   with ( document.forms[0] ) {
+      var ipv6LanModeValue;
+      pmapaction.value = editAction; 
+      if(editAction == 'editIPv6' || editAction == 'addIPv6')
+      {
+         if(editAction == 'editIPv6')
+         {
+            document.getElementById("headTitle").innerHTML = "LAN Subnets - IPv6 For Default LAN <span>Using this page to edit an IPv6 subnet to default LAN.</span>";
+            document.getElementById("ReplaceTitle").innerHTML = "<strong>2. Click &quot;Replace&quot; to save your changes or &quot;Cancel&quot; to discard.</strong>";
+            $('.applyReplace').show();
+            $('.setsubnetname').hide();
+            $('.setinterface').hide();
+            $('.applyAdd').hide();
+         }
+         else
+         {
+            document.getElementById("headTitle").innerHTML = "LAN Subnets - IPv6 For Default LAN <span>Using this page to add an IPv6 subnet to default LAN.</span>";
+            document.getElementById("ApplyTitle").innerHTML = "<strong>2. Click &quot;Add&quot; to save your changes.</strong>";
+            $('.applyReplace').hide();
+            $('.setsubnetname').hide();
+            $('.setinterface').hide();
+            $('.applyAdd').show();
+         }
+         document.getElementById("IPv6Title").innerHTML =  "<strong>1. Set the IPv6 LAN Subnet addressing paremeters.(optional) </strong>";
+         $('.lansubnet_ipv4').hide();
+      }
+      else 
+      {
+         document.getElementById("headTitle").innerHTML = "LAN Subnets For " + SubnetBrName + "<span>Your Broadband router can support multiple LAN subnet settings. Use the DHCP Settings page to configure the default IPv4 subnet.</span>";
+         //document.getElementById("SubnetNameTitle").innerHTML ="<strong>1. Enter the LAN subnet name. </strong>";
+         document.getElementById("InterfaceTitle").innerHTML ="<strong>1. Set the interface(s) associated with the subnet. </strong>";
+         document.getElementById("IPv4Title").innerHTML =  "<strong>2. Sets the IPv4 state and addressing.</strong>";
+         document.getElementById("IPv6Title").innerHTML =  "<strong>3. Set the IPv6 LAN Subnet addressing paremeters.(optional) </strong>";
+         document.getElementById("ReplaceTitle").innerHTML = "<strong>4. Click &quot;Replace&quot; to save your changes or &quot;Cancel&quot; to discard.</strong>";
+         $('.lansubnet_ipv4').show();
+         $('.setsubnetname').hide();
+         $('.setinterface').show();
+         $('.applyReplace').show();
+         $('.applyAdd').hide();
+      }
+      /* For Subnet Name Part */
+      if(SubnetBrName != 'Default' && SubnetBrName != '')
+      {
+         subnetname.value = SubnetBrName;
+      }
+      /* For Interface Part */
+      ShowHideHPNAInterface();
+      ShowHide5GLanInterface();
+      DisableaAsociatedLan(1);
+      /* For IPv4 Parts */
+      if(SubnetBrName != 'Default')
+      {
+         /* Not supported on Defualt LAN now */
+         if(oldSubnetMask != '0.0.0.0' && ipAddress != '0.0.0.0')
+         {
+            enblIpv4Address[0].checked = true;
+            ethSubnetMask.value = oldSubnetMask;
+            ethIpAddress.value = ipAddress;
+			
+            uddateNetworkAddress(ipAddress, oldSubnetMask)
+	 
+            if ( dhcpEnbl == '1' ) {
+               enblDhcpSrv[0].checked = true;
+               enblDhcpSrv[1].checked = false;
+               tmpDhcpEthStart.value = dhcpStart;
+               tmpDhcpEthEnd.value = dhcpEnd;
+			
+               var tempTime = dhcpLease;
+               var settingDay = parseInt(tempTime/86400);
+               tempTime=tempTime%86400;
+               var settingHour = parseInt(tempTime/3600);
+               tempTime=tempTime%3600;
+               var settingMin = parseInt(tempTime/60);
+			
+               day.value = settingDay;
+               hour.value = settingHour;
+               minute.value = settingMin;
+
+
+               if(dnsAddress.length == 2)
+               {
+                  if(dnsAddress[0] == "0.0.0.0" && dnsAddress[1] =="0.0.0.0")
+                  {
+                     dnsType[0].checked = true;
+                     dnsType[1].checked = false;
+                     dns_server_1.value = ipAddress;
+                     dns_server_2.value = "";
+                  }
+                  else
+                  {			         
+                     dnsType[0].checked = false;
+                     dnsType[1].checked = true;
+                     dns_server_1.value = dnsAddress[0];
+                     dns_server_2.value = dnsAddress[1];
+                  }
+               }
+               else if(dnsAddress.length == 1)
+               {
+                  dnsType[0].checked = false;
+                  dnsType[1].checked = true;
+                  dns_server_1.value = dnsAddress[0];
+               }
+               else
+               {
+                  /* Default value */
+                  dnsType[0].checked = false;
+                  dnsType[1].checked = true;
+                  dns_server_1.value = "192.168.0.1";
+               }
+
+               DNSTypeChange();
+            } else {
+               enblDhcpSrv[0].checked = false;
+               enblDhcpSrv[1].checked = true;
+               setDhcpAddresses();
+            }
+			
+            if(g_lanAdminAcess4 == '1')
+            {
+               modemipv6admin[0].checked = true;
+               modemipv6admin[1].checked = false;
+            }
+            else
+            {
+               modemipv6admin[0].checked = false;
+               modemipv6admin[1].checked = true;
+            }
+         }
+         else
+         {
+            enblIpv4Address[0].checked = false;
+            enblIpv4Address[1].checked = true;
+            dnsType[1].checked = false;
+            dnsType[0].checked = true;
+            enblDhcpSrv[0].checked = false;
+            enblDhcpSrv[1].checked = true;	           
+            modemipv6admin[0].checked = false;
+            modemipv6admin[1].checked = true
+            DNSTypeChange();
+         }
+         dhcpSrvTypeChange();
+         if(enblDhcpSrv[0].checked == true)
+            dhcpTypeChange(1);
+         else
+            dhcpTypeChange(0);
+      }
+
+      /* For IPv6 Parts */
+      if(radvdEnbl == '1' && dhcpv6Enbl == '1' && dhcpv6State == '0')
+      {
+         ipv6LanModeValue = 'Stateless';
+      }
+      else if(radvdEnbl == '1' && dhcpv6Enbl == '1' && dhcpv6State == '1')
+      {
+         ipv6LanModeValue = 'Stateful';
+      }
+      else
+      {
+         ipv6LanModeValue = 'Disabled';
+      }
+
+      switch (ipv6LanModeValue ){
+      case 'Disabled':
+         ipv6LanMode.options[2].selected=true;
+         $('div#disabled').show();
+         $('div#stateful, div#stateless').hide();
+         $('tr.stateful, tr.stateless').hide();
+         $('tr.stateful_dns').hide();
+         break;
+      case 'Stateful':		
+         ipv6LanMode.options[1].selected=true;
+         v4v6_statefululaprefix.value = g_ulaprefix.slice(0,g_ulaprefix.lastIndexOf("/"));
+         var ula = g_ulaaddr.slice(0,g_ulaaddr.lastIndexOf("/"));
+         $('#v4v6_statefululaaddr').text(ula);
+         v4v6_statefulNAprefix.value=g_lanPDSubnetPrefix.split("::")[0]+ "::";
+         v4v6_statefulNAplen.value=g_lanPDSubnetPrefix.split("::/")[1];
+
+         if(g_lanAdminAcess6 == '1')
+         {
+            v4v6_statefulmodemipv6admin[0].checked = true;
+            v4v6_statefulmodemipv6admin[1].checked = false;
+         }
+         else
+         {            
+            v4v6_statefulmodemipv6admin[0].checked = false;
+            v4v6_statefulmodemipv6admin[1].checked = true;
+         }
+	  
+         $('div#stateful').show();
+         $('div#disabled, div#stateless').hide();
+         //enblIpv6Lan.value=1;		    
+         //[TODO] enable radvd-gw (M=1,O=1,A=0) / enable-dhcp6s ip and dns (stateful/statelsss)	 	
+
+         $('tr.stateful').show();
+         $('tr.stateless').hide();
+		 
+         if (l_dns6type !='Default')
+         {
+            v4v6_dhcpv6_dns_type[1].checked=true;
+            v4v6_dhcpv6_dns_primary.value = l_dns6pri;
+            v4v6_dhcpv6_dns_secondary.value =l_dns6sec;
+            $('tr.stateful_dns').show();
+         }
+         else
+         {
+            v4v6_dhcpv6_dns_type[0].checked=true;	
+            $('tr.stateful_dns').hide();
+         }	
+         break;
+		 
+      case 'Stateless':	
+         ipv6LanMode.options[0].selected=true;
+         v4v6_statelessulaprefix.value = g_ulaprefix.slice(0,g_ulaprefix.lastIndexOf("/"));
+         var ula = g_ulaaddr.slice(0,g_ulaaddr.lastIndexOf("/"));
+         $('#v4v6_statelessulaaddr').text(ula);
+         v4v6_statelessNAprefix.value=g_lanPDSubnetPrefix.split("::")[0]+ "::";
+         v4v6_statelessNAplen.value=g_lanPDSubnetPrefix.split("::/")[1];
+
+         if(g_lanAdminAcess6 == '1')
+         {
+            v4v6_statlessmodemipv6admin[0].checked = true;
+            v4v6_statlessmodemipv6admin[1].checked = false;
+         }
+         else
+         {            
+            v4v6_statlessmodemipv6admin[0].checked = false;
+            v4v6_statlessmodemipv6admin[1].checked = true;
+         }
+	  
+         $('div#stateless').show();
+         $('div#disabled, div#stateful').hide();	
+         //enblIpv6Lan.value=1;			
+         //[TODO] enable radvd-prefix (M=0,O=1,A=1) / enable-dhcp6s dns (stateful/statelsss)
+
+         $('tr.stateful').hide();
+         $('tr.stateful_dns').hide();
+         $('tr.stateless').show();	
+         break;
+      }
+      var dhcpv6StartTmp = ipv6IntfIDStartValue.split(':');         
+      if(dhcpv6StartTmp.length > 1)
+      {
+         v4v6_ipv6IntfIDStartTmp.value = parseInt(dhcpv6StartTmp[dhcpv6StartTmp.length-1],16);
+      }
+		 
+      var dhcpv6EndTmp = ipv6IntfIDEndValue.split(':');         
+      if(dhcpv6EndTmp.length > 1)
+      {
+         v4v6_ipv6IntfIDEndTmp.value = parseInt(dhcpv6EndTmp[dhcpv6EndTmp.length-1],16);
+      } 
+      v4v6_statelessRaTime.value = ipv6RaLifetimeValue;  
+      var temptime;
+      temptime=ipv6RaLifetimeValue;
+      v4v6_statefulRaTime_D.value=parseInt(temptime/1440);
+      temptime=temptime%1440;
+      v4v6_statefulRaTime_H.value=parseInt(temptime/60);
+      temptime=temptime%60;
+      v4v6_statefulRaTime_M.value=parseInt(temptime);
+   }
+}
+function btnSave() {
+   with ( document.forms[0] ) {
+      var msg = "";
+      //brName.value= SubnetBrName;
+      wanIfName.value = dnsIfcvalue;
+      if(editAction != 'editIPv6' && editAction != 'addIPv6')
+      {
+         //subnetname
+         if(subnetname.value=="")
+         {
+            msg = 'You should input the Subnet Name.';
+            AlertOpen(msg);
+            return false;
+         }
+         if(CheckDuplicateBrNAME() == -1)
+         {
+            AlertOpen('The subnet name ' + subnetname.value + ' already in used.');
+            return false;
+         }
+         if(isValidNameAllowSpace(subnetname.value) == false)
+         {
+            msg = 'The subnet name is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+         groupName.value=subnetname.value;
+         brName.value=subnetname.value;
+
+         //lanInterface
+         var tempitf="";
+         var ifchooseintf=0;
+
+         if(ethernet1.checked){
+            tempitf=tempitf+','+"eth0";
+            ifchooseintf++;
+         }
+         if(ethernet2.checked){
+            tempitf=tempitf+','+"eth1";
+            ifchooseintf++;
+         }
+         if(ethernet3.checked){
+            tempitf=tempitf+','+"eth2";
+            ifchooseintf++;
+         }
+         if(ethernet4.checked){
+            tempitf=tempitf+','+"eth3";
+            ifchooseintf++;
+         }
+         if(ssid1.checked){
+            tempitf=tempitf+','+"wl0";
+            ifchooseintf++;
+         }
+         if(ssid2.checked){
+            tempitf=tempitf+','+"wl0.1";
+            ifchooseintf++;
+         }
+         if(ssid3.checked){
+            tempitf=tempitf+','+"wl0.2";
+            ifchooseintf++;
+         }
+         if(ssid4.checked){
+            tempitf=tempitf+','+"wl0.3";
+            ifchooseintf++;
+         }
+         if(Feature5G == '1')
+         {
+            if(SSID1_5G.checked)
+            {
+               tempitf=tempitf+','+"eth4.1";
+               ifchooseintf++;
+            }
+            if(SSID2_5G.checked)
+            {
+               tempitf=tempitf+','+"eth4.2";
+               ifchooseintf++;
+            }
+            if(SSID3_5G.checked)
+            {
+               tempitf=tempitf+','+"eth4.3";
+               ifchooseintf++;
+            }
+            if(SSID4_5G.checked)
+            {
+               tempitf=tempitf+','+"eth4.4";
+               ifchooseintf++;
+            }
+         }
+         /* Check LAN/WAN and HPNA */
+         if(Feature5G == '0' && FeatureHPNA == '0')
+         {
+            if(lan_wan.checked)
+            {
+               tempitf=tempitf+','+"eth4";
+               ifchooseintf++;
+            }
+         }
+         else if(Feature5G == '0' && FeatureHPNA == '1')
+         {
+            if(hpna.checked)
+            {
+               tempitf=tempitf+','+"eth4";
+               ifchooseintf++;
+            }
+            if(lan_wan.checked)
+            {
+               tempitf=tempitf+','+"eth5";
+               ifchooseintf++;
+            }
+         }
+         else if(Feature5G == '1' && FeatureHPNA == '0')
+         {
+            if(lan_wan.checked)
+            {
+               tempitf=tempitf+','+"eth5";
+               ifchooseintf++;
+            }
+         }
+         else if(Feature5G == '1' && FeatureHPNA == '1')
+         {
+            if(hpna.checked)
+            {
+                tempitf=tempitf+','+"eth6";
+                ifchooseintf++;
+            }
+            if(lan_wan.checked)
+            {
+                tempitf=tempitf+','+"eth5";
+                ifchooseintf++;
+            }
+         }
+         if(parseInt(ifchooseintf)>0)
+            tempitf=tempitf+',';
+         else
+         {
+            msg = 'You should choose Lan Interface.';
+            AlertOpen(msg);
+            return false;
+         }
+
+         pmaplanIntf.value=tempitf;
+
+         //lanInterface
+         /* No need to check IPv4 for edit/add IPv6 */
+         if(enblIpv4Address[0].checked == false)
+         {
+            /* Not support the IPv4 Part */
+            ethIpAddress.value = "0.0.0.0";
+            ethSubnetMask.value = "0.0.0.0";
+            enblDhcpSrv[0].checked = false;
+            return true;
+         }
+		 
+         if ( isValidIpAddress(ethIpAddress.value) == false ) {
+            msg = 'The modem IP address entered in step 1 is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+
+         if ( isValidSubnetMask(ethSubnetMask.value) == false ) {
+            msg = 'The subnetmask entered in step 1 is invalid.';
+            AlertOpen(msg);
+            return false;
+         }
+
+         var lan_ip = ethIpAddress.value.split('.');
+         var lan_mask = ethSubnetMask.value.split('.');
+         var vip_ip = lan2IpAddress.split('.');
+         var vip_mask = lan2SubnetMask.split('.');
+         var lanDomain = new Array(2);
+
+         lanDomain[0] = "";
+         lanDomain[1] = "";
+         for (var i = 0 ; i < 4 ; i++) {
+            lanDomain[0] += lan_ip[i] & lan_mask[i];
+            lanDomain[1] += vip_ip[i] & vip_mask[i];
+            if (i != 3) {
+               lanDomain[0] += '.';
+               lanDomain[1] += '.';
+            }
+         }
+		 
+         if ((lanDomain[0] == wlDomain[0]) || (lanDomain[0] == wlDomain[1]) || lanDomain[0] == wlDomain[2] ||
+             (lanDomain[0] == lanDomain[1])) {
+            AlertOpen('The Modem IP address is used for other interface. Please enter a valid Modem IP Address.');
+            return false;
+         }
+         if(CheckDuplicateDomain() == -1)
+         {
+            return false;
+         }
+         if (dnsType[1].checked == true) {
+            if ( isValidIpAddress(dns_server_1.value) == false ) {
+               msg = 'The Primary DNS IP Address is invalid.';
+               AlertOpen(msg);
+               return false;
+            }
+
+            if(dns_server_2.value != "")
+            {
+               if ( isValidIpAddress(dns_server_2.value) == false ) {
+                  msg = 'The Secondary DNS IP Address is invalid.';
+                  AlertOpen(msg);
+                  return false;
+               }
+            }
+
+            if (dns_server_1.value == dns_server_2.value) {
+               AlertOpen('The Primary DNS IP is the same as the Secondary DNS IP Address.');
+               return false;
+            }
+
+            var dnsValue = dns_server_1.value + ',' + dns_server_2.value;
+            lanDnsServer.value = dnsValue;
+         } 
+         else 
+         {
+            lanDnsServer.value = "0.0.0.0,0.0.0.0";
+         }
+	  
+         if (isValidIpAddress(tmpDhcpEthStart.value) == false || 
+            !(isSameSubNet(ethIpAddress.value, ethSubnetMask.value, tmpDhcpEthStart.value, ethSubnetMask.value))) {
+            AlertOpen('The Beginning IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+         if (tmpDhcpEthStart.value == ethIpAddress.value) {
+            AlertOpen('The Beginning IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+            return false;
+         }
+
+         if ( isValidIpAddress(tmpDhcpEthEnd.value) == false ||
+            !(isSameSubNet(ethIpAddress.value, ethSubnetMask.value, tmpDhcpEthEnd.value, ethSubnetMask.value))) {
+            AlertOpen('The Ending IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+         if (tmpDhcpEthEnd.value == ethIpAddress.value) {
+            AlertOpen('The Ending IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+            return false;
+         }
+
+         var startAddr = tmpDhcpEthStart.value.split('.');
+         var endAddr = tmpDhcpEthEnd.value.split('.');
+         var startLast = parseInt(startAddr[3]);
+         var endLast = parseInt(endAddr[3]);
+         if (endLast < startLast) {
+            AlertOpen('The Ending IP Address is invalid. Please enter a valid IP address.');
+            return false;
+         }
+
+         var tmpDay = parseInt(day.value);
+         var tmpHour = parseInt(hour.value);
+         var tmpMinute = parseInt(minute.value);
+         if (isNaN(tmpDay) || tmpDay > 365) {
+            AlertOpen('The Day(s) is invalid. Please enter a valid Day(s) which is located from 0 to 365.');
+            return false;
+         }
+         if (isNaN(tmpHour) || tmpHour > 23) {
+            AlertOpen('The Hours is invalid. Please enter a valid Hours which is located from 0 to 23.');
+            return false;
+         }
+         if (isNaN(tmpMinute) || tmpMinute > 59) {
+            AlertOpen('The Minutes is invalid. Please enter a valid Minutes which is located from 0 to 59.');
+            return false;
+         }
+
+         dhcpLeasedTime.value = ((((parseInt(day.value) * 24) + parseInt(hour.value)) * 60) + parseInt(minute.value)) * 60;
+         if (dhcpLeasedTime.value < 60) {
+            AlertOpen('The Lease Time is zero. Please enter a valid Lease Time.');
+            return false;
+         }
+
+         dhcpEthStart.value = tmpDhcpEthStart.value;
+         dhcpEthEnd.value = tmpDhcpEthEnd.value;
+
+         if (!isSameSubNet(ethIpAddress.value, ethSubnetMask.value, oldEthIpAddress, oldSubnetMask) ||
+            ethIpAddress.value != oldEthIpAddress || ethSubnetMask.value != oldSubnetMask) {
+			
+            //comStr = "The Modem IP address or subnet mask is changed. Are you sure you want to apply?";
+            //ConfirmOpen(comStr, goSubmit);
+            //return false;		
+         } 
+         else 
+         {
+            /*
+            day.disabled = true;
+            hour.disabled = true;
+            minute.disabled = true;
+            tmpDhcpEthStart.disabled = true;
+            tmpDhcpEthEnd.disabled = true;
+            publicDhcpEthStart.disabled = true;
+            publicDhcpEthEnd.disabled = true;
+            dnsType[0].disabled = true;
+            dnsType[1].disabled = true;
+            dns_server_1.disabled = true;
+            dns_server_2.disabled = true;
+            return true;
+            */
+            // document.forms[0].submit();
+         }
+		 
+         if (modemipv6admin[0].checked == true)
+         {
+            /* Enable Admin Access */
+            lanSubnetAccess4.value = "1";
+         }
+         else
+         {
+            /* Disable Admin Access */
+            lanSubnetAccess4.value = "0";
+         }
+       }
+       return true;
+   }
+}
+
+
+function goSubmit() {
+   with ( document.forms[0] ) {
+      day.disabled = true;
+      hour.disabled = true;
+      minute.disabled = true;
+      tmpDhcpEthStart.disabled = true;
+      tmpDhcpEthEnd.disabled = true;
+      publicDhcpEthStart.disabled = true;
+      publicDhcpEthEnd.disabled = true;
+      dnsType[0].disabled = true;
+      dnsType[1].disabled = true;
+      dns_server_1.disabled = true;
+      dns_server_2.disabled = true;
+   }
+
+   document.forms[0].sessionKey.value = gblsessionKey;
+   document.forms[0].submit();
+}
+
+function btnApply() {
+   with ( document.forms[0] ) {
+      if (btnSave()&& btnv4v6Apply()) {
+         var x=document.getElementById("LanSubnetlPage");
+         x.action= 'advancedsetup_lansubnet.cgi';
+         if(editAction == 'editIPv6' || editAction == 'addIPv6')
+         {
+            pmapaction.value = "replace6";
+         }
+         else
+         {
+            pmapaction.value = "replace";
+         }
+         pmaprml.value=SubnetBrName;
+      }
+      else
+          return false;
+   }
+   document.forms[0].sessionKey.value = gblsessionKey;
+   document.forms[0].submit();
+}
+function btnv4v6Apply() 
+{
+   with ( document.forms[0] ) {
+      var msg = "";
+      switch (ipv6LanMode.value){
+      case 'Disabled':
+         lanSubnetAccess6.value = "0";
+         v4v6_onoffParameter('Disabled');
+         break;
+      
+      case 'Stateful':
+         //ULA Prefix
+         ipv6UlaPrefix.value=v4v6_statefululaprefix.value+"/64";
+         if (isValidULAPrefix(v4v6_statefululaprefix.value) == false) {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return false;
+    	 }
+
+         if (checkIPv6(v4v6_statefululaprefix.value) == false) {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return false;
+         }
+		 
+         if(CheckDuplicateULAPrefix(v4v6_statefululaprefix.value) == -1)
+         {
+            return false;
+         }
+         //ULA Address for br
+         lanIntfAddr6.value=v4v6_statefululaprefix.value+"1"+"/64";
+
+         var Subnettemp = CheckAndGetPrefixSubnetID(v4v6_statefulNAprefix.value,v4v6_statefulNAplen.value, g_PDprefix, g_PDplen);
+         if(CheckDuplicatePrefix(Subnettemp) == -1)
+         {
+            return false;
+         }
+         if(parseInt(Subnettemp)==-1){
+            ipv6SubnetNumber.value = "";
+            return false;
+         }
+         else if((parseInt(Subnettemp) <0) || (parseInt(Subnettemp)> 255))
+         {
+            AlertOpen(" The Network Address is invalid.  ");
+            ipv6SubnetNumber.value = "";
+            return false;
+         }
+         else
+            ipv6SubnetNumber.value = Subnettemp;
+		 
+         //New Stateful RA time, DHM->M
+         if(isValidDecKey(v4v6_statefulRaTime_D.value)==false || 
+            isValidDecKey(v4v6_statefulRaTime_H.value)==false || 
+            isValidDecKey(v4v6_statefulRaTime_M.value)==false ){
+            msg = "The router advertisement lifetime is not valid.";
+            AlertOpen(msg);
+            return false; 	            
+         }
+
+         if(v4v6_statefulRaTime_D.value == ''  && 
+            v4v6_statefulRaTime_H.value == ''  && 
+            v4v6_statefulRaTime_M.value == ''  ){
+            msg = "The router advertisement lifetime is not valid.";
+            AlertOpen(msg);
+            return false; 	            
+         }
+         tmpRaltime = parseInt(v4v6_statefulRaTime_D.value*1440) + parseInt(v4v6_statefulRaTime_H.value*60) + parseInt(v4v6_statefulRaTime_M.value);
+         ipv6RaLifetime.value=tmpRaltime;
+		 	
+         //DHCPv6
+         if( (v4v6_ipv6IntfIDStartTmp.value=='' || isValidDecKey(v4v6_ipv6IntfIDStartTmp.value)==false || v4v6_ipv6IntfIDStartTmp.value < 2 || v4v6_ipv6IntfIDStartTmp.value > 111)
+				   ||(v4v6_ipv6IntfIDEndTmp.value=='' || isValidDecKey(v4v6_ipv6IntfIDEndTmp.value)==false || v4v6_ipv6IntfIDEndTmp.value < 2 || v4v6_ipv6IntfIDEndTmp.value > 111) )
+         {
+            msg = "The LAN IPv6 address range is not valid.";
+            AlertOpen(msg);
+            return false;  				
+         }
+         if( parseInt(v4v6_ipv6IntfIDStartTmp.value,10) > parseInt(v4v6_ipv6IntfIDEndTmp.value,10) )
+         {
+            msg = "The LAN IPv6 address range is not valid.";
+            AlertOpen(msg);
+            return false;  				
+         }
+         ipv6IntfIDStart.value = "0:0:0:" + decToHex(v4v6_ipv6IntfIDStartTmp.value,16);
+         ipv6IntfIDEnd.value = "0:0:0:" + decToHex(v4v6_ipv6IntfIDEndTmp.value,16);
+
+         dns6Type.value= g_dns6type;
+         dns6Pri.value= g_dns6pri;
+         dns6Sec.value= g_dns6sec;	
+         dns6Ifc.value = dnsIfcvalue;
+         //stateful dns part
+         if (v4v6_dhcpv6_dns_type[0].checked == true)
+         {
+            localdns6Type.value = "Default";
+         }
+         else
+         {
+            localdns6Type.value = "Custom";
+            if (v4v6_dhcpv6_dns_primary.value == "" && v4v6_dhcpv6_dns_secondary.value == "") {
+               AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+               return false;
+            }
+				
+            if (v4v6_dhcpv6_dns_primary.value != "" && (isValidIpAddress6(v4v6_dhcpv6_dns_primary.value) == false)) {
+               AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+               return false;
+            }
+				
+            if (v4v6_dhcpv6_dns_secondary.value != "" && (isValidIpAddress6(v4v6_dhcpv6_dns_secondary.value) == false)) {
+               AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+               return false;
+            }
+				
+            if (v4v6_dhcpv6_dns_primary.value == v4v6_dhcpv6_dns_secondary.value){
+               AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+               // AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+               return false;
+            }
+				
+            if (v4v6_dhcpv6_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+               if (v4v6_dhcpv6_dns_secondary.value != ""){
+                  AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+                  return false;
+               }
+            }
+				
+            if (v4v6_dhcpv6_dns_secondary.value == "")
+               v4v6_dhcpv6_dns_secondary.value="";
+
+            localdns6Pri.value = v4v6_dhcpv6_dns_primary.value;
+            localdns6Sec.value = v4v6_dhcpv6_dns_secondary.value;
+         }
+         if (v4v6_statefulmodemipv6admin[0].checked == true)
+         {
+            /* Enable Admin Access */
+            lanSubnetAccess6.value = "1";
+         }
+         else
+         {
+            /* Disable Admin Access */
+            lanSubnetAccess6.value = "0";
+         }	 
+         v4v6_onoffParameter('Stateful');
+         break;
+   
+      case 'Stateless':
+         //ULA Prefix
+         ipv6UlaPrefix.value=v4v6_statelessulaprefix.value+"/64";
+
+         if (isValidULAPrefix(v4v6_statelessulaprefix.value) == false) {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return false;
+          }
+
+         if (checkIPv6(v4v6_statelessulaprefix.value) == false) {
+            AlertOpen(" The ULA Prefix is invalid.  ");
+            return false;
+         }
+
+         if(CheckDuplicateULAPrefix(v4v6_statelessulaprefix.value) == -1)
+         {
+            return false;
+         }
+         //ULA Address for br
+         lanIntfAddr6.value=v4v6_statelessulaprefix.value+"1"+"/64";
+         var Subnettemp = CheckAndGetPrefixSubnetID(v4v6_statelessNAprefix.value,v4v6_statelessNAplen.value, g_PDprefix, g_PDplen);
+         if(CheckDuplicatePrefix(Subnettemp) == -1)
+         {
+            return false;
+         }
+         if(parseInt(Subnettemp)==-1){
+            ipv6SubnetNumber.value = "";
+            return false;
+         }
+         else if((parseInt(Subnettemp) <0) || (parseInt(Subnettemp)> 255))
+         {
+            AlertOpen(" The Network Address is invalid.  ");
+            ipv6SubnetNumber.value = "";
+            return false;
+         }
+         else
+            ipv6SubnetNumber.value = Subnettemp;
+		 
+         //RA time
+         if(v4v6_statelessRaTime.value == '' || isValidDecKey(v4v6_statelessRaTime.value)==false ){
+            msg = "The router advertisement lifetime is not valid.";
+            AlertOpen(msg);
+            return false; 	            
+         } 
+         tmpRaltime = v4v6_statelessRaTime.value;	            
+         if( tmpRaltime < 0 ||
+            (tmpRaltime >0 && !(tmpRaltime >= 2 && tmpRaltime <= 150)))
+         {
+            msg = "The router advertisement lifetime is not valid.";
+            AlertOpen(msg);
+            return false;            
+         }
+         ipv6RaLifetime.value = tmpRaltime;
+		 
+         if (v4v6_statlessmodemipv6admin[0].checked == true)
+         {
+            /* Enable Admin Access */
+            lanSubnetAccess6.value = "1";
+         }
+         else
+         {
+            /* Disable Admin Access */
+            lanSubnetAccess6.value = "0";
+         }
+         dns6Type.value=g_dns6type;
+         dns6Pri.value=g_dns6pri;
+         dns6Sec.value=g_dns6sec;	
+         dns6Ifc.value = dnsIfcvalue;
+         v4v6_onoffParameter('Stateless');
+         break;
+      }
+   }
+   return true;
+}
+function v4v6_onoffParameter(type)
+{
+   with ( document.forms[0] ) {
+      if(type=='Stateful')
+      {
+         ipv6RaLifetime.disabled=false;
+         ipv6IntfIDStart.disabled=false;
+         ipv6IntfIDEnd.disabled=false;
+      }
+      else if(type=='Stateless')
+      {
+         ipv6RaLifetime.disabled=false;
+         ipv6IntfIDStart.disabled=true;
+         ipv6IntfIDEnd.disabled=true;
+      }
+      else
+      {
+         //Disabled
+         ipv6RaLifetime.disabled=true;
+         ipv6IntfIDStart.disabled=true;
+         ipv6IntfIDEnd.disabled=true;
+      }
+      v4v6_statelessRaTime.disabled=true;		
+      v4v6_ipv6IntfIDStartTmp.disabled=true;
+      v4v6_ipv6IntfIDEndTmp.disabled=true;
+   }
+}
+
+function changeipv6LanMode()
+{
+   with ( document.forms[0] ) {
+      if(v4v6_lan_connection_type.selectedIndex==0)//stateless
+      {
+         if(g_lanprefix != '')
+         {
+            v4v6_statelessNAprefix.value=g_lanprefix;
+            v4v6_statelessNAplen.value=g_lanplen;
+         }
+         else
+         {
+            v4v6_statelessNAprefix.value=g_PDprefix;
+            v4v6_statelessNAplen.value=g_PDplen;
+         }
+
+         if(g_ulaprefix != '')
+            v4v6_statelessulaprefix.value = g_ulaprefix.slice(0,g_ulaprefix.lastIndexOf("/"));
+         else
+            v4v6_statelessulaprefix.value = g_ulaprefix.slice(0,g_ulaprefix.lastIndexOf("/"));
+		 
+         var ula = g_ulaaddr.slice(0,g_ulaaddr.lastIndexOf("/"));
+         $('#v4v6_statelessulaaddr').text(ula);
+         $('tr.stateful_dns').hide();
+      }
+      else if(v4v6_lan_connection_type.selectedIndex==1)//stateful
+      {
+         if(g_lanprefix != '')
+         {
+            v4v6_statefulNAprefix.value=g_lanprefix;
+            v4v6_statefulNAplen.value=g_lanplen;
+         }
+         else
+         {
+            v4v6_statefulNAprefix.value=g_PDprefix;
+            v4v6_statefulNAplen.value=g_PDplen;
+         }
+         if(g_ulaprefix != '')
+            v4v6_statefululaprefix.value = g_ulaprefix.slice(0,g_ulaprefix.lastIndexOf("/"));
+         else
+            v4v6_statefululaprefix.value = "fd00";
+		 
+         var ula = g_ulaaddr.slice(0,g_ulaaddr.lastIndexOf("/"));
+         $('#v4v6_statefululaaddr').text(ula);
+         if (g_dns6type =='Static')
+         {
+            v4v6_dhcpv6_dns_type[1].checked=true;
+            v4v6_dhcpv6_dns_primary.value = g_dns6pri;
+            v4v6_dhcpv6_dns_secondary.value = g_dns6sec;
+            $('tr.stateful_dns').show();
+         }
+         else
+         {
+            v4v6_dhcpv6_dns_type[0].checked=true;	
+            $('tr.stateful_dns').hide();
+         }	
+      }
+      else if(v4v6_lan_connection_type.selectedIndex==2)//disalbe
+      {
+         /* Do notghing  */
+      }
+   }
+}
+
+function removeClick(rml) {
+   with ( document.forms[0] ) {
+      var x=document.getElementById("LanSubnetlPage");
+      x.action= 'advancedsetup_lansubnet.cgi';
+      pmapaction.value="remove";
+      pmaprml.value=rml;
+      if(l2Intf==1)
+         wanIfName.value="atm0";
+      else if(l2Intf==2)
+         wanIfName.value="ptm0.1";		
+      }
+      document.forms[0].sessionKey.value = gblsessionKey;	
+      document.forms[0].submit();
+      return;
+}
+function EditIPv6Click(groupList) {
+   with ( document.forms[0] ) 
+   {
+      var x=document.getElementById("LanSubnetlPage");
+      x.action= 'advancedsetup_editlansubnet.cgi';
+      pmapaction.value="editIPv6";
+      brName.value=groupList;
+      document.forms[0].submit();
+   }
+}
+
+function AddIPv6Click(groupList) {
+   with ( document.forms[0] ) 
+   {
+      var x=document.getElementById("LanSubnetlPage");
+      x.action= 'advancedsetup_editlansubnet.cgi';
+      pmapaction.value="addIPv6";
+      brName.value=groupList;
+      document.forms[0].submit();
+   }
+}
+function EditClick(groupList) {
+   with ( document.forms[0] ) 
+   {
+      var x=document.getElementById("LanSubnetlPage");
+      x.action= 'advancedsetup_editlansubnet.cgi';
+      pmapaction.value="replace";
+      brName.value=groupList;
+      document.forms[0].submit();
+   }
+}
+
+function CancelApply() {
+   with ( document.forms[0] ) 
+   {
+      var x=document.getElementById("LanSubnetlPage");
+      x.action= 'advancedsetup_lansubnet.html';
+      document.forms[0].submit();
+   }
+}
+
+function ShowHide5GLanInterface()
+{
+   with ( document.forms[0] ) {
+      if(Feature5G == '0')
+      {
+         /* Need to hide all 5G infomation */
+         document.getElementById('5G_SSID1').style.display = "none";
+         document.getElementById('5G_SSID2').style.display = "none";
+         document.getElementById('5G_SSID3').style.display = "none";
+         document.getElementById('5G_SSID4').style.display = "none";
+
+         document.getElementById('5G_SSID1_text').style.display = "none";
+         document.getElementById('5G_SSID2_text').style.display = "none";
+         document.getElementById('5G_SSID3_text').style.display = "none";
+         document.getElementById('5G_SSID4_text').style.display = "none";
+      }
+      else
+      {
+         document.getElementById("24G_SSID1_text").innerHTML = '2.4GHz SSID1:';
+         document.getElementById("24G_SSID2_text").innerHTML = '2.4GHz SSID2:';
+         document.getElementById("24G_SSID3_text").innerHTML = '2.4GHz SSID3:';
+         document.getElementById("24G_SSID4_text").innerHTML = '2.4GHz SSID4:';
+      }
+   }
+}
+
+function ShowHideHPNAInterface()
+{
+   with ( document.forms[0] ) {
+      if(FeatureHPNA == '0')
+      {
+         /* Need to hide all HPNA infomation */
+         document.getElementById('hpna_text').style.display = "none";
+         document.getElementById("hpna").style.display = "none";
+      }
+   }
+}
+
+</SCRIPT>
+   </head>
+   <body id="advancedsetup_editlansubnet" onLoad='frmLoad()'>
+   <div id="wrapper">
+      <div id="masthead">
+         <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+         <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+         WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+         <a href="help.html" title="Click here to launch" class="helplink">help</a>
+         <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+         WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	   WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+      WriteAdvancedSetupMenuHeader('lansubnet');
+</script>
+      </ul>
+      <div id="subnav_footer">
+      </div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+         WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+         </div>
+      </div>
+   </div>
+   <div id="content_right">
+      <div id="content_right_contentarea">
+         <h1 class="advancedsetup_editlansubnet"  id="headTitle">LAN Subnets <span>Your Broadband router can support multiple LAN subnet settings. Use the DHCP Settings page to configure the default IPv4 subnet.</span></h1>
+         <form id="LanSubnetlPage" action="advancedsetup_editlansubnet.cgi" method="post">
+            <input size="15" type="hidden" name="sessionKey" id="sessionKey" value="" />
+            <input size="15" type="hidden" name="dhcpLeasedTime" />
+            <input size="15" type="hidden" name="dhcpEthStart" />
+            <input size="15" type="hidden" name="dhcpEthEnd" />
+            <input size="15" type="hidden" name="publicDhcpEthStart" />
+            <input size="15" type="hidden" name="publicDhcpEthEnd" />
+            <input size="15" type="hidden" name="lanDnsServer" />
+            <input name="ipv6RaLifetime" type="hidden" value="" />   
+            <input name="ipv6SubnetNumber" type="hidden" value="0" />
+            <input name="ipv6IntfIDStart" type="hidden" />
+            <input name="ipv6IntfIDEnd" type="hidden" />
+            <input type="hidden" name="dns6Type" id="dns6Type" value="Static">
+            <input type="hidden" name="dns6Pref" id="dns6Pref" value="">				
+            <input type="hidden" name="dns6Pri" id="dns6Pri" value="">	
+            <input type="hidden" name="dns6Sec" id="dns6Sec" value="">
+            <input type="hidden" name="dns6Ifc" id="dns6Ifc" value="">
+            <input type="hidden" name="localdns6Type" id="localdns6Type" value="Default">
+            <input type="hidden" name="localdns6Pri" id="localdns6Pri" value="">				
+            <input type="hidden" name="localdns6Sec" id="localdns6Sec" value="">	
+            <input type="hidden" name="ipv6UlaPrefix" id="ipv6UlaPrefix" value="">
+            <input type="hidden" name="lanIntfAddr6" id="lanIntfAddr6" value="">		
+            <input type="hidden" name="subnetaction" id="subnetaction" value="">	
+            <input type="hidden" name="groupName" id="groupName" value="">	
+            <input type="hidden" name="pmaplanIntf" id="pmaplanIntf" value="">	
+            <input type="hidden" name="wanIfName" id="wanIfName" value="">	
+            <input type="hidden" name="pmapaction" id="pmapaction" value="">	
+            <input type="hidden" name="intfSts" id="intfSts" value="">	
+            <input type="hidden" name="brdSts" id="brdSts" value="">	
+            <input type="hidden" name="pmaprml" id="pmaprml" value="">	
+            <input type="hidden" name="brName" id="brName" value="">
+            <input type="hidden" name="lanSubnetAccess4" id="lanSubnetAccess4" value="1">
+            <input type="hidden" name="lanSubnetAccess6" id="lanSubnetAccess6" value="1">
+            <!--  subnet name    -->
+            <div class="setsubnetname">
+            <div class="stepWrapper">
+               <p id ="SubnetNameTitle"><strong>Enter the LAN subnet name. </strong></p>
+               <table>
+                  <tr>
+                     <td width="150">LAN Subnet Name: </td>
+                     <td><input name="subnetname" id="subnetname" type="text" value="" /> </td>
+                  </tr>
+               </table>
+            </div>
+            </div>
+            <!--  subnet done    -->
+            <!--  interface    -->
+            <div class="setinterface">
+            <div class="stepWrapper">
+               <p id ="InterfaceTitle"><strong>Set the interface(s) associated with the subnet. </strong></p>
+               <table>
+                  <tr>
+                     <td width="80"><label for="ethernet1">Ethernet 1:</label></td>
+                     <td width="40"><input type="checkbox" name="ethernet1" id="ethernet1" disabled="true" /></td>
+                     <td width="80"><label for="ssid1" id='24G_SSID1_text'>SSID 1:</label></td>
+                     <td width="40"><input type="checkbox" name="ssid1" id="ssid1" disabled="true" /></td>
+                     <td width="80" id='5G_SSID1_text'><label for="SSID1_5G">5GHz SSID1:</label></td>
+                     <td width="40"><input type="checkbox" name="SSID1_5G" id="5G_SSID1" disabled="true" /></td>
+                     <td width="80" style = "display:none"><label for="lan_wan">LAN/WAN:</label></td>
+                     <td width="40" style = "display:none"><input type="checkbox" name="lan_wan" id="lan_wan" disabled="true" /></td>
+                     <td width="80"><label for="All_Intf">All:</label></td>
+                     <td width="40"><input type="checkbox" name="All_Intf" id="All_Intf" onClick="intfChange()"/></td>
+                  </tr>
+                  <tr>
+                     <td><label for="ethernet2">Ethernet 2:</label></td>
+                     <td><input type="checkbox" name="ethernet2" id="ethernet2" disabled="true"/></td>
+                     <td><label for="ssid2"  id='24G_SSID2_text'>SSID 2:</label></td>
+                     <td><input type="checkbox" name="ssid2" id="ssid2" disabled="true" /></td>
+                     <td id='5G_SSID2_text'><label for="SSID2_5G">5GHz SSID2:</label></td>
+                     <td><input type="checkbox" name="SSID2_5G" id="5G_SSID2" disabled="true" /></td>
+                     <td><label for="hpna" id="hpna_text">HPNA:</label></td>
+                     <td id="hpna_checkbox"><input type="checkbox" name="hpna" id="hpna"  disabled="true" /> </td>
+                  </tr>
+                  <tr>
+                     <td><label for="ethernet3">Ethernet 3:</label></td>
+                     <td><input type="checkbox" name="ethernet3" id="ethernet3" disabled="true" /></td>
+                     <td><label for="ssid3" id='24G_SSID3_text'>SSID 3:</label></td>
+                     <td><input type="checkbox" name="ssid3" id="ssid3" disabled="true" /></td>
+                     <td id='5G_SSID3_text'><label for="SSID3_5G">5GHz SSID3:</label></td>
+                     <td><input type="checkbox" name="SSID3_5G" id="5G_SSID3" disabled="true" /></td>
+                     <td></td>
+                     <td></td>
+                  </tr>
+                  <tr>
+                     <td><label for="ethernet4">Ethernet 4:</label></td>
+                     <td><input type="checkbox" name="ethernet4" id="ethernet4" disabled="true" /></td>
+                     <td><label for="ssid4" id='24G_SSID4_text'>SSID 4:</label></td>
+                     <td><input type="checkbox" name="ssid4" id="ssid4" disabled="true" /></td>
+                     <td id='5G_SSID4_text'><label for="SSID4_5G">5GHz SSID4:</label></td>
+                     <td><input type="checkbox" name="SSID4_5G" id="5G_SSID4" disabled="true" /></td>
+                     <td></td>
+                     <td></td>
+                  </tr>
+               </table>
+            </div>
+            </div>
+            <!--  interface done   -->
+            <div class="lansubnet_ipv4">
+            <div class="stepWrapper">
+               <p id ="IPv4Title"><strong>Sets the IPv4 state and addressing.</strong></p>
+               <table>
+               	  <tr>
+                     <td width="33%">IPv4 Addressing State:</td>
+                     <td width="33%"><input name="enblIpv4Address" id="enabled" type="radio" value="1" onClick='dhcpTypeChange(1)' /> Enable</td>
+                     <td width="33%"><input name="enblIpv4Address" id="disabled" type="radio" value="0" onClick='dhcpTypeChange(0)' /> Disable</td>
+                  </tr>
+                  <tr class="showenable">
+                     <td>Network Address:</td>
+                     <td><input maxlength="15" size="20" name="ethDomainAddress" value="" onChange="setGatewayAddresses()" /></td>
+                     <td>&nbsp;</td>
+                  </tr>
+                  <tr class="showenable">
+                     <td>Subnetmask: </td>
+                     <td><input maxlength="15" size="20" name="ethSubnetMask" value="" onChange="setGatewayAddresses()" /></td>
+                     <td>&nbsp;</td>
+                  </tr>
+                  <tr class="showenable">
+                     <td>Gateway Address:</td>
+                     <td><input maxlength="15" size="20" name="ethIpAddress" value="" onChange="setDhcpAddresses()" /></td>
+                     <td>&nbsp;</td>
+                  </tr>
+                  <tr class="showenable">
+                     <td>Modem IPv4 Admin Access: </td>
+                     <td><input name="modemipv6admin" id="modemipv6adminenabled" type="radio" value="1" /> Enable</td>
+                     <td><input name="modemipv6admin" id="modemipv6admindisabled" type="radio" value="0" checked="checked"/> Disable</td>
+                  </tr>
+
+                  <tr class="showenable"> 
+                     <td>DHCP Server State: </td>
+                     <td><input name="enblDhcpSrv" id="Srvenabled" type="radio" onclick="dhcpSrvTypeChange()" value="1" /> Enable</td>
+                     <td><input name="enblDhcpSrv" id="Srvdisabled" type="radio" onclick="dhcpSrvTypeChange()" value="0" checked="checked"/> Disable</td>
+                  </tr>                 
+                  <tr class="showenable2">
+                     <td>Beginning DHCP Address:</td>
+                     <td><input maxlength="15" size="20" name="tmpDhcpEthStart" onChange="changeEthEnd(this.value)" /></td>
+                     <td>&nbsp;</td>
+                  </tr>
+                  <tr class="showenable2">
+                     <td>Ending DHCP Address: </td>
+                     <td><input maxlength="15" size="20" name="tmpDhcpEthEnd" onChange="changeEthStart(this.value)" /></td>
+                     <td>&nbsp;</td>
+                  </tr>
+                  <tr class="showenable2">
+                    <td> DHCP Server Lease Time:</td>                                
+                    <td colspan="2">
+                    <input name="day" type="text" maxlength="3" size="5" value="1" onChange='changeleasetime()' /> Day(s)
+                    <input name="hour" type="text" maxlength="2" size="5" value="12" onChange='changeleasetime()'/> Hours
+                    <input name="minute" type="text" maxlength="2" size="5" value="30" onChange='changeleasetime()'/> Minutes
+                    </td>
+                  </tr>
+                  <tr class="showenable2">
+                     <td> DHCP DNS Type:</td>
+                     <td><input name="dnsType" type="radio" onclick="DNSTypeChange()" checked="checked"/> Default Servers</td>
+                     <td><input name="dnsType" type="radio" onclick="DNSTypeChange()"/> Custom Servers</td>
+                  </tr>
+                  <tr class="dns_group">
+                     <td>Primary DNS: </td>
+                     <td colspan="2"><input maxlength="20" size="20" name="dns_server_1" id="dns_server_1" value="192.168.0.1" onClick="highlight(this);"/></td>
+                  </tr>
+                  <tr class="dns_group">
+                     <td>Secondary DNS: </td>
+                     <td colspan="2"><input maxlength="20" size="20" name="dns_server_2" id="dns_server_2" value="" onClick="highlight(this);"/></td>
+                  </tr>                    
+               </table>
+            </div>
+            </div>
+            <div id="step3_disabled" class="greyed_out" style="display:none;">
+               <div class="stepWrapper">
+               </div>
+            </div>               
+			<div class="stepWrapper">
+              <p id ="IPv6Title"><strong>Set the IPv6 LAN Subnet addressing paremeters.(optional) </strong></p>
+              <table>
+                <tr>
+                  <td width="33%"><label for="v4v6_lan_connection_type">LAN Connection Type:</label></td>
+                  <td width="33%">
+                  <select name="ipv6LanMode" id="v4v6_lan_connection_type" onChange="changeipv6LanMode()">
+                    <option value="Stateless">Stateless</option>
+                    <option value="Stateful">Stateful(DHCPv6)</option>
+                    <option value="Disabled" selected="selected">Disabled</option>
+                  </select></td>
+                  <td width="33%">&nbsp;</td>
+                </tr>
+                <!-- Statless Part-->                
+				<tr class="stateless">
+                  <td>Network Address:</td>
+                  <td><input name="v4v6_statelessNAprefix" type="text" id="v4v6_statelessNAprefix" value="" size="20" /></td>
+                  <td>/ <input name="v4v6_statelessNAplen" type="text" id="v4v6_statelessNAplen" value="" size="5" /></td>
+                </tr>
+				<tr class="stateless">
+                  <td>ULA Prefix</td>
+                  <td><input name="v4v6_statelessulaprefix" type="text" id="v4v6_statelessulaprefix" value="fd00::" size="20" onChange="updateULAAddress(0)"/></td>
+                  <td>/64</td>
+                </tr>
+                <tr class="stateless">
+                  <td>Router ULA Address</td>
+                  <td id="v4v6_statelessulaaddr"></td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr class="stateless">
+                  <td>Router Advertisement Lifetime:</td>
+                  <td><input name="v4v6_statelessRaTime" type="text" id="v4v6_statelessRaTime" value="30" size="20" /></td>
+                  <td>Minutes</td>
+                </tr>
+  				<tr class="stateless">
+                  <td>Modem IPv6 Admin Access:</td>
+                  <td><input name="v4v6_statlessmodemipv6admin" type="radio" /> Enable</td>
+                  <td><input name="v4v6_statlessmodemipv6admin" type="radio" checked="checked"/> Disable</td>
+             	</tr>
+                <!-- Stateful Part--> 
+				<tr class="stateful">
+                  <td>Network Address:</td>
+                  <td><input name="v4v6_statefulNAprefix" type="text" id="v4v6_statefulNAprefix" value="" size="20" /></td>
+                  <td>/&nbsp;&nbsp;<input name="v4v6_statefulNAplen" type="text" id="v4v6_statefulNAplen" value="" size="5" /></td>
+                </tr>
+                <tr class="stateful">
+	              <td>LAN IPv6 Address Range</td>
+	              <td><input name="v4v6_ipv6IntfIDStartTmp" type="text" id="v4v6_ipv6IntfIDStartTmp" value="2" size="20" /></td>
+	              <td>to&nbsp;<input name="v4v6_ipv6IntfIDEndTmp" type="text" id="v4v6_ipv6IntfIDEndTmp" value="111" size="15" /></td>
+	            </tr>
+				<tr class="stateful">
+                  <td>ULA Prefix</td>
+                  <td><input name="v4v6_statefululaprefix" type="text" id="v4v6_statefululaprefix" value="fd00::" size="20" onChange="updateULAAddress(0)"/></td>
+                  <td>/64</td>
+                </tr>
+                <tr class="stateful">
+                  <td>Router ULA Address</td>
+                  <td id="v4v6_statefululaaddr"></td>
+                  <td>&nbsp;</td>
+                </tr>
+        		<tr class="stateful">
+                  <td><label for="v4_dhcpv6_dns_type"> IPv6 DNS Type:</label></td>
+                  <td><label>
+                    <input name="v4v6_dhcpv6_dns_type" type="radio" id="v4v6_dhcpv6_dns_type_dynamic" value="v4v6_dhcpv6_dns_type_dynamic" checked="checked" />
+                    Default  Servers</label></td>
+                  <td><label>
+                    <input name="v4v6_dhcpv6_dns_type" type="radio" id="v4v6_dhcpv6_dns_type_static" value="v4v6_dhcpv6_dns_type_static" />
+                    Custom  Servers</label></td>
+                </tr>
+                <tr class="stateful_dns">
+                  <td><label for="v4v6_dhcpv6_dns_primary">Primary DNS:</label></td>
+                  <td colspan="2"><input type="text" id="v4v6_dhcpv6_dns_primary" value="2001:428::1" size="20" /></td>
+                </tr>
+                <tr class="stateful_dns">
+                  <td><label for="v4v6_dhcpv6_dns_secondary">Secondary DNS:</label></td>
+                  <td colspan="2"><input type="text" id="v4v6_dhcpv6_dns_secondary" value="2001:428::2" size="20" /></td>
+                </tr>
+                <tr class="stateful">
+                  <td>IPv6 DHCP Server Lease Time:</td>
+                  <td colspan="2">
+                  <input name="v4v6_statefulRaTime_D" type="text" id="v4v6_statefulRaTime_D" value="1" size="5" />Day(s)  
+				  <input name="v4v6_statefulRaTime_H" type="text" id="v4v6_statefulRaTime_H" value="0" size="5" />Hours  
+				  <input name="v4v6_statefulRaTime_M" type="text" id="v4v6_statefulRaTime_M" value="0" size="5" />Minutes
+                  </td>
+                </tr>
+  				<tr class="stateful">
+                  <td>Modem IPv6 Admin Access:</td>
+                  <td><input name="v4v6_statefulmodemipv6admin" type="radio" /> Enable</td>
+                  <td><input name="v4v6_statefulmodemipv6admin" type="radio" checked="checked"/> Disable</td>
+             	</tr>         		
+              </table>
+            </div>
+            <div class="applyReplace">
+               <div class="stepWrapper">
+                  <p id ="ReplaceTitle"><strong>Click &quot;Replace&quot; to save your changes or &quot;Cancel&quot; to discard.</strong></p>
+                  <a href="#" class="btn apply_btn" onClick="btnApply();">Replace</a>
+                  <a href="#" class="btn apply_btn" onClick="CancelApply();">Cancel</a>
+               </div>
+            </div>
+            <div class="applyAdd">
+               <div class="stepWrapper">
+                  <p id ="ApplyTitle"><strong>Click &quot;Add&quot; to save your changes.</strong></p>
+                  <a href="#" class="btn apply_btn" onClick="btnApply();">Add</a>
+               </div>
+            </div>
+            <p>&nbsp;</p>
+            <div class="lansubnet">
+               <table>
+               <tr>
+                  <th width="11%"></th>
+                  <th width="14%"></th>
+                  <th width="20%"></th>
+                  <th width="20%"></th>
+                  <th width="15%"></th>
+                  <th width="15%"></th>
+               </tr>
+               <tr>
+                  <th colspan="6" class="tableTitle">Subnet List</th>
+               </tr>
+               <tr>
+                  <th width="5%">Lan Name </th>
+                  <th width="5%">LAN Interface </th>
+                  <th width="20%">IPv4 Subnet </th>
+                  <th width="20%">IPv6 Subnet </th>
+                  <th width="20%">Edit</th>
+                  <th width="10%">Remove</th>
+               </tr>
+                  <%ejGetOtherBig(subnettable)%>              
+               </table>
+            </div>
+         </form>
+      </div>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+   </div>
+   </body>
+</html>

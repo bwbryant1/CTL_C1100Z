@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.showpassword-1.0.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var info="<%ejGetOther(RemoteGUI)%>"
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var portForwardingall = '<%ejGetOtherBig(portMap, all)%>';
+
+function hideOther(element, hide) {
+  var status = ''; //don,t use block to fix the bug for some browser such as Firefox, Chorme.., Steven
+   if (window.ActiveXObject) { // IE,...
+      status =  "block";   
+   } else if (window.XMLHttpRequest) { // Mozilla, Safari,...
+      status = "table-row";
+   } 
+
+   if ( hide == 1 ){
+	status = "none";
+   }
+
+   if (document.getElementById){  // DOM3 = IE5, NS6
+	document.getElementById(element).style.display = status;
+   }
+   else {
+      if (document.layers == false){ // IE4
+		document.getElementById(element).style.display = status;
+      }
+   }
+}
+
+function show_password_change(){
+   with ( document.forms[0] ) {
+      if(show_password.checked == true)
+      {
+      	 hideOther("PasswordConfirmID", 1);
+      }   
+      else{
+      	 hideOther("PasswordConfirmID", 0);
+      }
+   }	
+}
+
+function checkPortCover( cS, cE, rS, rE ) {
+	if ( cS >= rS && cS <= rE ) {
+		return true;
+	}
+	else if ( cE >= rS && cE <= rE ) {
+		return true;
+	}
+	else if ( rS >= cS && rS <= cE ) {
+		return true;
+	}
+	else if ( rE >= cS && rE <= cE ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function btnApply()
+{
+		var infos = info.split('|');
+		with(document.forms[0])
+		{
+			if(httpsdRemoteEnable.selectedIndex != 0 ) {
+			
+				if(adminUserName.value==''){
+					AlertOpen("An admin username and password must be entered to enable remote GUI.\nEnter an admin username and password in step 2");
+					return false;
+				}
+				
+				if(adminPassword.value=='')
+				{
+					AlertOpen("An admin username and password must be entered to enable remote GUI.\nEnter an admin username and password in step 2");
+					return false;
+				}			
+			}
+
+			if(show_password.checked==false)
+			{
+				if(PasswordConfirm.value!=adminPassword.value)
+				{
+					AlertOpen("The administrative passwords entered do not match. Please enter matching passwords.");
+					return false;
+				}
+			}	
+			
+			if(!isValidName(adminUserName.value)){
+				AlertOpen("The admin username is invalid.\nEnter other admin username in step 2");
+				return false;
+			}
+			
+			if(!checkLength(adminPassword.value))
+			{
+			   AlertOpen("Invalid password. Password must be at least 8 characters long and required to have at least a upper case character, a lower case character, a special character and a number. No sequence over 4 characters is allow.");
+			   return false;
+			}
+
+			if(!isPwdformatPass(adminPassword.value))
+			{
+			   AlertOpen("Invalid password. Password must be at least 8 characters long and required to have at least a upper case character, a lower case character, a special character and a number. No sequence over 4 characters is allow.");
+			   return false;
+			}
+			if(!isPwdNoSeqPass(adminPassword.value))
+			{
+			   AlertOpen("Invalid password. Password must be at least 8 characters long and required to have at least a upper case character, a lower case character, a special character and a number. No sequence over 4 characters is allow.");
+			   return false;
+			}	
+
+			var pfinfo = portForwardingall.split('|');
+			if (pfinfo != '') {
+				var tmpeS;
+				var tmpeE;
+				var eS = parseInt(httpsdPort.value);
+				var eE = parseInt(httpsdPort.value);
+
+				for ( i = 0; i < pfinfo.length; i++ ) 
+				{
+					if (pfinfo[i] == '')
+						break;
+					var names = pfinfo[i].split('/');
+					
+					tmpeS = parseInt(names[1]);
+					tmpeE = parseInt(names[2]);
+					
+					if ( checkPortCover(eS, eE, tmpeS, tmpeE ) ) {
+							AlertOpen('The remote GUI port defined is configured for another device. Please enter a new remote GUI port.');
+							return false;
+					}
+				}
+			}
+			
+			if ( !isValidPort( httpsdPort.value ) ) {
+				AlertOpen("Port number is invalid");
+				return false;
+			}
+			if ( httpsdPort.value == 21 ) {
+				AlertOpen("Because of security issue, browsers don't support https running on port 21.\n Please change the port number.");
+				return false;
+			}
+
+			if( adminPassword.value == "*********" )
+				adminPassword.value="";
+
+			if ( httpsdPort.value != infos[3] ) {
+				appPortChange.value='1';
+			}
+			else {
+				appPortChange.value='0';
+			}
+			
+			if(httpsdRemoteEnable.selectedIndex > 1){
+				httpsdSchedule.value=httpsdRemoteEnable.options[httpsdRemoteEnable.selectedIndex].value;
+				httpsdRemoteEnable.selectedIndex = 1;
+			}		
+		document.forms[0].sessionKey.value = gblsessionKey;
+		}
+		return true;
+}
+
+function doSubmit () {
+	if ( btnApply() ) {
+		document.forms[0].submit();
+	}
+}
+
+/*function dofocus () {
+	with ( document.forms[0] ) {
+		adminPassword.focus();
+	}
+}*/
+
+function dofocus () {
+	with ( document.forms[0] ) {
+		adminPassword.value = "";
+		adminPassword.focus();
+		adminPassword.onfocus = null;
+	}
+}
+
+function dofocus2 () {
+	with ( document.forms[0] ) {
+		PasswordConfirm.value = "";
+		PasswordConfirm.focus();
+		PasswordConfirm.onfocus = null;
+	}
+}
+
+function change () {
+	//document.getElementById("passwd").innerHTML = "<input name=\"adminPassword\" type=\"text\" size=\"35\" maxlength=15 />";
+	setTimeout("dofocus();",10);
+}
+
+function change2 () {
+	setTimeout("dofocus2();",10);
+}
+
+function setChange() {
+	with ( document.forms[0] ) {
+	
+		if ( httpsdRemoteEnable.selectedIndex != 0 ) {
+			document.getElementById("password_table").style.display = 'block';
+			document.getElementById("set_admin_table").style.display = 'block';
+		}
+		else {
+			document.getElementById("password_table").style.display = 'none';
+			document.getElementById("set_admin_table").style.display = 'none';
+		}
+	}
+}
+
+function frmLoad()
+{
+	var infos = info.split('|');
+	with ( document.forms[0] ) {
+
+		if ( infos[5] == "TRUE" ) {
+			httpsdRemoteEnable.selectedIndex = 1;
+
+			for ( i = 2 ; i < httpsdRemoteEnable.options.length ; i++ ) {
+				if ( httpsdRemoteEnable.options[i].value == infos[4] ) {
+					httpsdRemoteEnable.selectedIndex = i;
+				}
+			}
+		}
+		else {
+			httpsdRemoteEnable.selectedIndex = 0;
+		}
+		
+		if ( infos[3] != '' ) {
+			httpsdPort.value = infos[3];
+		}
+		else {
+			httpsdPort.value = 0;
+		}
+		
+		if ( infos[0] == null ) {
+			 adminUserName.value = "";
+		}
+		else {
+			 adminUserName.value = infos[0];
+		}
+		 if ( infos[1] == 1 ) {
+			 //document.getElementById("passwd").innerHTML = "<input name=\"adminPassword\" type=\"password\" onfocus=\"change();\" size=\"35\" maxlength=15 />";
+			 adminPassword.onfocus = function () {change();};
+			 adminPassword.value = "*********";
+			 PasswordConfirm.onfocus = function () {change2();};
+			 PasswordConfirm.value = "*********";
+			 }
+		else {
+			 adminPassword.value = "*********";
+			 PasswordConfirm.value = "*********";
+		}
+			
+		setChange() 
+	}
+}
+
+$(function(){
+	$('#adminPassword').showPassword('#show_password');
+});
+//-->
+
+
+</SCRIPT>
+</head>
+<body id="advancedsetup_dhcpsettings" onLoad='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('remotegui');
+</script>
+            
+        </ul>
+        <div id="subnav_footer">
+        </div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_remotemgmt">Remote GUI <span>Remote GUI enables access into the router from a WAN connection. To access your modem remotely you will need to use https:// followed by the modem IP. </span></h1>
+            
+            <form action="advancedsetup_remotegui.cgi" method="post" onSubmit="return btnApply();">
+            <input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+             <div class="stepWrapper">
+            <p><strong>1. Select the remote GUI state.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="httpsdRemoteEnable">GUI State:</label>
+                        </td>
+                        <td><select name="httpsdRemoteEnable" id="httpsdRemoteEnable" onChange='setChange()'>
+                                <option value="0" selected="selected">Disabled </option>
+                                <option value="1">Enabled </option>
+                                <option value="15">Enabled for 15 Minutes </option>
+                                <option value="30">Enabled for 30 Minutes </option>
+                                <option value="60">Enabled for 60 Minutes </option>
+                                <option value="720">Enabled for 12 Hours </option>
+                                <option value="1440">Enabled for 24 Hours </option>
+                                <option value="10080">Enabled for 7 Days </option>
+                            </select>
+                        </td>
+                        <input name="httpsdSchedule" type="HIDDEN" id="httpsdSchedule" value="0" size="35" />
+                    </tr>
+                </table>
+                </div>
+
+                 <div class="stepWrapper" name = 'password_table' id = 'password_table'>
+				 <div id="set_admin_pw">
+                <p><strong>2. Enter the admin username and password below.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="adminUserName">Administrator Username:</label></td>
+                        <td><input name="adminUserName" type="text" id="adminUserName" value="admin" class="textInput2" maxlength=15/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150"><label for="adminPassword">Administrator Password:</label></td>
+                        <td>
+                                <span id=passwd><input name="adminPassword" type="password" id="adminPassword" class="textInput2" maxlength=64/></span>
+                            </td>
+                    </tr>
+                    <tr id="PasswordConfirmID">
+                        <td width="150"><label for="PasswordConfirm">Confirm Password:</label></td>
+                        <td>
+                                <span id=passwd><input name="PasswordConfirm" type="Password" id="PasswordConfirm" class="textInput2" maxlength=64/></span>
+                            </td>
+                    </tr>					
+                    <tr>
+                      <td>
+                          <input name="show_password" type="checkbox" id="show_password" onClick="show_password_change()" size="25" /> Show Password
+                      </td>
+                      <td>&nbsp;</td>
+                    </tr>					
+                </table>
+				</div>
+                </div>
+                 <div id="stepWrapper_header"></div>
+                 <div class="stepWrapper" id = 'set_admin_table'>
+				 <div id="set_admin_pw">
+                <p><strong>3. Enter the remote GUI port.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="httpsdPort">Remote GUI Port:</label></td>
+                        <td><input name="httpsdPort" type="text" id="httpsdPort" value="443" class="textInput2" />
+                        <input name="appPortChange" type="hidden" value="1" maxlength=1 />
+                        </td>
+                    </tr>
+                </table>
+				</div>
+                </div>
+                 <div class="stepWrapper">
+                <p><strong>4. Click &quot;Apply&quot; to save your changes. </strong></p>
+                <a href="#" onClick="doSubmit();" class="btn apply_btn">Apply</a>
+				
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var getnatTable = '<%ejGetOtherBig(natconntrack)%>';
+function frmLoad() {
+	natTableStatus("frmLoad_call");
+}
+function natTableStatus_take() {
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest) { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+	else if (window.ActiveXObject) { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}	
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./GetnatTableStatus.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+    	objXMLHTTP.onreadystatechange = function() {
+			if(objXMLHTTP.readyState == 4) {
+    			natTableStatus(objXMLHTTP);
+			}
+    	}
+		objXMLHTTP.send(null);
+	}
+}
+function natTableStatus(req)
+{
+	var tbody = document.getElementById("natTable").getElementsByTagName("TBODY")[0];
+	var lastRow1 = tbody.rows.length;
+	var info;
+	var i  = 0;
+
+	for ( i = lastRow1; i > 1 ; i-- ) {
+		tbody.removeChild(tbody.rows[i - 1]);
+	}
+
+	if(req == 'frmLoad_call'){
+		info = getnatTable.split("|");
+	}
+	else{
+		info = req.responseText.split("|");
+	}
+	i = 0;
+	if (info != '') {
+		for ( i = 0; i < info.length; i++ ) 
+		{
+			if (info[i] == '')
+				break;
+			var names = info[i].split('-');
+			var row = document.createElement("TR");
+			row.setAttribute("align", "center");
+			var td0 = document.createElement("TD");
+			td0.setAttribute("style", "padding:10px;");
+			td0.appendChild(document.createTextNode(names[0]));
+			var td1 = document.createElement("TD");
+			td1.setAttribute("style", "padding:10px;");
+			td1.appendChild(document.createTextNode(names[1]));
+			var td2 = document.createElement("TD");
+			td2.setAttribute("style", "padding:10px;");
+			td2.appendChild (document.createTextNode(names[2]));
+			var td3 = document.createElement("TD");
+			td3.setAttribute("style", "padding:10px;");
+			td3.appendChild (document.createTextNode(names[3]));
+			var td4 = document.createElement("TD");
+			td4.setAttribute("style", "padding:10px;");
+			td4.appendChild (document.createTextNode(names[4]));
+			var td5 = document.createElement("TD");
+			td5.setAttribute("style", "padding:10px;");
+			td5.appendChild (document.createTextNode(names[5]));
+			row.appendChild(td0);
+			row.appendChild(td1);
+			row.appendChild(td2);
+			row.appendChild(td3);
+			row.appendChild(td4);
+			row.appendChild(td5);
+			tbody.appendChild(row);
+		}
+	}else{
+		var row = document.createElement("TR");
+		row.setAttribute("align", "center");
+		var td0 = document.createElement("TD");
+		td0.setAttribute("style", "padding:10px;");
+		td0.appendChild(document.createTextNode("N/A"));
+		var td1 = document.createElement("TD");
+		td1.setAttribute("style", "padding:10px;");
+		td1.appendChild(document.createTextNode("N/A"));
+		var td2 = document.createElement("TD");
+		td2.setAttribute("style", "padding:10px;");
+		td2.appendChild (document.createTextNode("N/A"));
+		var td3 = document.createElement("TD");
+		td3.setAttribute("style", "padding:10px;");
+		td3.appendChild (document.createTextNode("N/A"));
+		var td4 = document.createElement("TD");
+		td4.setAttribute("style", "padding:10px;");
+		td4.appendChild (document.createTextNode("N/A"));
+		var td5 = document.createElement("TD");
+		td5.setAttribute("style", "padding:10px;");
+		td5.appendChild (document.createTextNode("N/A"));
+		row.appendChild(td0);
+		row.appendChild(td1);
+		row.appendChild(td2);
+		row.appendChild(td3);
+		row.appendChild(td4);
+		row.appendChild(td5);
+		tbody.appendChild(row);
+	}
+	setTimeout('natTableStatus_take()', 10000);
+}
+</SCRIPT>
+</head>
+
+<body onLoad="frmLoad()">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+        WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>	
+		<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+			WriteModemStatusMenuHeader('nattable','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>'); 
+</script>
+			</ul>			
+      <div id="connectionstatus">
+        <h1>Connection Status</h1>
+        <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script> 
+        </div>
+      </div>
+  </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_nattable">NAT Table </h1>
+				<div class="stepWrapper">
+                <table id="natTable">
+					<tbody>
+					<tr align="center">
+						<th>Protocol</th>
+						<th>Timeout</th>
+						<th>Source <br />
+					    IP</th>
+						<th>Source <br />
+					    Port</th>
+						<th>Destination <br />
+					    IP</th>
+						<th>Destination <br />
+					    Port</th>
+					</tr>
+					</tbody>
+				</table>
+				</div>
+			</div>
+			
+  </div>
+</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+        </div>
+</body>
+</html>

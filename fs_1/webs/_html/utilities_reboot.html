@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var submittwiceCheck = 0;//__CTLK__, Morris, handle IE11 submit twice  issue. 2016/09/26
+function btnReset() {
+	ConfirmOpen("You are about to Reboot your modem.  Click ok to Reboot.", goSubmit );
+}
+
+function goSubmit() {
+	document.forms[0].sessionKey.value = gblsessionKey;
+	if(submittwiceCheck == 0)
+	{
+		//__CTLK__, Morris, handle IE11 submit twice issue. 2016/09/26
+		document.forms[0].submit();
+		submittwiceCheck++;
+	}
+}
+</script>
+</head>
+
+<body>
+<form action="utilities_reboot.cgi" method="post">
+<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+    <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteUtilitiesMenuHeader('reboot', '<%ejGet(HpnaFeature)%>');
+</script>
+       </ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="utilities_reboot">Reboot Modem </h1>
+	
+                    <div class="stepWrapper">
+                    <p><strong>To reboot the modem, click on the "Reboot" button below.</strong></p>
+			  <table>
+                      <tr align="center">
+                        <td width="55"><img src="../_images/h_utilities_reboot.png" width="45" height="40" /></td>
+                        <td>Reboot Modem:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                        <td><a href="#" class="btn reboot_btn" onClick="btnReset()">Reboot</a></td>
+                      </tr>
+                      </table>
+                      </div>
+				    <div class="clear_left"></div>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</form>
+</body>
+</html>

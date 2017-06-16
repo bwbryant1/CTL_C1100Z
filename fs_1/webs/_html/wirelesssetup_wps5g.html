@@ -1,0 +1,408 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<link href="../_css/slider_toggle.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/toggle-buttonC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--hide
+var enblWireless = '<%ejGetExtWl(wlEnbl_wl0v0)%>';
+var mode = '<%ejGetExtWl(wlAuthMode)%>';
+var WscDevPin = '<%ejGetExtWl(wlWscDevPin)%>';
+var WscStaPin = '<%ejGetExtWl(wlWscStaPin)%>';
+var WscMode = '<%ejGetExtWl(wlWscMode)%>';
+var hide = '<%ejGetExtWl(wlHide_wl0v0)%>';
+
+var wlWscUIConfig = '<%ejGetExtWl(wlWscUIConfig)%>';
+var WscAPMode = '<%ejGetExtWl(wlWscAPMode)%>';
+var config = '<%ejGetExtWl(wlWscAPMode)%>';
+var aplock = '<%ejGetExtWl(wlWscApLock)%>';
+var sessionKey='<%ejGetOther(sessionKey)%>';
+
+
+
+function frmLoad() {
+
+   with (document.forms[0]) {                
+		if(enblWireless =='0')
+		{
+			wlWscMode[1].checked = true; //disabled
+			$('#wps_state_off').trigger('change');
+			return;	
+		}
+
+		/*document.getElementById("wlWscDevPin").innerHTML = WscDevPin;*/
+			
+		//WscMode		
+		switch ( mode ) {
+		 case 'open':
+		 case 'psk psk2':
+		 case 'psk2':   
+		    if (WscMode == 'enabled'){
+		       wlWscMode[0].checked = true;
+		    }else{
+		       wlWscMode[1].checked = true;
+		    }
+			$('#wps_state_off').trigger('change');
+		    break;
+		}
+
+		
+		if (WscMode == 'enabled' && wlWscMode[1].checked==false){
+			if(config==0){
+				raClientMethod.options[1].selected=true;
+			}else{	
+				switch (wlWscUIConfig) {
+				case 'client-pin':
+					raClientMethod.options[2].selected=true;
+					break;
+				case 'client-pbc':
+					raClientMethod.options[0].selected=true;		
+					break;
+				case 'ap-pin':
+					raClientMethod.options[1].selected=true;		
+					break;			
+				}
+			
+				/*if ( raClientMethod.selectedIndex == 0 ) {
+					raClientMethod.options[0].selected=true;
+				}
+				if ( raClientMethod.selectedIndex == 1 ) {
+					raClientMethod.options[1].selected=true;
+				}
+				if ( raClientMethod.selectedIndex == 2 ) {
+					raClientMethod.options[2].selected=true;
+				}*/
+			}			
+				
+		}
+   }
+
+} 
+
+function btnGenPin()
+{
+   var loc="wirelesssetup_wps5g.wl?wlWscReGen=1";
+
+   with (document.forms[0]) {
+      if (wlWscMode[0].checked == false) {
+         AlertOpen("WPS is not active!");
+         return;
+      }
+	  loc += '&wlWscUIConfig=ap-pin';
+	  //loc += '&wl_wsc_mode=unconfig';	//disabled, config, unconfig
+	  loc += '&wlWscState=0';	//0: trigger type none, 1: trigger type PBC, 2: trigger type STA PIN
+      loc += '&sessionKey='+sessionKey;
+   }
+	 submitFrm(loc);   
+}
+
+function changeWebValidateChecksum(){
+   with (document.forms[0]) {
+   	   var str = wlWscStaPin.value;
+   	   if(str.length>=8){
+   	   		if(WebValidateChecksum(str)==0)
+   	   			AlertOpen("WPS PINs are numeric only.  Letters and special characters are not supported.");
+   	   }
+   }
+}
+
+function WebValidateChecksum(str) {
+   with (document.forms[0]) {
+	   var accum = 0;
+	   var returnvalue = 0;
+	
+	   accum += 3*( parseInt(str.charAt(0)) % 10);
+	   accum += 1*( parseInt(str.charAt(1)) % 10);
+	   accum += 3*( parseInt(str.charAt(2)) % 10);
+	   accum += 1*( parseInt(str.charAt(3)) % 10);
+	   accum += 3*( parseInt(str.charAt(4)) % 10);
+	   accum += 1*( parseInt(str.charAt(5)) % 10);
+	   accum += 3*( parseInt(str.charAt(6)) % 10);
+	   accum += 1*( parseInt(str.charAt(7)) % 10);
+	
+	   if( 0 == (accum % 10) )
+	      return 1;
+	   else
+	      return 0;
+   }
+}	
+
+function verifyPinDigitFormat(str){
+   for(i = 0; i < str.length; i++){
+      if(isDecDigit(str.charAt(i)) == false){
+         return 0;
+      }
+   }
+
+   return 1;
+}
+
+
+function wscModeCheck(){
+   if ( enblWireless == '0' ) {
+       AlertOpen('Cannot apply the change since wireless is currently disabled.');
+       return true;
+   }else {
+      with (document.forms[0]) {
+		switch (mode) {
+			case 'open':					
+			case 'psk2':
+			case 'psk psk2':
+				break;
+		} 
+	  }  
+   }
+   return false;	
+}
+
+function btnEnableApply() {
+   var loc = "wirelesssetup_wps5g.wl?";
+
+   with (document.forms[0]) {
+	   if ( enblWireless == '0' ) {
+	       AlertOpen('Cannot apply the change since wireless is currently disabled.');
+	       return;
+	   }   
+	   if(hide == '1') {
+	      // SSID broadcast is hide.
+	      AlertOpen("Cannot apply the change since SSID broadcast is hide.");
+	      return;
+	   }
+	   
+	   if (wlWscMode[1].checked == true){//disabled
+			//mark autoDisabled
+		   loc += '&wl_wsc_mode=disabled';	//disabled, config, unconfig
+		   loc += '&wsc_config_state=0';  //0: disableed, 1: config, else: unconfig
+	   }else{
+		   loc += '&wl_wsc_mode=config';	//disabled, config, unconfig
+  	   	   loc += '&wsc_config_state=1';  //0: disableed, 1: config, else: unconfig
+		   loc += '&wlWscState=0';			//0: trigger type none, 1: trigger type PBC, 2: trigger type STA PIN
+	   }	      
+	   loc += '&sessionKey='+sessionKey;    
+	   
+	   submitFrm(loc);	   
+	}	   
+}
+
+function btnApply(type) {
+   var loc = "wirelesssetup_wps5g.wl?";
+
+   if ( enblWireless == '0' ) {
+       AlertOpen('Cannot apply the change since wireless is currently disabled.');
+       return;
+   }
+   
+   if ( WscMode != 'enabled'){
+      AlertOpen('Cannot apply the change since wps is currently disabled.');
+      return;
+   }   
+
+   //loc += 'wlSsidIdx=0';
+   
+   with (document.forms[0]) {
+		switch (mode) {
+			case 'open':							
+			case 'psk2':
+			case 'psk psk2':
+				break;
+		}
+		
+		if (WscAPMode == '0') { /*unconfigured*/
+			switch (type) {
+			case "PBC":
+			   loc += '&wlWscStaPin=0';
+			   loc += '&wlWscConfig=client-pbc-reset';
+			   loc += '&wlWscPBC=1';
+			   loc += '&wlWscUIConfig=client-pbc';
+			   break;
+			case "PIN":
+			   if(verifyPinDigitFormat(wlWscStaPin.value)){
+			      AlertOpen("The WPS End Device PIN is invalid. Letters and special characters are not supported.");
+			      return;
+			   }			
+			   if (WebValidateChecksum(wlWscStaPin.value) != 1) {
+			      AlertOpen("The WPS End Device PIN is invalid.");
+			      return;
+			   }
+			   loc += '&wlWscStaPin=' + encodeUrl(wlWscStaPin.value);
+			   loc += '&wlWscConfig=client-pin-reset';
+			   loc += '&wlWscPBC=1';
+			   loc += '&wlWscUIConfig=client-pin';			   
+			   break;
+			default:
+			   break;
+			}
+			loc += '&wsc_force_restart=n';
+		 
+		}else { /*Configured*/
+			switch (type) {
+			case "PBC":
+				loc += '&wlWscStaPin=0';
+			    loc += '&wlWscPBC=1';
+				loc += '&wlWscUIConfig=client-pbc';				
+				break;
+			case "PIN":	
+				if (verifyPinDigitFormat(wlWscStaPin.value) != 1) {
+				  AlertOpen("The WPS End Device PIN is invalid. Letters and special characters are not supported.");
+				  return;
+				}
+			    if (WebValidateChecksum(wlWscStaPin.value) != 1) {
+			      AlertOpen("The WPS End Device PIN is invalid.");
+			      return;
+			    }				
+				
+				loc += '&wlWscStaPin=' + encodeUrl(wlWscStaPin.value);
+				loc += '&wlWscPBC=0';		
+				loc += '&wlWscUIConfig=client-pin';	
+				break;
+			default:
+			   break;
+			}
+		}
+
+		switch (type) {
+		case "AP-PIN":
+		 //BRCM 4.04l01
+			loc += '&wlWscStaPin=0';
+	        loc += '&wlWscDevPin=' + encodeUrl(document.getElementById("wlWscDevPin").innerHTML);
+			//loc += '&wlWscState=1';
+			loc += '&wlWscPBC=0';
+			break;   
+		}
+   
+ 	}//end of document.forms[0]
+	
+	loc += '&sessionKey='+sessionKey;
+	submitFrm(loc);	
+}
+  
+// done hiding -->
+</script>
+
+</head>
+<body id="wirelesssetup_wps5g" onLoad='frmLoad()'>
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+        <a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">        	
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>  
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('wps5g', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+        </ul>
+                <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="wirelesssetup_wps5g">WPS (Wi-Fi Protected Setup) <span>WPS provides an easy and secure way to establish a wireless network by
+                    sharing the wireless key between the modem and wireless client. </span></h1>
+                    
+            <form>
+                <div class="stepWrapper" id="wps_state_wrapper">
+                    <div class="radios" align="center">
+                        <input name="wlWscMode" id="wps_state_on" type="radio" value="wps_state_on"  /><label for="wps_state_on">Enable WPS</label>
+                        <input name="wlWscMode" type="radio" id="wps_state_off" value="wps_state_off" checked="checked" /><label for="wps_state_off">Disable WPS</label>
+                    </div>
+                </div>
+                
+                <div class="stepWrapper" id="wps_type_wrapper" style="display:none">
+                <p><strong>1. Select the WPS type. </strong> </p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="wps_type">WPS Type:</label></td>
+                        <td><select name="raClientMethod" id="wps_type">
+                                <option value="client-pbc" selected="selected">Push Button (PBC)</option>
+                                <option value="ap-pbc">AP PIN</option>
+                                <option value="client-pin">End Device PIN</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr class="ap_pin_group">
+                        <td width="150">WPS AP PIN:</td>
+                        <td ><span id='wlWscDevPin'>11223344</span></td>
+                    </tr>
+                    <tr class="ap_pin_group">
+                    	<td><a href="#" id="generatepin_btn" class="btn generatepin_btn"  style="margin:0 auto;" onclick="btnGenPin()">Generate PIN</a></td>
+						<td></td>
+					</tr>
+                </table>
+               </div>
+                <div class="push_button_group" id="push_button_submit">
+                 <div class="stepWrapper">
+                    <p><strong>1. Click &quot;Connect&quot; to initiate a WPS connection in the modem. </strong> </p>
+					<a href="#" class="btn connect_btn" onclick="btnApply('PBC')">Connect</a>
+                </div>
+                </div>
+               <!-- 
+                <div class="ap_pin_group">
+                <div class="stepWrapper">
+                    <p><strong>2. Insert the WPS AP PIN in the  end device. </strong> </p>
+                </div>
+                </div>
+               
+                <div class="end_device_pin_group">
+                     <div class="stepWrapper">
+                    <p><strong>2. Insert the PIN from the end device. </strong></p>
+                    <table>
+                            <tr>
+                                <td width="150"><label for="wps_end_device_pin">End Device PIN:</label></td>
+                                <td><input id="wlWscStaPin" type="text" size="35" maxlength="8" onkeyup='changeWebValidateChecksum()'/></td>
+                            </tr>
+                        </table>
+                    </div>
+                     <div class="stepWrapper">
+                    <p><strong>3. Click &quot;Connect&quot; to initiate a WPS PIN connection in the modem. </strong></p>
+                    <a href="#" class="connect_btn btn" onclick="btnApply('PIN')">Connect</a>
+                    </div>
+                </div>
+                -->
+            </form>
+        </div>
+        
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
