@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!--//
+var oamtest_type="<%ejGet(oamPingType)%>";
+var interfaceInfo = '<%ejGetOther(diagInfo, diag)%>';
+var interfaces = interfaceInfo.split('|');
+var isDefaultAtm='<%ejGetOther(sysInfo, l2Intf)%>';
+var blinkTime;
+var showimage = 0;
+
+function blink() {
+	clearTimeout(blinkTime);
+	if (showimage == 0)
+	{
+		document.getElementById("Message").innerHTML = "<font color='#FF6319'><strong>TESTING</strong></font>";
+		showimage = 1;
+	}
+	else
+	{
+		document.getElementById("Message").innerHTML = "<font><strong>TESTING</strong></font>";
+		showimage = 0;
+	}
+	blinkTime = setTimeout("blink()", 500);
+}
+
+function pagePos()
+{
+ 	var pos;
+    if (document.documentElement && document.documentElement.scrollTop) {
+        pos = document.documentElement.scrollTop;
+    } else if (document.body) {
+        pos = document.body.scrollTop;
+    }
+	return pos;
+}
+
+function btnApply()
+{
+	var diagCurr="";
+	if(isDefaultAtm=="1"){
+		var loc='supportconsole_oampingtest.cgi?';
+		for(i=0;i<interfaces.length;i++)
+		{
+			var currParams = interfaces[i].split('/');
+			if(currParams[2]=="Default")
+			{
+				diagCurr=currParams[0]+"/"+currParams[1];
+			}
+		}
+		
+		loc+="diagCurr=" + diagCurr;
+		with(document.forms[0])
+		{
+			loc+="&oamPingType="+select5[select5.selectedIndex].value;
+		}
+
+		BackgroundUrl(loc);
+		setTimeout("getRefresh();", 1000);
+		blink();
+
+		var tbody1 = document.getElementById("oampingResult").getElementsByTagName("TBODY")[0];
+		var lastRow1 = tbody1.rows.length;
+		for ( i = lastRow1; i > 1 ; i-- ) {
+			tbody1.removeChild(tbody1.rows[i - 1]);
+		}
+	
+		var row = document.createElement("TR")
+		var td1 = document.createElement("TD")
+		td1.appendChild(document.createTextNode("N/A"))
+		var td2 = document.createElement("TD")
+		td2.appendChild (document.createTextNode("N/A"))
+		var td3 = document.createElement("TD")
+		td3.appendChild (document.createTextNode("N/A"))
+		var td4 = document.createElement("TD")
+		td4.appendChild (document.createTextNode("N/A"))
+		row.appendChild(td1);
+		row.appendChild(td2);
+		row.appendChild(td3);
+		row.appendChild(td4);
+		tbody1.appendChild(row);
+
+	}
+	else
+		AlertOpen("Default L2 is not ATM");
+}
+
+function showResult ( diagResult ) {
+	var tbody1 = document.getElementById("oampingResult").getElementsByTagName("TBODY")[0];
+	var lastRow1 = tbody1.rows.length;
+	var i = 0;
+	for ( i = lastRow1; i > 1 ; i-- ) {
+		tbody1.removeChild(tbody1.rows[i - 1]);
+	}
+
+	var items=diagResult.split("|");
+	var status = items[0];
+	if ( items[0].indexOf("oam_end")>=0 ) {
+		for ( i = 2 ; i < 6 ; i ++ ) {
+			if(items[i] == "-1") {
+				items[i] = "N/A";
+			}
+		}
+
+    document.getElementById("Message").innerHTML = items[1];
+    
+		var row = document.createElement("TR")
+		var td1 = document.createElement("TD")
+		td1.appendChild(document.createTextNode(items[2]))
+		var td2 = document.createElement("TD")
+		td2.appendChild (document.createTextNode(items[3]))
+		var td3 = document.createElement("TD")
+		td3.appendChild (document.createTextNode(items[4]))
+		var td4 = document.createElement("TD")
+		td4.appendChild (document.createTextNode(items[5]))
+		row.appendChild(td1);
+		row.appendChild(td2);
+		row.appendChild(td3);
+		row.appendChild(td4);
+	  tbody1.appendChild(row);
+	}
+	else {
+		setTimeout("getRefresh();", 5000);
+	}
+}
+
+function getRefresh()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)  { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+		else if (window.ActiveXObject)  { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+		
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./oampingResult.html",true);
+		objXMLHTTP.onreadystatechange = function()
+		{
+			if (objXMLHTTP.readyState == 4) {
+				var tmpResult=objXMLHTTP.responseText;
+				if(tmpResult!=""){
+					//document.getElementById("Message").innerHTML = "<font color='#00FF00'>Test Complete</font>";
+					showResult( tmpResult );
+					clearTimeout(blinkTime);
+					//stop
+				}
+				else{
+					setTimeout("getRefresh();", 5000);
+				}
+			}
+		}
+		objXMLHTTP.send(null);
+	}
+}
+
+function frmLoad()
+{
+	with(document.forms[0])
+	{
+		for(i=0;i<select5.length;i++)
+		{
+			if(select5[i].value==oamtest_type)
+				select5.selectedIndex=i;
+		}	
+	}
+}
+
+//-->
+</script>
+</head>
+<body onLoad=frmLoad()>
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+		WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+        WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left">
+    </div>
+    <div id="content_left">
+			<ul id="subnav">
+<script language="javascript">   
+	WriteSupportConsoleMenuHeader('oampingtest', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>		
+			</ul>
+			<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+           WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+            </div>
+        	</div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="supportconsole_oampingtest"> OAM Ping Test<span>OAM Ping Test checks the ATM layer connection to the network.
+                    During the test an operation, administration and maintenance
+                    packet is sent to confirm connectivity of the assigned
+                    PVC. If the network is not configured to support OAM ping tests
+                    the
+                    test
+                    below
+                    will
+                    fail.
+                    Ensure
+                    the
+                    network
+                    is
+                    configured
+                    for OAM ping support before running this test.</span></h1>
+            <form>
+                <div class="stepWrapper">
+                <table>
+                    <tr>
+                        <th width="50%">VPI</th>
+                        <th width="50%">VCI</th>
+                    </tr>
+<script language="javascript">
+<!--
+
+if(isDefaultAtm=="1")
+{
+    document.writeln("<tr align='center'>");
+    document.writeln("<td height='19'><%ejGet(atmVpi)%></td>");
+    document.writeln("<td><%ejGet(atmVci)%></td>");
+    document.writeln("</tr>");
+}
+else{
+    document.writeln("<tr align='center'>");
+    document.writeln("<td height='19'></td>");
+    document.writeln("<td></td>");
+    document.writeln("</tr>");
+
+}
+//-->
+</script>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>1. Select the OAM test type below.</strong> </p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="oam_test">OAM Test:</label>
+                        </td>
+                        <td><select name="select5" id="select">
+                                <option value="3" selected="selected">F5 Segment </option>
+                                <option value="4">F5 End </option>
+                                <option value="15">F4 Segment </option>
+                                <option value="16">F4 End </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>2. Click "Test" to perform the OAM Test.</strong></p>
+                <a href="javascript:scroll(0,pagePos())" id="test_btn" class="btn test_btn" onClick="btnApply()">Test</a>
+                </div>
+                <div class="stepWrapperdark">
+                <table>
+                	<tr>
+							<th colspan="2" class="tableTitle">OAM Ping Results</th>
+						</tr>
+                    <tr>
+                        <td width="150">OAM Ping Result: </td>
+                        <td id="resultVaule"><span id="Message">N/A</span></td>
+                    </tr>
+                </table>
+                <table id="oampingResult">
+                    <tr>
+                        <th>Near End f4 Loopback </th>
+                        <th>Far End f4 Loopback </th>
+                        <th>Near End f5 Loopback </th>
+                        <th>Far End f5 Loopback </th>
+                    </tr>
+                    <tr>
+                        <td>N/A</td>
+                        <td>N/A</td>
+                        <td>N/A</td>
+                        <td>N/A</td>
+                    </tr>
+                </table>
+                </div>
+                <div id="stepWrapperdark_footer"></div>
+            </form>
+            <div class="clear_left">
+            </div>
+        </div>
+        		<div id="vendor_logo_footer"><a href="http://us.zyxel.com" id="vendor_logo" target="_blank"></a></div>
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Communications International Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

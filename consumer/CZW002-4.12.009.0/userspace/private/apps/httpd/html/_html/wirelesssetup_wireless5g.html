@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--hide
+var enbl 			  = '<%ejGetExtWl(wlEnbl_wl0v0)%>';
+/*var ssid 			  = '<%ejGetExtWl(wlSsid_wl0v0)%>';*/
+var hide 			  = '<%ejGetExtWl(wlHide_wl0v0)%>';
+var band 			  = '<%ejGetExtWl(wlBand)%>';
+var channel 		  = '<%ejGetExtWl(wlChannel)%>';
+var wlCurrentChannel  = '<%ejGetExtWl(wlCurrentChannel)%>';
+var mode 		   	  = '<%ejGetExtWl(wlAuthMode)%>';
+var wpa 			  = '<%ejGetExtWl(wlWpa)%>';
+var wpaPskKey 		  = '<%ejGetExtWl(wlWpaPsk)%>';
+var WscCfgMethod	  = '<%ejGetExtWl(wlWscCfgMethod)%>';
+var WscMode			  = '<%ejGetExtWl(wlWscMode)%>';
+var WscAPMode		  = '<%ejGetExtWl(wlWscAPMode)%>';
+var WscDevPin		  = '<%ejGetExtWl(wlWscDevPin)%>';
+var WscStaPin		  = '<%ejGetExtWl(wlWscStaPin)%>';
+var scs				  = '<%ejGetExtWl(wlScs)%>';
+var autoGenWpaKey     = '<%ejGetExtWl(wlAutoGenWpaKey)%>';
+var autoGenWpaKeyEnbl = '<%ejGetExtWl(wlWpaIsAutoGen)%>';
+
+function btnApply() {
+	with(document.forms[0]) {
+		var str = new String();
+		/*
+		str = wlSsid.value;
+		if(str.length > 32) {
+			alert('SSID "' + wlSsid.value + '" should not be longer than 32 characters.');
+			return;
+		}
+		
+		if(str =='') {
+			AlertOpen("An unsupported character is included in the SSID.  Please rename the SSID.");
+			return;
+		}*/
+		
+		if(wlAuthMode.options[1].selected == true) {
+			wlWpa.value = "aes";
+		}
+		else if(wlAuthMode.options[2].selected == true) {
+			wlWpa.value = "tkip+aes";
+		}	
+		
+		wlWscState.value = "0";
+
+		if(security_wpa_key[0].checked == true){
+			wlWpaPsk.value = autoGenWpaKey;
+			wlWpaIsAutoGen.value = "1";
+		}else{
+			wlWpaPsk.value = security_wpa_custom_security_key.value;
+			wlWpaIsAutoGen.value = "0";
+		}	
+		/*
+		if (wlHide[1].checked == true) {	//if hide -> disable wps
+			wl_wsc_mode.value = "disabled";
+			wsc_config_state.value = "0";
+		}
+		else {
+			wl_wsc_mode.value = "config";
+			wsc_config_state.value = "1";
+		}*/
+	}
+	document.forms[0].submit();
+}
+
+function fromLoad() {
+	with(document.forms[0]) {
+		/*wl_recalc(true);
+		if(enbl == 1) {
+			wlEnbl[0].checked = true;
+		}
+		else {		
+			wlEnbl[1].checked = true;
+		}
+		
+		if (hide == 1) {
+			wlHide[1].checked = true;
+		}
+		else {
+			wlHide[0].checked = true;
+		}
+		
+		if (scs == 1) {
+			wlScs[0].checked = true;
+		}
+		else {
+			wlScs[1].checked = true;
+		}
+		
+		wlSsid.value = ssid;
+		*/
+		authModeName = new Array("Security Off", "WPA2 - Personal", "WPA - WPA2 Personal");
+		authModeValue = new Array("open", "psk2", "psk psk2");
+		wlAuthMode.length = authModeName.length;
+		for(var i in authModeName) {
+			wlAuthMode[i] = new Option(authModeName[i], authModeValue[i]);
+			wlAuthMode[i].value = authModeValue[i];
+		}
+	
+		/*wlWpaPsk.value = wpaPskKey;*/	
+		
+		if(mode == "open") {
+			wlAuthMode.options[0].selected = true;				
+		}
+		else if(mode == "psk2") {
+			wlAuthMode.options[1].selected = true;				
+		}
+		else if(mode == "psk psk2") {
+			wlAuthMode.options[2].selected = true;				
+		}
+		
+		document.getElementById('security_wpa_default_key_value').innerHTML = autoGenWpaKey;	
+		
+		if(autoGenWpaKeyEnbl == 0){		
+			security_wpa_key[1].checked = true;			
+			security_wpa_custom_security_key.value = wpaPskKey;
+		}else{
+			security_wpa_key[0].checked = true;
+			security_wpa_custom_security_key.value = "";
+		}	
+	}
+	/*wl_recalc(true);*/
+	authModeChange(1);
+	/*scsModeChange(1);*/
+
+}
+
+function wl_recalc(OnPageLoad) {
+	with(document.forms[0]) { 
+		updateCurChannel(OnPageLoad);      
+		loadChannelList(OnPageLoad);
+	}
+}
+
+function updateCurChannel(OnPageLoad) {
+	if(OnPageLoad) { 
+		if(document.getElementById) { // DOM3 = IE5, NS6
+			document.getElementById("wlSelectedchannel").innerHTML = wlCurrentChannel;
+		}
+		else {
+			if(document.layers == false) // IE4
+				document.all.wlSelectedchannel.innerHTML = wlCurrentChannel;
+		}	  
+	}
+}
+
+function loadChannelList(OnPageLoad) {
+	var sel_ch;
+	var idx;
+
+	//save selected
+	if(OnPageLoad) {      
+		sel_ch = channel;
+	}
+	else {
+		sel_ch = document.forms[0].wlChannel.value;
+	}
+   
+	//load list
+	document.forms[0].wlChannel.length = 0;
+	if(1) {
+		<%ejGetExtWl(wlChannelList)%>
+	}
+	else {
+		document.forms[0].wlChannel[0] = new Option("Auto", "0")
+	}
+
+         
+	// mark selected
+	for(idx = 0; idx < document.forms[0].wlChannel.options.length; idx++) {
+		if(document.forms[0].wlChannel.options[idx].value == sel_ch) {
+			document.forms[0].wlChannel.options[idx].selected = true;
+			break;
+		}
+	}
+   
+	// set to first channel none-auto if not found   
+	if(idx == document.forms[0].wlChannel.options.length) {
+		document.forms[0].wlChannel.options[1].selected = true;
+	}
+}
+
+function doAutoGenPSKKey() {
+   with (document.forms[0]) {
+      if (security_wpa_key[0].checked == true) {      
+         security_wpa_custom_security_key.disabled = true;		
+      } else {        
+         security_wpa_custom_security_key.disabled = false;
+      }
+   }
+}
+
+function authModeChange(OnPageLoad) {
+	setChange();
+}
+
+function setChange() {
+	with (document.forms[0]) {
+		if (wlAuthMode.selectedIndex == 0) {
+			document.getElementById("NoSec").style.display = 'block';
+			document.getElementById("Sec").style.display = 'none';
+			document.getElementById("Sec_wpa").style.display = 'none';
+		}
+		else if (wlAuthMode.selectedIndex == 1) {
+			document.getElementById("NoSec").style.display = 'none';
+			document.getElementById("Sec").style.display = 'block';
+			document.getElementById("Sec_wpa").style.display = 'block';
+		}
+		else if (wlAuthMode.selectedIndex == 2) {
+			document.getElementById("NoSec").style.display = 'none';
+			document.getElementById("Sec").style.display = 'block';
+			document.getElementById("Sec_wpa").style.display = 'block';
+		}	
+		
+	/*
+		if ( httpsdRemoteEnable.selectedIndex != 0 ) {
+			document.getElementById("password_table").style.display = 'block';
+			document.getElementById("set_admin_table").style.display = 'block';
+		}
+		else {
+			document.getElementById("password_table").style.display = 'none';
+			document.getElementById("set_admin_table").style.display = 'none';
+		}*/
+	}
+}
+
+function scsModeChange(OnPageLoad) {
+	with (document.forms[0]) {
+		if(wlScs[0].checked == true) {
+			$('#select_channel').attr("disabled", "disabled");
+		}
+		else {
+			$('#select_channel').attr("disabled", "");
+		}
+	}
+}
+// done hiding -->
+</script>
+
+</head>
+<body onload="fromLoad()">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+        <a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">        	
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>          
+		</div>  
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>		 
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('wireless5g', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+        </ul>
+                <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="wirelesssetup_wireless5g">Wireless Security <span>Secure your wireless traffic as it transmits through the air.</span></h1>
+            <div id="content_right_contentarea">
+            <form action="wirelesssetup_wireless5g.wl" method="post">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="<%ejGetOther(sessionKey)%>">
+			<input type="hidden" name="wlWpa" id="wlWpa" value="">
+			<input type="hidden" name="wlWpaIsAutoGen" id="wlWpaIsAutoGen" value="">
+			<input type="hidden" name="wlWpaPsk" id="wlWpaPsk" value="">
+			<input type="hidden" name="wlWscState" id="wlWscState" value="">
+			<input type="hidden" name="wl_wsc_mode" id="wl_wsc_mode" value="">
+			<input type="hidden" name="wsc_config_state" id="wsc_config_state" value="">
+<!--
+                  <div class="stepWrapper">
+                    <p><strong>1. Set the wireless radio state.</strong></p>
+                    <table>
+                      <tr>
+                        <td width="150">Wireless Radio: </td>
+                        <td><input name="wlEnbl" type="radio" value="1"/> Enabled</td>
+                        <td><input name="wlEnbl" type="radio" value="0"/> Disabled</td>
+                      </tr>
+                    </table>
+                  </div>
+                  
+					<div class="stepWrapper">
+						<p><strong>2. Change the network name (optional).</strong></p>
+						<table>
+							<tr>
+								<td width="150">Network Name:</td>
+								<td>
+									<input name="wlSsid" type="text" id="single_ssid_name" value="" size="32" maxlength='32'/>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div class="stepWrapper"> 
+						<p><strong>3. Select channel.</strong></p>
+						<table>
+							<tr>
+								<td width="150"><label for="channel">Channel:</label></td>
+								<td><select name='wlChannel' size="1" id="select_channel" onChange="wl_recalc(false)"></select></td>
+							</tr>
+						   <tr class="wlSelectedChannel">
+							 <td width="150">Channel Selected:</td>
+							 <td ><span id="wlSelectedchannel"></span></td>
+						   </tr>
+						</table>
+					</div>
+					<div class="stepWrapper">
+                    <p><strong>4. Smart Channel Select.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">SCS:</td>
+                            <td><input name="wlScs" type="radio" value="1" onClick="scsModeChange(0)" /> Enabled</td>
+                            <td><input name="wlScs" type="radio" value="0" onClick="scsModeChange(0)" /> Disabled</td>
+                        </tr>
+                    </table>				
+                    </div>
+					<div class="stepWrapper">
+                    <p><strong>5. Set SSID broadcast.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">SSID Broadcast:</td>
+                            <td><input name="wlHide" type="radio" value="0" /> Broadcast SSID</td>
+                            <td><input name="wlHide" type="radio" value="1" /> Hide SSID</td>
+                        </tr>
+                    </table>				
+                    </div>
+-->
+					<div class="stepWrapper">
+					<p><strong>1. Select security type.</strong></p>
+					<table>
+                        <tr>
+                            <td width="150">Security Type:</td>
+							<td><select name="wlAuthMode" size="1" onChange='authModeChange(0)'></select></td>
+                        </tr>
+                    </table>                    
+					</div>
+					<div class="stepWrapper" id="Sec_wpa">
+					<p><strong>2. Enter security key/passphrase.</strong></p>
+					<table>
+						<tr>
+                            <td><input name="security_wpa_key" id="security_wpa_key" type="radio" value="default_key" onClick="doAutoGenPSKKey()" checked="CHECKED" /></td>
+                            <td colspan="2"><label for="default_key" id="default_key">Use Default Security Key/Passphrase</label></td>
+                        </tr>
+                        <tr>     
+                        	<td></td>
+                            <td>Security Key:</td>
+                            <td class="greentext"><label id="security_wpa_default_key_value"></label></td>
+                        </tr>
+                        <tr>
+                            <td><input name="security_wpa_key" id="security_wpa_custom_key" type="radio" value="custom_key" onClick="doAutoGenPSKKey()"/></td>
+                            <td colspan="2"><label for="custom_key">Use Custom Security Key/Passphrase</label></td>
+                        </tr>                        
+						<tr>
+							<td></td>						
+							<td><label for="security_wpa_custom_security_key">Security Key/Passphrase:</label></td>
+                            <td><input id="security_wpa_custom_security_key" type="text" size="35" maxlength='64'/></td>
+						</tr>
+					</table>
+					</div>
+					
+					
+				  <div class="stepWrapper" id="Sec">
+                    <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick="btnApply()" >Apply</a>
+                  </div>
+				  
+					
+                  <div class="stepWrapper" id="NoSec">
+                    <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick="btnApply()" >Apply</a>
+                  </div>
+				  </form>
+            </div>
+        </div>
+        
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
+

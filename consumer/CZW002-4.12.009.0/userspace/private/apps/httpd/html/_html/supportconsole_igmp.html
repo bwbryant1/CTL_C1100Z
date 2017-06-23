@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+<SCRIPT LANGUAGE="JavaScript">
+var enblIgmpSnpvalue = '<%ejGetOther(sysInfo, enblIgmpSnp)%>';
+var igmprule = '<%ejGetOtherBig(igmprule)%>';
+function btnApply() {
+	document.forms[0].submit();
+}
+
+function fromLoad()
+{
+	with ( document.forms[0] ) {
+		if ( enblIgmpSnpvalue == '1' ) {
+	    enblIgmpSnp[0].checked = true;
+	  } else {
+	    enblIgmpSnp[1].checked = true;
+	  }
+	}
+}
+</SCRIPT>
+</head>
+<body onload="fromLoad()">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+		<script language="javascript">
+			WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+		</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+		<SCRIPT LANGUAGE="JavaScript">
+			WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+		</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+		<script language="javascript">
+		   WriteSupportConsoleMenuHeader('igmp', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+		</script>
+        </ul>
+        <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+            <script language="javascript">
+			<!-- hide
+			WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+			// done hiding -->
+			</script>
+            </div>
+        </div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="supportconsole_igmpsnooping">IGMP <span>IGMP
+                 listens to IGMP network traffic communication between
+            hosts and routers to analyze packets.</span></h1>
+            <div id="content_right_contentarea">
+            <form action="supportconsole_igmp.cgi" method="post">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="<%ejGetOther(sessionKey)%>">
+                  <div class="stepWrapper">
+                    <p><strong>1. Set the IGMP snooping state.</strong></p>
+                    <table>
+                      <tr>
+                        <td width="150">IGMP Snooping: </td>
+                        <td><input name="enblIgmpSnp" type="radio" value="1"/>
+                          Enabled</td>
+                        <td><input name="enblIgmpSnp" type="radio" value="0"/>
+                          Disabled</td>
+                      </tr>
+                    </table>
+                  </div>
+                  
+                  <div class="stepWrapper">
+                    <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick="btnApply()" >Apply</a>
+                  </div>
+                  <div class="stepWrapperdark">
+                    <table>
+                        <tr>
+							<th colspan="5" class="tableTitle">IGMP Snooping Table</th>
+					    </tr>
+                        <tr>
+                            <th>Index</th>
+                            <th>GroupAddress</th>
+                            <th>Interface</th>
+                        </tr>
+<script language="javascript">
+					var info = igmprule.split("|");
+					if ( info != '' ) {
+						for ( i = 0; i < info.length ; i ++ ) {
+							if (info[i] == '')
+								break;
+							var items = info[i].split('/');
+							if (items.length != 2)
+								continue;
+							document.writeln("<tr align=\"center\">");
+							document.writeln("<td>" + (i+1) + "</td>");
+							document.writeln("<td>" + items[0] + "</td>");
+							document.writeln("<td>" + items[1] + "</td>");
+							document.writeln("</tr>");
+						}
+					}
+					if (igmprule == "")
+					{
+						document.writeln("<tr align=\"center\">");
+						document.writeln("<td>N/A</td>");
+						document.writeln("<td>N/A</td>");
+						document.writeln("<td>N/A</td>");
+						document.writeln("</tr>");
+					}
+</script>
+                      </table>
+                  </div>
+              </form>
+            </div>
+        </div>
+        
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

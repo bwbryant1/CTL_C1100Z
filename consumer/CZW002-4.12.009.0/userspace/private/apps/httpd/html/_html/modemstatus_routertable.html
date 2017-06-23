@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<script LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<script LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="JavaScript">
+
+function updateResourcesTable (req)
+{
+    //alert(req.responseText);
+	var ResourcesInfo=req.responseText;
+	var ResourcesInfos;
+	var i;
+	var rowfound = 0;
+	var TotalSes = 0;
+	if ( ResourcesInfo != "" && ResourcesInfo != null ) {
+		ResourcesInfos = ResourcesInfo.split('$');
+		if ( ResourcesInfos.length == 14 ) {
+			document.getElementById("ProcessorUtilization").innerHTML = ResourcesInfos[0];
+			document.getElementById("SDRAMMemory").innerHTML = ResourcesInfos[1];
+			document.getElementById("SDRAMUsed").innerHTML = ResourcesInfos[2];
+			document.getElementById("MemoryStatus").innerHTML = ResourcesInfos[3];
+			document.getElementById("MemRecommended").innerHTML = ResourcesInfos[4];
+			document.getElementById("FLASHUsed").innerHTML = ResourcesInfos[5];
+			document.getElementById("LanTCPSessions").innerHTML = ResourcesInfos[6];
+			document.getElementById("LanUDPSessions").innerHTML = ResourcesInfos[7];
+			document.getElementById("ModemSessions").innerHTML = ResourcesInfos[8];
+			document.getElementById("TotalSessions").innerHTML = ResourcesInfos[9];
+			document.getElementById("MaxNumSessions").innerHTML = ResourcesInfos[10];
+			document.getElementById("SessionStatus").innerHTML = ResourcesInfos[11];
+			document.getElementById("SessionRecommended").innerHTML = ResourcesInfos[12];
+			
+		     
+			var LogTable = document.getElementById("SessionLogTable").getElementsByTagName("TBODY")[0];
+			var lastRow = LogTable.rows.length;
+			for ( i = lastRow; i > 1 ; i-- ) {
+				LogTable.removeChild(LogTable.rows[i - 1]);
+			}
+
+			if( ResourcesInfos[13].indexOf('|') > 0 )
+			{
+				var names=ResourcesInfos[13].split('|');
+				for( i=0 ; i < (names.length-1) ; i++ ){ 
+					var items = names[i].split('/');
+					var row = document.createElement("TR");
+			  		var td1 = document.createElement("TD");
+			  		td1.appendChild (document.createTextNode(items[0]));
+			  		var td2 = document.createElement("TD");
+			  		td2.appendChild (document.createTextNode(items[1]));
+			  		var td3 = document.createElement("TD");
+			  		td3.appendChild (document.createTextNode(items[2]));
+					var td4 = document.createElement("TD");
+			  		td4.appendChild (document.createTextNode(items[3]));
+					var td5 = document.createElement("TD");
+			  		td5.appendChild (document.createTextNode(items[4]));
+					var td6 = document.createElement("TD");
+			  		td6.appendChild (document.createTextNode(items[5]));
+			  		row.appendChild(td1);
+			    	row.appendChild(td2);
+			    	row.appendChild(td3);
+			    	row.appendChild(td4);
+				    row.appendChild(td5);
+				    row.appendChild(td6);
+				    LogTable.appendChild(row);
+				    rowfound = 1;
+			  	}
+			}
+			if ( rowfound == 0 ) {
+				var row = document.createElement("TR");
+				var td1 = document.createElement("TD");
+				td1.appendChild (document.createTextNode("N/A"));
+				var td2 = document.createElement("TD");
+				td2.appendChild (document.createTextNode("N/A"));
+				var td3 = document.createElement("TD");
+				td3.appendChild (document.createTextNode("N/A"));
+				var td4 = document.createElement("TD");
+				td4.appendChild (document.createTextNode("N/A"));
+				var td5 = document.createElement("TD");
+				td5.appendChild (document.createTextNode("N/A"));
+				var td6 = document.createElement("TD");
+				td6.appendChild (document.createTextNode("N/A"));
+				row.appendChild(td1);
+				row.appendChild(td2);
+				row.appendChild(td3);
+				row.appendChild(td4);
+				row.appendChild(td5);
+				row.appendChild(td6);
+				LogTable.appendChild(row);
+			}
+		}
+	}
+	setTimeout('updateResourcesValue_take()', 5000);
+}
+
+function updateResourcesValue_take() {
+//alert("1");
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest) { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+	else if (window.ActiveXObject) { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}	
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./GetRouterTable.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+    	objXMLHTTP.onreadystatechange = function() {
+			if(objXMLHTTP.readyState == 4) {
+    			updateResourcesTable(objXMLHTTP);
+			}
+    	}
+		objXMLHTTP.send(null);
+	}
+}
+
+
+</script>
+</head>
+
+<body>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left"></div>
+   <div id="content_left">
+      <div id="subnav_header"></div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('routertable','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+      </ul>
+      <div id="subnav_footer"></div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+			<div id="connectionstatus_footer"></div>
+  </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_modemutilitization">Resources Table </h1>
+				<div class="stepWrapper">
+                <p><strong>Modem Resources</strong></p>
+			    <table>
+                  <tr>
+                    <th width="225">Resource</th>
+                    <th>Status</th>
+                  </tr>
+                  <tr>
+                    <td width="225">Processor:</td>
+                    <td align="center">400 MHz</td>
+                  </tr>
+				   <tr>
+                    <td width="225"> Processor Utilization:</td>
+                    <td align="center"><span id="ProcessorUtilization"></span>%</td>
+                  </tr>
+                  <tr>
+                    <td width="225">SDRAM Memory:</td>
+                    <td><span id="SDRAMMemory"></span>M</td>
+                  </tr>
+                  <tr>
+                    <td width="225"> SDRAM Used:</td>
+                    <td align="center"><span id="SDRAMUsed"></span>%</td>
+                  </tr>
+				  <tr>
+                    <td width="225">FLASH Memory:</td>
+                    <td align="center">128 M</td>
+                  </tr>
+                  <tr>
+                    <td width="225">FLASH Used:</td>
+                    <td align="center"><span id="FLASHUsed"></span>%</td>
+                  </tr>
+                  <tr>
+                    <td width="225">Memory Status</td>
+                    <td><span id="MemoryStatus"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="225">Recommended Action:</td>
+                    <td><span id="MemRecommended"></span></td>
+                  </tr>
+                </table>
+		        </div>
+                <div class="stepWrapper">
+			  <p><strong>Modem Sessions</strong></p>
+			  <table>
+                <tr>
+                  <th width="225">Session </th>
+                  <th>Status</th>
+                </tr>
+                <tr>
+                  <td width="225">Maximum Number of Sessions:</td>
+                  <td><span id="MaxNumSessions"></span></td>
+                </tr>
+                <tr>
+                  <td width="225">LAN TCP Sessions:</td>
+                  <td><span id="LanTCPSessions"></span></td>
+                </tr>
+                <tr>
+                  <td width="225">LAN UDP Sessions:</td>
+                  <td><span id="LanUDPSessions"></span></td>
+                </tr>
+                <tr>
+                  <td width="225"> Modem Sessions:</td>
+                  <td><span id="ModemSessions"></span></td>
+                </tr>
+                <tr>
+                  <td width="225">Total  Open Sessions:</td>
+                  <td><span id="TotalSessions"></span></td>
+                </tr>
+                <tr>
+                  <td width="225">Session Status:</td>
+				  <td><span id="SessionStatus"></span></td>
+                </tr>
+                <tr>
+                  <td width="225">Recommended Action:</td>
+				  <td><span id="SessionRecommended"></span></td>
+                </tr>
+              </table>
+			 </div>
+             <div class="stepWrapper">
+			  <p><strong>LAN Device Log</strong></p>
+			    <table id="SessionLogTable" width="85%" border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle">
+				  <tbody>
+					<tr>
+						<th style="padding:10px;">Device</th>
+						<th style="padding:10px;">Protocol</th>
+						<th style="padding:10px;">Destination IP</th>
+						<th style="padding:10px;">Sessions</th>
+						<th style="padding:10px;">Packets<br />
+						Tx</th>
+						<th style="padding:10px;">Packets<br />
+						Rx</th>
+					</tr>
+					<tr align="center">
+                        <td style="padding:10px;">N/A</td>
+                        <td style="padding:10px;">N/A</td>
+                        <td style="padding:10px;">N/A</td>
+						<td style="padding:5px;">N/A</td>
+						<td style="padding:5px;">N/A</td>
+						<td style="padding:5px;">N/A</td>
+                    </tr>
+                  </tbody>
+				</table>
+				</div>
+                </div>
+  </div>
+</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<script language='JavaScript'>
+<!--
+$(document).ready(function() {
+	document.getElementById("ProcessorUtilization").innerHTML = "0.0";
+	document.getElementById("SDRAMMemory").innerHTML = "0";
+	document.getElementById("SDRAMUsed").innerHTML = "0.0";
+	document.getElementById("FLASHUsed").innerHTML = "0.0";
+	document.getElementById("MemoryStatus").innerHTML = "OK";
+	document.getElementById("MemRecommended").innerHTML = "NONE";
+	document.getElementById("MaxNumSessions").innerHTML = "20480";
+	document.getElementById("LanTCPSessions").innerHTML = "0";
+	document.getElementById("LanUDPSessions").innerHTML = "0";
+	document.getElementById("ModemSessions").innerHTML = "0";
+	document.getElementById("TotalSessions").innerHTML = "0";
+	document.getElementById("SessionStatus").innerHTML = "OK";
+	document.getElementById("SessionRecommended").innerHTML = "NONE";
+
+	updateResourcesValue_take();
+});
+//-->
+</script>
+</body>
+</html>

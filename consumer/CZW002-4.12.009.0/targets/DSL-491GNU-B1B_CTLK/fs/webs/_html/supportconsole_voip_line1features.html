@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+<!--hide
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var tmpcallwait = '<%ejGetVoice(callwait)%>';
+var tmpmw = '<%ejGetVoice(mwi)%>';
+
+var tmpt38  = '<%ejGetVoice(t38Enable)%>';
+var tmpvet = '<%ejGetVoice(v18Enable)%>';
+
+if ( tmpcallwait.search("ejGetVoice") < 0 ) {
+   eval( tmpcallwait );
+}
+if ( tmpmw.search("ejGetVoice") < 0 ) {
+   eval( tmpmw );
+}
+
+if ( tmpt38.search("ejGetVoice") < 0 ){
+	eval(tmpt38);
+}
+
+if ( tmpvet.search("ejGetVoice") < 0 ) {
+   eval( tmpvet );
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+	
+		// call waiting
+		if (callWaitingEnabled.checked == true)
+		{
+			callwait0_0.value = 'on';
+		}
+		else
+		{
+			callwait0_0.value = 'off';
+		}
+		
+		// mwi
+		if (mwiEnabled.checked == true)
+		{
+			mwi0_0.value = 'on';
+		}
+		else
+		{
+			mwi0_0.value = 'off';
+		}
+		
+		// fax
+		if (t38Enabled.checked == true)
+		{
+			t38Enable0.value = 'on';
+			faxPassThrough0.value = 'Disable';
+		}
+		else
+		{
+			t38Enable0.value = 'off';
+			faxPassThrough0.value = 'Force';
+		}
+		
+		// v18
+		if (v18Enabled.checked == true)
+		{
+			v18Enable0.value = 'on';
+		}
+		else
+		{
+			v18Enable0.value = 'off';
+		}
+		
+
+		sessionKey.value = gblsessionKey;
+	}
+	document.forms[0].submit();
+}
+
+function frmLoad() {		
+	with (document.forms[0]) {
+	
+		// Call Waiting
+		if (eval("cw"+ '0' + "_" + '0') == 1)
+		{
+			callWaitingEnabled.checked = true;
+			callWaitingDisabled.checked = false;
+		}
+		else
+		{
+			callWaitingEnabled.checked = false;
+			callWaitingDisabled.checked = true;
+		}
+		
+		//mwi
+		if (eval("mw"+ '0' + "_" + '0') == 1)
+		{
+			mwiEnabled.checked = true;
+			mwiDisabled.checked = false;
+		}
+		else
+		{
+			mwiEnabled.checked = false;
+			mwiDisabled.checked = true;
+		}
+		
+		// fax
+		if (eval("t38" + '0') == 1)
+		{
+			t38Enabled.checked = true;
+			t38Disabled.checked = false;
+		}    
+		else
+		{
+			t38Enabled.checked = false;
+			t38Disabled.checked = true;
+		}
+				
+		// v18
+		if (eval("vet"+ '0') == 1)
+		{
+			v18Enabled.checked = true;
+			v18Disabled.checked = false;
+		}
+		else
+		{
+			v18Enabled.checked = false;
+			v18Disabled.checked = true;
+		}
+	}
+}
+
+// done hiding -->
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('voipline1', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+         </div>
+   </div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+            <h1 class="supportconsole_voip_line1features">Line 1 Feature Settings<span>The VoIP settings below configure the feature settings for line 1. The settings below are bassed on the United States location designator.</span></h1>
+			<form id="form1" name="form1" method="post" action="voiceline1features.cmd" onSubmit="return btnApply();">
+			<input type="hidden" name="callwait0_0" id="callwait0_0" value="">
+			<input type="hidden" name="mwi0_0" id="mwi0_0" value="">
+			<input type="hidden" name="t38Enable0" id="t38Enable0" value="">
+			<input type="hidden" name="faxPassThrough0" id="faxPassThrough0" value="">
+			<input type="hidden" name="v18Enable0" id="v18Enable0" value="">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="">
+					<div class="stepWrapper">
+					<p><strong>1. Set the call waiting state.</strong></p>
+						<table>
+						<tr>
+							<td width="175"><label for="callWaiting">Call Waiting:</label></td>
+							<td><label><input name="callWaiting" type="radio" id="callWaitingEnabled" value="" checked="checked" /> Enable </label></td>
+							<td><label><input name="callWaiting" type="radio" id="callWaitingDisabled" value="" /> Disable </label></td>
+						</tr>
+						</table>
+               </div>
+				  
+					<div class="stepWrapper">
+					<p><strong>2. Set the MWI state (Optional).</strong></p>
+						<table>
+						<tr>
+							<td width="175"><label for="mwi">MWI LED State:</label></td>
+							<td><label><input name="mwi" type="radio" id="mwiEnabled" value="" checked="checked" /> Enable </label></td>
+							<td><label><input name="mwi" type="radio" id="mwiDisabled" value="" /> Disable </label></td>
+						</tr>
+						</table>
+               </div>
+					
+					<div class="stepWrapper">
+					<p><strong>3. Set the T38 state (Optional).</strong></p>
+						<table>
+						<tr>
+							<td width="175"><label for="t38">T38 Support:</label></td>
+							<td><label><input name="t38" type="radio" id="t38Enabled" value="" checked="checked" /> Enable </label></td>
+							<td><label><input name="t38" type="radio" id="t38Disabled" value="" /> Disable </label></td>
+						</tr>
+						</table>
+               </div>
+					
+					<div class="stepWrapper">
+					<p><strong>4. Set the V18 state (Optional).</strong></p>
+						<table>
+						<tr>
+							<td width="175"><label for="v18">V18 Support:</label></td>
+							<td><label><input name="v18" type="radio" id="v18Enabled" value="" /> Enable </label></td>
+							<td><label><input name="v18" type="radio" id="v18Disabled" value="" checked="checked" /> Disable </label></td>
+						</tr>
+						</table>
+               </div>               
+					
+               <div class="stepWrapper">
+					  <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+					  <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+					</div>
+			   </form>
+                      <p>&nbsp;</p>
+
+					<div class="clear_left"></div>
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
+

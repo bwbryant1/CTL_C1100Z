@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+<script LANGUAGE="Javascript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var upnpinfo = '<%ejGetOtherBig(portMap, upnp)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var showtable = 0;
+
+function removeClick(index){
+	var uinfo = upnpinfo.split('|');
+	var names = uinfo[index].split('/');
+	with ( document.forms[1] ) {
+		iStart.value=names[1];
+		iEnd.value=names[2];
+		srvAddr.value=names[4];
+		eStart.value=names[5];
+		eEnd.value=names[6];
+		proto.value=names[3];
+	}
+	document.forms[1].sessionKey.value = gblsessionKey;
+	document.forms[1].submit();
+	return;
+}
+
+function NATTClick () {
+	var enblUpnpNATTGet = '<%ejGetOther(sysInfo, enblUpnpNATT)%>';
+	if ( enblUpnpNATTGet > 1 ) {
+		AlertOpen ( 'NAT-T will function only when NAT is enabled.' );
+	}
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+		if (enblUpnp[1].checked == true)
+		{	
+			enblUpnpNATT[1].checked = true;
+		}
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+}
+
+function frmLoad() {
+	with ( document.forms[0] ) {
+		var enblUpnpGet = '<%ejGetOther(sysInfo, enblUpnp)%>';
+		var enblUpnpNATTGet = '<%ejGetOther(sysInfo, enblUpnpNATT)%>';
+	  
+		if (enblUpnpGet == 1)
+			enblUpnp[0].checked = true;
+		else 
+			enblUpnp[1].checked = true;
+		
+		if (enblUpnpNATTGet == 0)
+			enblUpnpNATT[1].checked = true;         
+		else if (enblUpnpNATTGet == 1)
+			enblUpnpNATT[0].checked = true;
+		else if (enblUpnpNATTGet == 2) {
+			enblUpnpNATT[1].checked = true;
+		}
+		else if (enblUpnpNATTGet == 3) {
+			enblUpnpNATT[0].checked = true;
+		}
+	}
+	UPnPEnchange();
+}
+
+function UPnPEnchange() {
+	with ( document.forms[0] ) {
+		if (enblUpnp[0].checked){
+			showtable = 1;
+			showhide("upnpenabled",1);
+			showhide("upnpdisabled",0);
+		}
+		else {
+			showtable = 0;
+			showhide("upnpenabled",0);
+			showhide("upnpdisabled",1);
+		}
+	}
+	table();
+}
+
+function table() {
+	with ( document.forms[1] ) {
+		if (showtable == 1){
+			showhide("upnptable",1);
+		}
+		else {
+			showhide("upnptable",0);
+		}
+	}
+}
+
+</SCRIPT>
+</head>
+<body id="advancedsetup_upnp" onLoad='frmLoad()'>
+
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+		<div id="subnav_header"></div>
+        <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('upnp');
+</script>
+        </ul>       
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+	<div id="content_right">
+		
+		<div id="content_right_contentarea">
+			<h1 class="advancedsetup_upnp">UPnP <span>UPnP  (Universal Plug and Play) simplifies the connection and implementation of devices to your network. Follow the steps below to enable or disable UPnP.</span></h1>
+			<form action="upnpcfg.cgi" method="post">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+				 <div class="stepWrapper">
+				<p><strong>1. Set the UPnP state.</strong></p>
+				<table>
+                  <tr>
+                    <td width="150">UPnP:</td>
+                    <td width="150">                        <input name="enblUpnp" id="enblUpnp" type="radio" value="1" onClick="UPnPEnchange();" />
+                        Enable</td>
+                    <td>                        <input name="enblUpnp" type="radio" id="enblUpnp" value="0" onClick="UPnPEnchange();" />
+                        Disable</td>
+                  </tr>
+                </table>
+				</div>
+				<span id="upnpenabled">
+                 <div class="stepWrapper">
+				<p><strong>2. Set the UPnP NAT-T state.</strong></p>
+				<table>
+                  <tr>
+                    <td width="150">UPnP NAT-T:</td>
+                    <td width="150">                        <input name="enblUpnpNATT" id="enblUpnpNATT" type="radio" value="1" />
+                        Enable</td>
+                    <td>                        <input name="enblUpnpNATT" type="radio" id="enblUpnpNATT" value="0"/>
+                        Disable</td>
+                  </tr>
+                </table>
+				</div>
+                 <div class="stepWrapper">
+				<p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+				<a href="#" class="btn apply_btn" onClick="btnApply()" id="apply_btn">Apply</a>
+                </div>
+				</span>
+				<span id="upnpdisabled">
+				<div class="stepWrapper">
+				<p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+				<a href="#" class="btn apply_btn" onClick="btnApply()" id="apply_btn">Apply</a>
+                </div>
+				</span>
+                </form><form action="rmupnprule.cmd" method="post">
+				<input type=hidden name="iStart" id="iStart" value="">
+				<input type=hidden name="iEnd" id="iEnd" value="">
+				<input type=hidden name="srvAddr" id="srvAddr" value="">
+				<input type=hidden name="eStart" id="eStart" value="">
+				<input type=hidden name="eEnd" id="eEnd" value="">
+				<input type=hidden name="proto" id="proto" value="">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+                <p>&nbsp;</p>
+				<span id="upnptable">
+                 <div class="stepWrapperdark">
+				<table>
+                	<tr>
+							<th colspan="7" class="tableTitle">UPnP NAT-T List</th>
+						</tr>
+                  <tr>
+                    <th width="47" height="24" align="center">&nbsp;</th>
+                    <th width="83">Device</th>
+                    <th width="90">IP Address</th>
+                    <th width="80">Port Range</th>
+                    <th width="73">Protocol</th>
+                    <th width="84">Edit</th>
+                  </tr>
+<script language="javascript">
+<!-- hide
+{
+	var i = 0;
+	var j = 0;
+
+	var hostinfo = '<%ejGetOtherBig(dhcpLeasesinfo,2)%>';
+	var hinfo = hostinfo.split('|');
+	var uinfo = upnpinfo.split('|');
+
+	
+	if ( uinfo != '' ) {
+		for ( i = 0; i < uinfo.length; i++ ) {
+			var hostname = 'unknown';
+			var htype = 'computer';
+			if (uinfo[i] == '')
+				break;
+			var names = uinfo[i].split('/');
+			
+			if (hinfo != '') {
+				for ( j = 0; j < hinfo.length; j++ ) 
+				{
+					if (hinfo[j] == '')
+						break;
+					var hnames = hinfo[j].split('/');
+					if ( hnames[2] == names[4] ) {
+						if ( hnames[0] != '' ) {
+							hostname = processLongName( hnames[0], 13 );
+						}
+						if ( hnames[3] != '' ) {
+							htype =  hnames[3];
+						}
+					}
+				}
+			}
+			document.writeln("<tr align=\"center\">");
+			document.writeln("<td height=\"50\"><img src=\"../_images/icon_"+htype+".png\" width=\"39\" height=\"39\" /></td>");
+			document.writeln("<td>"+hostname+"</td>");
+			document.writeln("<td>"+names[4]+"</td>");
+			if(names[1] == names[2]){
+				document.writeln("<td>"+names[1]+"</td>");
+			}
+			else{
+				document.writeln("<td>"+names[1]+" - "+names[2]+"</td>");
+			}
+			document.writeln("<td>"+names[3]+"</td>");
+			document.writeln("<td><a onClick='removeClick("+i+")' class='btn remove_btn'>Remove<a/></td>");
+			document.writeln("</tr>"); 
+			
+		}
+	}
+	if (i == 0 ) {
+		document.writeln("<tr align=\"center\" class=\"nattable\">");
+		document.writeln("<td colspan=7 style=\"padding:10px;\">No Rules Defined</td>");
+		document.writeln("</tr>");
+	} 
+}
+//-->
+</script>
+                </table>
+			    </div>
+				</span>
+			</form>
+		</div>
+	</div>
+	<div class="clear_left">
+	</div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

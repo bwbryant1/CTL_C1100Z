@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.showpassword-1.0.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var info="<%ejGetOther(AdminPassword)%>"
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var oriEnable;
+
+function btnApply()
+{
+		with(document.forms[0])
+		{
+			if(inUserName.value==''){
+				//AlertOpen("An admin username and password can not be empty.\nEnter an admin username and password");
+				AlertOpen("An administrator username and password must be entered to enable the \nadministrative password feature.  Enter an admin username and password in step 2. ");
+				return false;
+			}
+
+			if(!isValidName(inUserName.value)){
+				AlertOpen("The admin username is invalid.\nEnter other admin username");
+				return false;
+			}
+			
+			if( inPassword.value==''&& admin_pw_state[0].checked==true)
+			{
+				AlertOpen("An administrator username and password must be entered to enable the \nadministrative password feature.  Enter an admin username and password in step 2.");
+				return false;
+			}
+
+			if( inPassword.value == "*********" )
+				inPassword.value="";
+			if( password_confirm.value == "*********" )
+				password_confirm.value="";
+
+			if( admin_pw_state[1].checked == true){
+				inUserName.disabled = false;
+				inPassword.disabled = false;
+				inPassword.value = "";
+				adminPasswdEnable.value=0;
+			}
+			else{
+				adminPasswdEnable.value=1;
+				if(isPwdSpecialChar(inPassword.value))
+				{
+					AlertOpen(" An unsupported character is included in the password.");
+					return false;
+				}
+				if(show_password.checked == false &&(password_confirm.value!=inPassword.value))
+				{
+					AlertOpen("The passwords entered do not match. Please enter matching passwords.");
+					return false;
+				}
+			}
+			admin_pw_state[0].disabled = true;
+			admin_pw_state[1].disabled = true;
+			document.forms[0].sessionKey.value = gblsessionKey;
+		}
+		return true;
+}
+
+function doSubmit () {
+	if ( btnApply() ) {
+		document.forms[0].submit();
+	}
+}
+
+function dofocus () {
+	with ( document.forms[0] ) {
+		inPassword.value = "";
+		inPassword.focus();
+		inPassword.onfocus = null;
+	}
+}
+
+function change () {	
+	setTimeout("dofocus();",10);
+}
+
+function frmLoad()
+{
+	var infos = info.split('|');
+	with ( document.forms[0] ) {
+		if ( infos[0] == null ) {
+			 inUserName.value = "";
+		}
+		else {
+			 inUserName.value = infos[0];
+		}
+
+		if ( infos[1] == 1 ) {
+			 $('#show_all').show();
+			 $('#set_admin_pw *').removeClass('greyed_out');
+						 
+			 inPassword.value = "*********";
+			 password_confirm.value = "*********";
+			 admin_pw_state[0].checked = true;
+			 inPassword.onfocus = function () {dofocus();};
+			 oriEnable=1;
+		}
+		else {
+			 inPassword.value = "*********";
+			 password_confirm.value = "*********";
+			 admin_pw_state[1].checked = true;
+			 $('#show_all').hide();
+			 $('#set_admin_pw *').addClass('greyed_out');
+			 oriEnable=0;
+		}
+		if (show_password.checked == true)
+		{
+			$('.PasswordConfirmID').hide();
+		}
+	      else
+	      {
+	        	 $('.PasswordConfirmID').show();
+	       }
+		
+	}
+}
+
+function showPass() {
+   with ( document.forms[0] ) {
+      if (show_password.checked == true)
+	{
+		$('.PasswordConfirmID').hide();
+	}
+      else
+      {
+        	 $('.PasswordConfirmID').show();
+       }
+   }
+}
+
+function enablepassword(){
+	with ( document.forms[0] ) {
+	if (admin_pw_state[0].checked == true ) {
+			 $('#show_all').show();
+			 $('#set_admin_pw *').removeClass('greyed_out');
+
+		}
+		else {
+			 $('#show_all').hide();
+			 $('#set_admin_pw *').addClass('greyed_out');
+		}
+	}
+}
+
+$(function(){
+	$('#inPassword').showPassword('#show_password');
+});
+
+//-->
+</SCRIPT>
+</head>
+<style type="text/css">
+   input {
+       font-family: sans-serif;
+   }
+</style>
+<body id="advancedsetup_dhcpsettings" onLoad='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('admin');
+</script>		  
+		</ul>
+		<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+	<div id="content_right">
+		<div id="content_right_contentarea">
+			<h1 class="advancedsetup_security">Administrator  Password <span>An administrator username and password prevents outsiders from accessing the modems firmware settings. After creating a username and password, you will need to enter them every time you access the modems firmware GUI.</span></h1>			
+				<form action="advancedsetup_admin.cgi" method="post" onSubmit="return btnApply();">
+				<input type="hidden" name="adminPasswdEnable">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+				  <div class="stepWrapper">
+				  <p><strong>1. Set the administrator username and password state.</strong></p>
+				  <table>
+                    <tr>
+                      <td width="150">Administrator Password:                      </td>
+                      <td>
+                          <input name="admin_pw_state" id="admin_pw_state_on" type="radio" onclick="enablepassword();" value="on" />
+        Enable                      </td>
+                      <td>
+                          <input name="admin_pw_state" type="radio" id="admin_pw_state_off" onclick="enablepassword();" value="off"/>
+        Disable                      </td>
+                    </tr>
+                  </table>
+					</div>
+                    <div id = "show_all" class="stepWrapper">
+                    <div id="set_admin_pw">
+				  <p><strong>2. Enter an administrator username and password.</strong></p>
+          
+
+				  <table>
+                    <tr>
+                      <td width="150">Administrator Username:
+                      </td>
+                      <td>
+                          <input name="inUserName" type="text" id="inUserName"  class="textinput" size="30" maxlength=15/>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                      <td>New Password:
+                      </td>
+                      <td>
+                          <span id=passwd><input name="inPassword" type="password" id="inPassword" class="textinput" size="30" maxlength=64/></span>
+                      </td>
+                    </tr>
+
+			<tr class='PasswordConfirmID'>
+	                            <td ><label for="password_confirm">Confirm Password:</label></td>
+	                            <td><input name = "password_confirm" id="password_confirm" type="password" size="30" maxlength=64 /></td>
+	              </tr>
+
+                    
+                    <tr>
+                      <td>
+                          <input name="show_password" type="checkbox" id="show_password" size="25" onclick="showPass()" /> Show Password
+                      </td>
+                      <td>&nbsp;</td>
+                    </tr>
+                  </table>
+				 </div>
+                 </div>
+             <div class="stepWrapper">
+				  <p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+				  <a href="#" class="btn apply_btn" id="apply_btn" onClick="doSubmit();">Apply</a>
+                 </div>
+				</form>
+		</div>
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1 @@
+cmd_net/netfilter/xt_mac.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/netfilter/xt_mac.ko net/netfilter/xt_mac.o net/netfilter/xt_mac.mod.o

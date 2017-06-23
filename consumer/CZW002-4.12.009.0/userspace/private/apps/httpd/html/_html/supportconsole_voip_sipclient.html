@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+<!--hide
+
+var ss0_0 = '';
+var ss1_0 = '';
+
+var tmpsipStatus = '<%ejGetVoice(sipStatus)%>';
+
+var stateEnabled  = '<%ejGetVoice(sipClientEnabled)%>';
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+
+if ( tmpsipStatus.search("ejGetVoice") < 0 ) {
+	eval( tmpsipStatus );
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+		
+		if (sipClientStateEnabled.checked == true)
+		{
+			sipClientEnabled.value = '1';
+		}
+		else
+		{
+			sipClientEnabled.value = '0';
+		}
+		sessionKey.value = gblsessionKey;
+	}
+	document.forms[0].submit();
+}
+
+function frmLoad() {		
+	with (document.forms[0]) {
+	
+		sipClientInfo1 = ss0_0.split(';');
+		sipClientInfo2 = ss1_0.split(';');
+	
+		if (stateEnabled == '1')
+		{
+			sipClientStateEnabled.checked = true;
+			sipClientStateDisabled.checked = false;
+
+			document.getElementById("table_sip_client").rows.item(2).cells.item(0).innerHTML='<font color=#0090><b>ENABLED</b></font>';
+			
+			//---
+			if ((sipClientInfo1[0] == 'On Register') || (sipClientInfo2[0] == 'On Register'))
+			{
+				document.getElementById("table_sip_client").rows.item(2).cells.item(1).innerHTML='<font color=#0090><b>REGISTERED</b></font>';
+			}
+			else if ((sipClientInfo1[0] == 'Registering') || (sipClientInfo2[0] == 'Registering'))
+			{
+				document.getElementById("table_sip_client").rows.item(2).cells.item(1).innerHTML='<font color=#FF6319><b>REGISTERING</b></font>';
+			}
+			else
+			{
+				document.getElementById("table_sip_client").rows.item(2).cells.item(1).innerHTML='<font color=#FF0000><b>REGISTRATION FAILED</b></font>';
+			}
+			
+			//---
+			if ((sipClientInfo1[0] == 'On Register') && (sipClientInfo2[0] == 'On Register'))
+			{
+				document.getElementById("table_sip_client").rows.item(2).cells.item(3).innerHTML='1 and 2';
+			}
+			else if ((sipClientInfo1[0] == 'On Register') && (sipClientInfo2[0] != 'On Register'))
+			{
+				document.getElementById("table_sip_client").rows.item(2).cells.item(3).innerHTML='1';
+			}
+			else if ((sipClientInfo1[0] != 'On Register') && (sipClientInfo2[0] == 'On Register'))
+			{
+				document.getElementById("table_sip_client").rows.item(2).cells.item(3).innerHTML='2';
+			}
+			
+			//--
+			var failCount1 = parseInt(sipClientInfo1[6], 10);
+			var failCount2 = parseInt(sipClientInfo2[6], 10);
+			var failSum = 0;
+
+			if (failCount1.toString() == 'NaN')
+			{
+				failCount1 = 0;
+			}
+			if (failCount2.toString() == 'NaN')
+			{
+				failCount2 = 0;
+			}
+			failSum = failCount1 + failCount2;
+			document.getElementById("table_sip_client").rows.item(2).cells.item(2).innerHTML=failSum.toString();			
+			
+			//---
+			var duration1 = parseInt(sipClientInfo1[1], 10);
+			var duration2 = parseInt(sipClientInfo2[1], 10);
+			var maxDuration;
+			var months = "January,February,March,April,May,June,July,August,September,October,November,December".split(",");
+			
+			if (duration1.toString() == 'NaN')
+			{
+				duration1 = 0;
+			}
+			if (duration2.toString() == 'NaN')
+			{
+				duration2 = 0;
+			}
+			
+			if (duration1 > duration2)
+			{
+				maxDuration = duration1;
+			}
+			else
+			{
+				maxDuration = duration2;
+			}
+			
+			var nowTime = new Date('<%ejGetOther(sysInfo, dateTime)%>');
+			var regTime = new Date(nowTime.getTime() - (maxDuration*1000)); //now - duration (ms)
+			var regTimeStr = months[regTime.getMonth()] + ' ' + regTime.getDate() + ', ' + regTime.getFullYear() + ' at ' + (regTime.getHours()%12) + ':' + regTime.getMinutes() + ' ';
+			
+			if (regTime.getHours() < 12)
+			{
+				regTimeStr += 'AM';
+			}
+			else
+			{
+				regTimeStr += 'PM';
+			}
+			document.getElementById("table_sip_client").rows.item(2).cells.item(4).innerHTML=regTimeStr;
+		}
+		else
+		{
+			sipClientStateEnabled.checked = false;
+			sipClientStateDisabled.checked = true;
+			document.getElementById("table_sip_client").rows.item(2).cells.item(0).innerHTML='<font color=#FF0000><b>DISABLED</b></font>';
+			document.getElementById("table_sip_client").rows.item(2).cells.item(1).innerHTML='<b>N/A</b>';
+			document.getElementById("table_sip_client").rows.item(2).cells.item(2).innerHTML='N/A';
+			document.getElementById("table_sip_client").rows.item(2).cells.item(3).innerHTML='N/A';
+			document.getElementById("table_sip_client").rows.item(2).cells.item(4).innerHTML='N/A';
+		}
+	}
+}
+
+// done hiding -->
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('voipsipclient', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+         </div>
+   </div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+            <h1 class="supportconsole_voip_line1features">SIP Client Settings<span>The VoIP basic settings below configure the overall VoIP in frastructure. The settings below are based on the United States location designator.</span></h1>
+			<form id="form1" name="form1" method="post" action="voicesipclient.cmd" onSubmit="return btnApply();">
+			<input type="hidden" name="sipClientEnabled" id="sipClientEnabled" value="">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="">
+					<div class="stepWrapper">
+					<p><strong>1. Set the SIP Client State.</strong></p>
+						<table>
+						<tr>
+							<td width="175"><label for="sipClientState">SIP Client State:</label></td>
+							<td><label><input name="sipClientState" type="radio" id="sipClientStateEnabled" value="" checked="checked" /> Enable </label></td>
+							<td><label><input name="sipClientState" type="radio" id="sipClientStateDisabled" value="" /> Disable </label></td>
+						</tr>
+						</table>
+               </div>
+					
+               <div class="stepWrapper">
+					  <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+					  <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+					</div>
+			   </form>
+                      <p>&nbsp;</p>
+							 
+				  <span>
+              <div class="stepWrapperdark">
+				  <div >
+              <table id="table_sip_client">
+                	<tr>
+							<th colspan="5" class="tableTitle">SIP Client</th>
+						</tr>
+                  <tr>
+							<th width="20%">State</th>
+							<th width="20%">Registration State</th>
+							<th width="10%">Registration Failures</th>
+							<th width="20%">Registration Account</th>
+							<th width="30%">Last Registration Date</th>
+						</tr>
+                  <tr>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+              </table>
+				  </div>
+				  </div>
+				  </span>
+
+					<div class="clear_left"></div>
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
+

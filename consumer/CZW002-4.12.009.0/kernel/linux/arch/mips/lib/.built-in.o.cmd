@@ -1,0 +1,1 @@
+cmd_arch/mips/lib/built-in.o :=  /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld  -m elf32btsmip   -r -o arch/mips/lib/built-in.o arch/mips/lib/iomap.o arch/mips/lib/iomap-pci.o arch/mips/lib/dump_tlb.o arch/mips/lib/ashldi3.o arch/mips/lib/ashrdi3.o arch/mips/lib/cmpdi2.o arch/mips/lib/lshrdi3.o arch/mips/lib/ucmpdi2.o 

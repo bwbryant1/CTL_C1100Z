@@ -1,0 +1,416 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.hidepassword-1.0.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="javascript">
+<!-- hide
+
+
+//ipv6 start
+var ipv6IntfIDStartValue = '<%ejGet(ipv6IntfIDStart)%>';
+var ipv6IntfIDEndValue = '<%ejGet(ipv6IntfIDEnd)%>';
+var ipv6RaLifetimeValue = '<%ejGet(ipv6RaLifetime)%>';
+var ipv6SubnetNumberValue = '<%ejGet(ipv6SubnetNumber)%>';
+var radvdEnbl = '<%ejGetOther(enblRadvd)%>';
+var dhcpv6Enbl = '<%ejGetOther(enblDhcp6s)%>';
+var dhcpv6State = '<%ejGet(enblDhcp6sStateful)%>';
+var gblsessionKey = '<%ejGetOther(sessionKey)%>';
+
+var subnetIDRange = '<%ejGetOther(sysInfo, subnetRange)%>';
+var SubnetIDList = "<%ejGetOther(sysInfo, SubnetIDList)%>";
+
+//ipv6 end
+
+
+
+
+function isValidCharAndLength(value)
+{
+	if(value.length<128 && value.indexOf('::')==-1)
+		return false;
+	for ( i = 0; i < value.length; i++ ){
+		if( value[i]!=':' && isHexaDigit(value[i])==false)
+			return false;
+	}
+	return true;
+}
+function CheckSubnetIDRange()
+{   
+   with ( document.forms[0] ) {
+      if(subnetIDRange != '')
+      {
+         var minValue = subnetIDRange.split("|")[0];
+         var maxValue = subnetIDRange.split("|")[1];
+         if((parseInt(ipv6SubnetNumber.value) > parseInt(maxValue)) || 
+            (parseInt(ipv6SubnetNumber.value) < parseInt(minValue)))
+         {
+            AlertOpen("Invalid subnet ID, must should between " + minValue + " to " + maxValue + ".");
+            return -1;
+         }
+      }
+   }
+   return 0;
+}
+function CheckDuplicatePrefix(subID)
+{
+   with ( document.forms[0] ) {
+      var SubnetID = SubnetIDList.split("|");
+      for(var i =1; i < SubnetID.length; i++) // Ingore the default one
+      {
+         if(parseInt(subID,10) == parseInt(SubnetID[i].split("/")[0],10))
+         {
+            AlertOpen("The IPv6 network address range in step 4 overlaps an existing address range.  Please enter an address range that does not overlap.");
+            return -1;
+         }	 	
+      }
+   }
+   return 0;
+}
+function frmLoad() 
+{
+   with ( document.forms[0] ) {
+
+//IPv6 start
+      var ipv6LanModeValue;
+      if ( radvdEnbl == true && dhcpv6Enbl == true && dhcpv6State == false )
+         ipv6LanModeValue = 'Stateless';
+      else if ( radvdEnbl == true && dhcpv6Enbl == true && dhcpv6State == true )
+         ipv6LanModeValue = 'Stateful';
+      else
+         ipv6LanModeValue = 'Disabled';
+
+      switch (ipv6LanModeValue ){
+      case 'Disabled':
+         ipv6LanMode.options[2].selected=true;
+         $('div#disabled').show();
+         $('div#stateful, div#stateless').hide();		 
+         //enblIpv6Lan.value=0;
+         break;
+      case 'Stateful':
+         ipv6LanMode.options[1].selected=true;
+         $('div#stateful').show();
+         $('div#disabled, div#stateless').hide();
+         //enblIpv6Lan.value=1;		    
+         //[TODO] enable radvd-gw (M=1,O=1,A=0) / enable-dhcp6s ip and dns (stateful/statelsss)	 	
+         break;
+      case 'Stateless':
+         ipv6LanMode.options[0].selected=true;
+         $('div#stateless').show();
+         $('div#disabled, div#stateful').hide();		 
+         //enblIpv6Lan.value=1;			
+         //[TODO] enable radvd-prefix (M=0,O=1,A=1) / enable-dhcp6s dns (stateful/statelsss)
+         break;
+      }
+      var dhcpv6StartTmp = ipv6IntfIDStartValue.split(':');         
+      if(dhcpv6StartTmp.length > 1)
+      {
+			 ipv6IntfIDStartTmp.value = parseInt(dhcpv6StartTmp[dhcpv6StartTmp.length-1],16);
+		}
+		 
+		var dhcpv6EndTmp = ipv6IntfIDEndValue.split(':');         
+		if(dhcpv6EndTmp.length > 1)
+      {
+		 	ipv6IntfIDEndTmp.value = parseInt(dhcpv6EndTmp[dhcpv6EndTmp.length-1],16);
+      } 
+       
+      //ipv6IntfIDStartTmp.value = ipv6IntfIDStartValue;
+      //ipv6IntfIDEndTmp.value = ipv6IntfIDEndValue;
+	   statelessRaTime.value = ipv6RaLifetimeValue;  
+      statefulRaTime.value = ipv6RaLifetimeValue;
+      statelessSubnetNumber.value = ipv6SubnetNumberValue;
+      statefulSubnetNumber.value = ipv6SubnetNumberValue;
+      
+//IPv6 end
+   }
+}
+
+function onoffParameter(type)
+{
+   with ( document.forms[0] ) {
+      if(type=='Stateful')
+      {
+			ipv6RaLifetime.disabled=false;
+			ipv6IntfIDStart.disabled=false;
+			ipv6IntfIDEnd.disabled=false;
+      }
+      else if(type=='Stateless')
+      {
+			ipv6RaLifetime.disabled=false;
+			ipv6IntfIDStart.disabled=true;
+			ipv6IntfIDEnd.disabled=true;
+      }
+      else
+      {
+         //Disabled
+			ipv6RaLifetime.disabled=true;
+			ipv6IntfIDStart.disabled=true;
+			ipv6IntfIDEnd.disabled=true;
+		}
+      statelessSubnetNumber.disabled=true;
+      statefulSubnetNumber.disabled=true;
+		statelessRaTime.disabled=true;		
+		statefulRaTime.disabled=true;			
+		ipv6IntfIDStartTmp.disabled=true;
+		ipv6IntfIDEndTmp.disabled=true;
+   }
+}
+
+function btnApply() 
+{
+   with ( document.forms[0] ) {
+      var msg = "";
+      switch (ipv6LanMode.value){
+      case 'Disabled':
+         onoffParameter('Disabled');
+         break;
+      
+      case 'Stateful':
+         //RA time
+         if(statefulRaTime.value == '' || isValidDecKey(statefulRaTime.value)==false ){
+            msg = "The router advertisement lifetime is not valid in step 2.";
+            AlertOpen(msg);
+            return false; 	            
+         }
+         tmpRaltime = statefulRaTime.value;
+         if( tmpRaltime < 0 ||
+            (tmpRaltime > 0 && !(tmpRaltime >= 2 && tmpRaltime <= 150)))
+         {
+               msg = "The router advertisement lifetime is not valid in step 2.";
+               AlertOpen(msg);
+            return false;            
+         }
+         ipv6RaLifetime.value = tmpRaltime;	
+         
+         //DHCPv6
+         if( (ipv6IntfIDStartTmp.value=='' || isValidDecKey(ipv6IntfIDStartTmp.value)==false || ipv6IntfIDStartTmp.value < 2 || ipv6IntfIDStartTmp.value > 111)
+				   ||(ipv6IntfIDEndTmp.value=='' || isValidDecKey(ipv6IntfIDEndTmp.value)==false || ipv6IntfIDEndTmp.value < 2 || ipv6IntfIDEndTmp.value > 111) )
+         {
+            msg = "The LAN IPv6 address range is not valid in step 2.";
+            AlertOpen(msg);
+            return false;  				
+         }
+         if( parseInt(ipv6IntfIDStartTmp.value,10) > parseInt(ipv6IntfIDEndTmp.value,10) )
+         {
+            msg = "The LAN IPv6 address range is not valid in step 2.";
+            AlertOpen(msg);
+            return false;  				
+         }
+         ipv6IntfIDStart.value = "0:0:0:" + decToHex(ipv6IntfIDStartTmp.value,16);
+			ipv6IntfIDEnd.value = "0:0:0:" + decToHex(ipv6IntfIDEndTmp.value,16);
+         
+         //Subnet number
+         if(statefulSubnetNumber.value == '' || isValidDecKey(statefulSubnetNumber.value)==false ){
+            msg = "The subnet number is not valid in step 2.";
+            AlertOpen(msg);
+            return false; 	            
+         }
+         ipv6SubnetNumber.value  = statefulSubnetNumber.value; 
+		 
+         if(CheckSubnetIDRange() == -1)
+         {
+            return false;
+         }
+         if(CheckDuplicatePrefix(ipv6SubnetNumber.value) == -1)
+         {
+            return false;
+         }
+		 
+         onoffParameter('Stateful');
+         break;
+      
+      case 'Stateless':
+         //RA time
+         if(statelessRaTime.value == '' || isValidDecKey(statelessRaTime.value)==false ){
+            msg = "The router advertisement lifetime is not valid in step 2.";
+            AlertOpen(msg);
+            return false; 	            
+         } 			
+         tmpRaltime = statelessRaTime.value;	            
+         if( tmpRaltime < 0 ||
+            (tmpRaltime >0 && !(tmpRaltime >= 2 && tmpRaltime <= 150)))
+         {
+            msg = "The router advertisement lifetime is not valid in step 2.";
+            AlertOpen(msg);
+            return false;            
+         }
+         ipv6RaLifetime.value = tmpRaltime;
+         
+         //Subnet number   
+         if(statelessSubnetNumber.value == '' || isValidDecKey(statelessSubnetNumber.value)==false ){
+            msg = "The subnet number is not valid in step 2.";
+            AlertOpen(msg);
+            return false; 	            
+         }         
+         ipv6SubnetNumber.value = statelessSubnetNumber.value;  
+		 
+         if(CheckSubnetIDRange() == -1)
+         {
+            return false;
+         } 		 
+         if(CheckDuplicatePrefix(ipv6SubnetNumber.value) == -1)
+         {
+            return false;
+         }       
+		 onoffParameter('Stateless');
+         break;
+      }
+      sessionKey.value = gblsessionKey;
+      submit();
+   }
+   return true;
+}
+-->
+</script>
+
+<body id="advancedsetup_IPv6lansettings" onload="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+    
+            <!--li class="modemstatus"><a href="modemstatus_home.html">Modem Status</a></li>
+            <li class="quicksetup"><a href="quicksetup.html">Quick Setup</a></li>
+            <li class="wirelesssetup"><a href="wirelesssetup_basicsettings.html">Wireless Setup</a></li>
+            <li class="utilities"><a href="utilities_reboot.html">Utilities</a></li>
+            <li class="advancedsetup"><a href="advancedsetup_accessscheduler.html" id="selected">Advanced Setup</a></li-->
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left">
+    </div>
+	<div id="content_left">
+		<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('IPv6lansettings');
+</script>
+		</ul>
+		<div id="connectionstatus">
+			<h1>Connection Status</h1>
+			<div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+    <div id="content_right">
+        <div id="content_right_contentarea">
+          <h1 class="supportconsole_IPv6">IPv6 LAN Settings<span>IPv6 is the next generation of IP addressing.</span></h1>
+          <form action="advancedsetup_ipv6lansettings.cgi" method="post">
+               <input name="ipv6RaLifetime" type="hidden" value="" />   
+               <input name="ipv6SubnetNumber" type="hidden" value="" />
+               <input name="ipv6IntfIDStart" type="hidden" />
+               <input name="ipv6IntfIDEnd" type="hidden" />
+               <input name="sessionKey" type="hidden" id="sessionKey" value=""/>
+            <p></p>
+            <div class="stepWrapper">
+              <p><strong>1. Set the IPv6 LAN connection type. </strong></p>
+              <table>
+                <tr>
+                  <td width="193"><label for="lan_connection_type">LAN Connection Type:</label></td>
+                  <td width="280">
+                  <select name="ipv6LanMode" id="lan_connection_type">
+                    <option value="Stateless">Stateless</option>
+                    <option value="Stateful">Stateful</option>
+                    <option value="Disabled" selected="selected">Disabled</option>
+                  </select></td>
+                </tr>
+              </table>
+            </div>
+            <div id="disabled">
+	            <div class="stepWrapper">
+	              <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+	            <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a></div>
+            </div>
+
+            <div id="stateless">
+            	<div class="stepWrapper">
+	              <p><strong>2. Set the IPv6 LAN addressing values.</strong></p>
+	              <table>
+	                <tr>
+	                  <td width="198">Prefix Length:</td>
+	                  <td width="82">64</td>
+	                  <td width="189">&nbsp;</td>
+	                </tr>
+	                <tr>
+	                  <td>Subnet Number:</td>
+	                  <td><input name="statelessSubnetNumber" type="text" id="statelessSubnetNumber" value="0" size="5" /></td>
+	                  <td>Decimal</td>
+	                </tr>
+	                <tr>
+	                  <td>Router Advertisement Lifetime:</td>
+	                  <td><input name="statelessRaTime" type="text" id="statelessRaTime" value="30" size="5" /></td>
+	                  <td>Minutes</td>
+	                </tr>
+	              </table>
+	            </div>
+	            <div class="stepWrapper">
+	              <p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+	            <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a></div>            
+            </div>
+            <div id="stateful">
+	            	<div class="stepWrapper">
+	              <p><strong>2. Set the IPv6 LAN subnet information below.</strong></p>
+	              <table>
+	                <tr>
+	                  <td width="198">Prefix Length:</td>
+	                  <td width="82">64</td>
+	                  <td width="189">&nbsp;</td>
+	                </tr>
+	                <tr>
+	                  <td>Subnet Number:</td>
+	                  <td><input name="statefulSubnetNumber" type="text" id="statefulSubnetNumber" value="0" size="5" /></td>
+	                  <td>Decimal</td>
+	                </tr>
+	                <tr>
+	                  <td>Router Advertisement Lifetime:</td>
+	                  <td><input name="statefulRaTime" type="text" id="statefulRaTime" value="30" size="5" /></td>
+	                  <td>Minutes</td>
+	                </tr>
+	              </table>
+	            </div>
+	            <div class="stepWrapper">
+	              <p><strong>3. Set the IPv6 LAN address range below.</strong></p>
+	              <table>
+	                <tr>
+	                  <td width="198">LAN IPv6 Address Range</td>
+	                  <td width="148"><input name="ipv6IntfIDStartTmp" type="text" id="ipv6IntfIDStartTmp" value="2" size="10" />
+	                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to</td>
+	                  <td width="123"><input name="ipv6IntfIDEndTmp" type="text" id="ipv6IntfIDEndTmp" value="111" size="10" /></td>
+	                </tr>
+	              </table>
+	            </div>
+	            <div class="stepWrapper">
+	              <p><strong>4. Click &quot;Apply&quot; to save your changes. </strong></p>
+	            <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a></div>
+            </div>
+          </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

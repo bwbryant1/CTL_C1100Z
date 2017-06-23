@@ -1,0 +1,521 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+
+var ethLanInfo = [ '<%ejGetOther(stsifcget, lan, 0)%>',
+                   '<%ejGetOther(stsifcget, lan, 1)%>',
+                   '<%ejGetOther(stsifcget, lan, 2)%>',
+                   '<%ejGetOther(stsifcget, lan, 3)%>',
+                   '<%ejGetOther(stsifcget, lan, 4)%>'
+                 ];
+var ethLanInfoNA = '0|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A|N/A';
+var ethLanPktCnt = '<%ejGetOther(ethlaninfo, ETHLAN_PKT_30MIN)%>';
+var ethLanStatus = [ 0, 0, 0, 0, 0 ];
+var periodRxByte = 0;
+var periodTxByte = 0;
+
+function updateValue_take()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)  { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+		else if (window.ActiveXObject)  { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./modemstatus_ethernetstatusupdate.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+		objXMLHTTP.onreadystatechange = function() 
+		{
+			if(objXMLHTTP.readyState == 4){
+				//document.getElementById('ethernetInfo').innerHTML=objXMLHTTP.responseText;
+                ethernetStatusUpdate = objXMLHTTP.responseText;
+                if ( ethernetStatusUpdate != "" && ethernetStatusUpdate != null ) {
+                    var statusUpdate = ethernetStatusUpdate.split('@');
+                    var selecetedPort = document.getElementById("ethPort").value;
+
+                    for ( i = 0 ; i < 5 ; i++ )
+                    {
+                        ethLanInfo[i] = statusUpdate[i];
+                    }
+
+                    ethLanPktCnt = statusUpdate[5];
+                    updatePortStatus();
+                    updatePacketCount(ethLanPktCnt, selecetedPort);
+                    updateCurrentLinkStatus(selecetedPort);
+                }
+				setTimeout('updateValue_take()',5000);
+			}
+		}
+		objXMLHTTP.send(null);
+	}
+}
+
+window.onload=function(){
+	setTimeout('updateValue_take()', 5000);
+}
+
+function portChange()
+{
+    var selecetedPort = document.getElementById("ethPort").value;
+    periodRxByte = 0;
+    periodTxByte = 0;
+    updateCurrentLinkStatus(selecetedPort);
+    updatePacketCount(ethLanPktCnt, selecetedPort);
+}
+
+function updateCurrentLinkStatus(selecetedPort)
+{
+    if (ethLanStatus[selecetedPort] == 0)
+    {
+        updateLinkStatus(ethLanInfoNA);
+    }
+    else
+    {
+        updateLinkStatus(ethLanInfo[selecetedPort]);
+    }
+}
+
+function updatePacketCount(packetCount, port)
+{
+    if (ethLanStatus[port] == 0)
+    {
+        document.getElementById("pktrx30m").innerHTML = 'N/A';
+        document.getElementById("pkttx30m").innerHTML = 'N/A';
+    }
+    else if ( packetCount != "" && packetCount != null ) {
+        var packetCountPort = packetCount.split('|');
+        document.getElementById("pktrx30m").innerHTML = packetCountPort[2*port];
+        document.getElementById("pkttx30m").innerHTML = packetCountPort[2*port+1];
+    }
+}
+
+function updatePortStatus()
+{
+    if ( ethLanInfo != "" && ethLanInfo != null )
+    {
+        for ( i = 0 ; i < 5 ; i++ )
+        {
+            var portInfos = ethLanInfo[i].split('|');
+            var speed = '';
+            var portnum = i+1;
+
+            ethLanStatus[i] = 1;
+            if (portInfos[0] == '0'){
+                speed = '<font color=\"#FF0000\"><b>DISCONNECTED</b></font>';
+                ethLanStatus[i] = 0;
+            }
+            else if (portInfos[0] == '1'){
+                speed = '<font color=\"#FF6319\"><b>10M</b></font>';
+            }
+            else if (portInfos[0] == '2'){
+                speed = '<font color=\"#009900\"><b>100M</b></font>';
+            }
+            else if (portInfos[0] == '3'){
+                speed = '<font color=\"#009900\"><b>1G</b></font>';
+            }
+            document.getElementById("port"+ portnum +"spd").innerHTML = speed;
+                
+            if (ethLanStatus[i] == 0){
+                document.getElementById("port"+ portnum +"rx").innerHTML = 'N/A';
+                document.getElementById("port"+ portnum +"tx").innerHTML = 'N/A';
+            }
+            else{
+                document.getElementById("port"+ portnum +"rx").innerHTML = portInfos[1];
+                document.getElementById("port"+ portnum +"tx").innerHTML = portInfos[2];
+            }
+        }
+    }
+}
+
+function updateLinkStatus(linkStatus)
+{
+    if ( linkStatus != "" && linkStatus != null ) {
+        var linkInfos = linkStatus.split('|');
+        var i = 1;
+
+        document.getElementById("pktrx").innerHTML = linkInfos[i++];
+        document.getElementById("pkttx").innerHTML = linkInfos[i++];
+        document.getElementById("unipkttx").innerHTML = linkInfos[i++];
+        document.getElementById("unipktrx").innerHTML = linkInfos[i++];
+        document.getElementById("mcastpktrx").innerHTML = linkInfos[i++];
+        document.getElementById("mcastpkttx").innerHTML = linkInfos[i++];
+        document.getElementById("bcastpktrx").innerHTML = linkInfos[i++];
+        document.getElementById("bcastpkttx").innerHTML = linkInfos[i++];
+        document.getElementById("droppktrx").innerHTML = linkInfos[i++];
+        document.getElementById("droppkttx").innerHTML = linkInfos[i++];
+        document.getElementById("crcpktrx").innerHTML = linkInfos[i++];
+        document.getElementById("crcpkttx").innerHTML = linkInfos[i++];
+        document.getElementById("fifopktrx").innerHTML = linkInfos[i++];
+        document.getElementById("fifopkttx").innerHTML = linkInfos[i++];
+        document.getElementById("shortrx").innerHTML = linkInfos[i++];
+        document.getElementById("longrx").innerHTML = linkInfos[i++];
+        document.getElementById("framepktrx").innerHTML = linkInfos[i++];
+        document.getElementById("jabberframerx").innerHTML = linkInfos[i++];
+        document.getElementById("fragframerx").innerHTML = linkInfos[i++];
+        document.getElementById("vlantagrx").innerHTML = linkInfos[i++];
+        document.getElementById("codeviorx").innerHTML = linkInfos[i++];
+
+        if (linkInfos[i] == 'N/A')
+        {
+            document.getElementById("raterx").innerHTML = 'N/A';
+            periodRxByte = 0;
+        }
+        else if (periodRxByte == 0 || (linkInfos[i] < periodRxByte))
+        {
+            document.getElementById("raterx").innerHTML = '0.00 Mbps';
+            periodRxByte = linkInfos[i];
+        }
+        else 
+        {
+            document.getElementById("raterx").innerHTML = parseFloat((linkInfos[i] - periodRxByte)*8 / 5 / 1024 / 1024).toFixed(2) + ' Mbps';
+            periodRxByte = linkInfos[i];
+        }
+        document.getElementById("byterx").innerHTML = linkInfos[i++];
+
+        if (linkInfos[i] == 'N/A')
+        {
+            document.getElementById("ratetx").innerHTML = 'N/A';
+            periodTxByte = 0;
+        }
+        else if (periodTxByte == 0 || (linkInfos[i] < periodTxByte))
+        {
+            document.getElementById("ratetx").innerHTML = '0.00 Mbps';
+            periodTxByte = linkInfos[i];
+        }
+        else 
+        {
+            document.getElementById("ratetx").innerHTML = parseFloat((linkInfos[i] - periodTxByte)*8 / 5 / 1024 / 1024).toFixed(2) + ' Mbps';
+            periodTxByte = linkInfos[i];
+        }
+        document.getElementById("btyetx").innerHTML = linkInfos[i++];
+        
+        if (linkInfos[i] == 'N/A')
+        {
+            document.getElementById("uptime").innerHTML = 'N/A';
+        }
+        else
+        {
+            document.getElementById("uptime").innerHTML = linkInfos[i++];
+        }
+    }
+}
+
+function setStatisticsValueToZero(portnum)
+{
+    periodRxByte = 0;
+    periodTxByte = 0;
+    if (ethLanStatus[portnum-1] == 1)
+    {
+        document.getElementById("port"+ portnum +"tx").innerHTML = '0';
+        document.getElementById("port"+ portnum +"rx").innerHTML = '0';
+        document.getElementById("pktrx").innerHTML = '0';
+        document.getElementById("pkttx").innerHTML = '0';
+        document.getElementById("pktrx30m").innerHTML = '0';
+        document.getElementById("pkttx30m").innerHTML = '0';
+        document.getElementById("unipkttx").innerHTML = '0';
+        document.getElementById("unipktrx").innerHTML = '0';
+        document.getElementById("mcastpktrx").innerHTML = '0';
+        document.getElementById("mcastpkttx").innerHTML = '0';
+        document.getElementById("bcastpktrx").innerHTML = '0';
+        document.getElementById("bcastpkttx").innerHTML = '0';
+        document.getElementById("droppktrx").innerHTML = '0';
+        document.getElementById("droppkttx").innerHTML = '0';
+        document.getElementById("crcpktrx").innerHTML = '0';
+        document.getElementById("shortrx").innerHTML = '0';
+        document.getElementById("longrx").innerHTML = '0';
+        document.getElementById("fifopktrx").innerHTML = '0';
+        document.getElementById("fifopkttx").innerHTML = '0';
+        document.getElementById("framepktrx").innerHTML = '0';
+        document.getElementById("framepktrx").innerHTML = '0';
+        document.getElementById("jabberframerx").innerHTML = '0';
+        document.getElementById("fragframerx").innerHTML = '0';
+        document.getElementById("byterx").innerHTML = '0';
+        document.getElementById("btyetx").innerHTML = '0';
+    }
+}
+
+function Clear() {
+    var selecetedPort = document.getElementById("ethPort").value;
+
+	setStatisticsValueToZero(parseInt(selecetedPort)+1);
+    BackgroundUrl("modemstatus_ethernetstatus_clear_perlan.cgi?clearEthIf="+selecetedPort);
+}
+
+$(document).ready(function(){
+    updatePortStatus();
+    updatePacketCount(ethLanPktCnt, 0);
+    updateCurrentLinkStatus(0);
+});
+
+</SCRIPT>
+</head>
+<body>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left"></div>	
+   <div id="content_left">
+      <div id="subnav_header"></div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('ethernetstatus','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+      </ul>
+      <div id="subnav_footer"></div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+         </div>
+      </div>
+   </div>
+   <div id="content_right">
+      <div id="content_right_contentarea">
+         <h1 class="modemstatus_lanstatus">Ethernet Status</h1>
+         <form onSubmit="return false;">
+         <div class="stepWrapperdark">
+            <table>
+                <tr>
+                    <th colspan="5" class="tableTitle">Ethernet Port Status</th>
+                </tr>
+               <tr>
+                  <th>Ethernet</th>
+                  <th> Port</th>
+                  <th>Connection Speed</th>
+                  <th>Packets Sent</th>
+                  <th>Packets Received</th>
+               </tr>
+               <tr align="center">
+                  <td><img src="../_images/modemstatus_hpna.png" width="39" height="39" /></td>
+                  <td>1</td>
+                  <td><span id="port1spd"></span></td>
+                  <td><span id="port1tx"></span></td>
+                  <td><span id="port1rx"></span></td>
+               </tr>
+               <tr align="center">
+                  <td><img src="../_images/modemstatus_hpna.png" width="39" height="39" /></td>
+                  <td>2</td>
+                  <td><span id="port2spd"></span></td>
+                  <td><span id="port2tx"></span></td>
+                  <td><span id="port2rx"></span></td>
+               </tr>
+               <tr align="center">
+                  <td><img src="../_images/modemstatus_hpna.png" width="39" height="39" /></td>
+                  <td>3</td>
+                  <td><span id="port3spd"></span></td>
+                  <td><span id="port3tx"></span></td>
+                  <td><span id="port3rx"></span></td>
+               </tr>
+               <tr align="center">
+                  <td><img src="../_images/modemstatus_hpna.png" width="39" height="39" /></td>
+                  <td>4</td>
+                  <td><span id="port4spd"></span></td>
+                  <td><span id="port4tx"></span></td>
+                  <td><span id="port4rx"></span></td>
+               </tr>
+                  <tr align="center">
+                  <td><img src="../_images/modemstatus_hpna.png" width="39" height="39" /></td>
+                  <td>LAN/WAN</td>
+                  <td><span id="port5spd"></span></td>
+                  <td><span id="port5tx"></span></td>
+                  <td><span id="port5rx"></span></td>
+               </tr>
+            </table>
+         </div>
+         <div class="stepWrapperdark">
+            <table>
+                <tr>
+                    <th colspan="2" class="tableTitle">Ethernet Link Status</th>
+                </tr>
+                <tr>
+                    <th width="46%">Parameter</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <th>Ethernet Port:</th>
+                    <th>
+                        <select name="ethPort" id="ethPort" onChange="portChange()">
+                            <option value="0">1</option>
+                            <option value="1">2</option>
+                            <option value="2">3</option>
+                            <option value="3">4</option>
+                            <option value="4">LAN/WAN</option>
+                        </select>
+                    </th>
+                </tr>
+                <tr>
+                    <td>Ethernet Bridge MAC Address:</td>
+                    <td>
+<script language="javascript">
+                        var lanMac = '<%ejGetOther(ethlaninfo, ETHLAN_MAC)%>';
+                        document.writeln(lanMac.toUpperCase());
+</script>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Packets Rx:</td>
+                    <td><span id="pktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Packets Tx:</td>
+                    <td><span id="pkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>Packets Rx - 30 minute:</td>
+                    <td><span id="pktrx30m"></span></td>
+                </tr>
+                <tr>
+                    <td>Packets Tx - 30 minute:</td>
+                    <td><span id="pkttx30m"></span></td>
+                </tr>
+                <tr>
+                    <td>Unicast Packets Rx:</td>
+                    <td><span id="unipkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>Unicast Packets Tx:</td>
+                    <td><span id="unipktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Multicast Packets Rx:</td>
+                    <td><span id="mcastpktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Multicast Packets Tx:</td>
+                    <td><span id="mcastpkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>Broadcast Packets Rx:</td>
+                    <td><span id="bcastpktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Broadcast Packets Tx:</td>
+                    <td><span id="bcastpkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>Packets Dropped Rx</td>
+                    <td><span id="droppktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Packets Dropped Tx:</td>
+                    <td><span id="droppkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>Uncorrected Packets (CRC) Rx:</td>
+                    <td><span id="crcpktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Uncorrected Packets (CRC) Tx:</td>
+                    <td><span id="crcpkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>FIFO Error Rx:</td>
+                    <td><span id="fifopktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>FIFO Error Tx:</td>
+                    <td><span id="fifopkttx"></span></td>
+                </tr>
+                <tr>
+                    <td>Short (Runts) Rx:</td>
+                    <td><span id="shortrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Long (Oversized) Rx:</td>
+                    <td><span id="longrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Framing Errors Rx:</td>
+                    <td><span id="framepktrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Jabber Frame Rx:</td>
+                    <td><span id="jabberframerx"></span></td>
+                </tr>
+                <tr>
+                    <td>Fragmented Frames Rx:</td>
+                    <td><span id="fragframerx"></span></td>
+                </tr>
+                <tr>
+                    <td>VLAN tagged Frames Rx:</td>
+                    <td><span id="vlantagrx"></span></td>
+                </tr>
+                <tr>
+                    <td>Code Violations Rx:</td>
+                    <td><span id="codeviorx"></span></td>
+                </tr>
+                <tr>
+                    <td>Total Byte Rx:</td>
+                    <td><span id="byterx"></span></td>
+                </tr>
+                <tr>
+                    <td>Total Byte Tx:</td>
+                    <td><span id="btyetx"></span></td>
+                </tr>
+                <tr>
+                    <td>Rx BIT Rate:</td>
+                    <td><span id="raterx"></span></td>
+                </tr>
+                <tr>
+                    <td>Tx BIT Rate:</td>
+                    <td><span id="ratetx"></span></td>
+                </tr>
+                <tr>
+                    <td>Link Uptime:</td>
+                    <td><span id="uptime"></td>
+                </tr>
+            </table>
+         </div>
+         <div class="stepWrapper">
+            <p><strong>USB</strong></p>
+            <p>USB port can be identified by the Blue port labeling and used with the Blue cable.</p>
+            <table>
+               <tr>
+                  <th>USB</th>
+                  <th> Port</th>
+                  <th>Connection Speed</th>
+                  <th>Packets Sent</th>
+                  <th>Packets Received</th>
+               </tr>
+			   <%ejGetOther(stsifcget, usb)%>
+            </table>
+         </div>
+         <div class="stepWrapper"> 
+            <p>Clear Statistics</p>
+            <a href="#" onClick="Clear();" id="clear_btn" class="btn clear_btn">Clear</a>
+         </div>
+         </form>
+       </div>
+   </div>
+   <div class="clear_left"></div>
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

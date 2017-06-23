@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# This script runs under fakeroot.  The fakeroot utility has 
+# problems under 64-bit/multi-processor/preemptive kernel, so
+# we run it only when necessary.
+
+source $BUILD_DIR/kernel/linux/.config
+
+# Create devices
+# (Swited from device table to fakeroot for device nodes - always use makeDevs)
+./makeDevs
+
+# make root file system image
+if [ "$BRCM_KERNEL_ROOTFS" = "squashfs" ]; then
+        $HOSTTOOLS_DIR/mksquashfs $TARGET_FS $PROFILE_DIR/rootfs.img -be -noappend -all-root -b $BRCM_SQUASHFS_BLOCK_SIZE $FS_COMPRESSION
+else
+ if [ "$BRCM_KERNEL_ROOTFS" = "cramfs" ]; then
+        $HOSTTOOLS_DIR/mkcramfs -r $TARGET_FS $PROFILE_DIR/rootfs.img
+ else
+  if [ "$BRCM_KERNEL_ROOTFS" = "jffs2" ]; then
+#start __MTS__, RaynorChung: Support 963268 nand flash, patch form SVN#3597 on http://svn.zyxel.com.tw/svn/CPE_SW1/BCM96368/trunk/P-870HA/branches/cht/fttb8/4.11 
+    if [ "$MSTC_NAND_BLOCK_16" = "y" ]; then
+        $HOSTTOOLS_DIR/mkfs.jffs2 -b -p -n -e $FLASH_NAND_BLOCK_16KB -r $TARGET_FS -o $PROFILE_DIR/rootfs16kb.img -N $HOSTTOOLS_DIR/nocomprlist
+    else
+        $HOSTTOOLS_DIR/mkfs.jffs2 -b -p -n -e $FLASH_NAND_BLOCK_128KB -r $TARGET_FS -o $PROFILE_DIR/rootfs128kb.img -N $HOSTTOOLS_DIR/nocomprlist
+    fi
+        rm $HOSTTOOLS_DIR/nocomprlist
+#end __MTS__, RaynorChung: Support 963268 nand flash, patch form SVN#3597 on http://svn.zyxel.com.tw/svn/CPE_SW1/BCM96368/trunk/P-870HA/branches/cht/fttb8/4.11 
+  fi
+ fi
+fi
+

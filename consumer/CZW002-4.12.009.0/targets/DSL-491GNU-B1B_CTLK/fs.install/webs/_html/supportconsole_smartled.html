@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+
+var ledEnbl = "<%ejGet(smartLedEnbl)%>";
+var ledServer = "<%ejGet(smartLedServer)%>";
+
+function btnApply()
+{
+	if (document.forms[0].smart_led_state[0].checked == true)
+		document.forms[0].smartLedEnbl.value = "1";
+	else
+		document.forms[0].smartLedEnbl.value = "0";
+
+	if (isValidUrl(document.forms[0].smartLedServer.value) == false) {
+		AlertOpen("The Domain Name is invalid.");
+		return false;
+	}
+
+	document.forms[0].smart_led_state[0].disabled = true;
+	document.forms[0].smart_led_state[1].disabled = true;
+	document.forms[0].submit();
+}
+
+function frmLoad()
+{
+	if (ledEnbl == '1')
+		document.forms[0].smart_led_state[0].checked = true;
+	else
+		document.forms[0].smart_led_state[1].checked = true;
+
+	document.forms[0].smartLedServer.value = ledServer;
+}
+
+</script>
+</head>
+
+<body onLoad="frmLoad();">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+	WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+		
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		<div id="date">
+<script language="javascript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+		</div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+	<div class="clear_left"></div>
+	<div id="content_left">
+		<ul id="subnav">
+<script language="javascript">
+	WriteSupportConsoleMenuHeader('smartled', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+		</ul>
+		<div id="connectionstatus">
+			<h1>Connection Status</h1>
+			<div id="connectionstatus_wrapper">
+<script language="javascript">
+	WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+			</div>
+		</div>
+	</div>
+	<div id="content_right">
+		<div id="content_right_header">
+		</div>
+		<div id="content_right_contentarea">
+			<h1 class="supportconsole_tr069">Smart LED <span>Do not change the setting below unless instructed 
+				 by a CenturyLink certified support representative.</span></h1>
+			<form action="supportconsole_smartled.cgi" method="post">
+				<input type="hidden" name="smartLedEnbl" id="smartLedEnbl" value="">
+				<input type="hidden" name="sessionKey" id="sessionKey" value="<%ejGetOther(sessionKey)%>">
+				<div class="stepWrapper">
+					<p><strong>1. Set the Smart LED state.</strong></p>
+					<table>
+						<tr>
+							<td width="150">Smart LED: </td>
+							<td><input name="smart_led_state" type="radio" id="smart_led_state_disable" value="enable" />
+								Enabled</td>
+							<td><input name="smart_led_state" type="radio" id="smart_led_state_disable" value="disable" />
+								Disabled</td>
+						</tr>
+					</table>
+				</div>
+				<div class="stepWrapper">
+					<p><strong>2. Enter the smart LED server below.</strong></p>
+					<table>
+						<tr>
+							<td width="150"><label for="acs_url2">Smart LED Server:</label></td>
+							<td><input name="smartLedServer" type="text" id="smartLedServer" value="" size="35" maxlength="127" /></td>
+						</tr>
+					</table>
+				</div>
+				<div class="stepWrapper">
+					<p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+					<a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+				</div>
+				<div class="stepWrapperdark">
+					<table>
+						<tr>
+							<th colspan="3" class="tableTitle">Smart LED List</th>
+						</tr>
+						<tr>
+							<th width="91">Server Response</th>
+							<th width="102">Date</th>
+							<th width="95">Time</th>
+						</tr>
+<script language="javascript">
+	var ledList = '<%ejGetOtherBig(smartledtable)%>';
+	var items = ledList.split('|');
+
+	if (ledList == '') {
+		document.writeln("<tr>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("</tr>");
+	}
+	else {
+		for ( var i = 0; i < items.length; i++ ) {
+			if (items[i] != '') {
+				document.writeln("<tr>");
+				var names = items[i].split('/');
+
+				document.writeln("<td>" + names[0] + "</td>");
+				document.writeln("<td>" + names[1] + "</td>");
+				document.writeln("<td>" + names[2] + "</td>");
+				document.writeln("</tr>");
+			}
+		}
+	}
+</script>
+					</table>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

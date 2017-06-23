@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Help - Modem Lights</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+    <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>            
+		</div>
+	</div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+            <li><a href="help.html">Help Home</a></li>
+            <li><a href="help_modemlights.html" class="selected">Modem Lights</a></li>
+            <li><a href="help_serviceFAQs.html">Service FAQ's</a></li>
+            <li><a href="help_quicksetupfeature.html">Quick Setup</a></li>
+            <li><a href="help_wirelessfeatures.html">Wireless Setup</a></li>
+            <li><a href="help_utilitiesfeature.html">Utilities</a></li>
+            <li><a href="help_advancedsetup.html">Advanced Setup </a></li>
+            <li><a href="help_acronyms.html">Acronyms</a></li>
+            <li><a href="help_glossary.html">Glossary</a></li>
+        </ul>
+        <!-- <div id="connectionstatus_header">
+        </div>
+        <div id="connectionstatus">
+            <h1>Connection Status:</h1>
+            <h2>CenturyLink Broadband:</h2>
+            <p><span class="connected">CONNECTED 1522/1024 Kbps</span></p>
+            <h2>ISP Status:</h2>
+            <p><span class="connected">CONNECTED</span></p>
+        </div>
+<div id="connectionstatus_footer">
+        </div> -->
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="help_modemlights">Modem Lights<span>The lights on your modem  provide a quick way to
+                determine the status of your Internet connection as well as
+                your LAN connections. The tables below defines in detail the lights on your modem. </span></h1>
+                 <div class="stepWrapper">
+            <p><strong>Modem Power Light</strong></p>
+            <p>The table below details the
+                different states of the power light.</p>
+            <table>
+                <tr>
+                    <th width="50">&nbsp;</th>
+<th width="106">
+                            State                    </th>
+                    <th>
+                            Definition                    </th>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_red.png" /></td>
+                    <td>
+                            Red During Boot-up
+                  </td>
+                    <td>
+                            The power light will be red when the
+                            modem is powered on. While the power light is red the
+                            modem is performing a hardware test. If the modem hardware
+                            test
+                            fails the power light will stay red. Not all CenturyLink modems
+                            show a red power light during boot-up.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_amber.png" /></td>
+                    <td>
+                            Amber During Boot-up
+                    </td>
+                    <td>
+                            The power light will move from red
+                            to amber during boot-up after the hardware test passes.
+                            Amber
+                            indicates the modem is performing onboard software tests.
+                            If the power light stays amber the software test failed.
+                            Not all CenturyLink modems show the software test with an amber
+                            light during boot-up.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_green.png" /></td>
+                    <td>
+                            Blinking Green
+                    </td>
+                    <td>
+                            The power light will move from amber
+                            to green indicating all self tests have passed and the
+                            modem is booting up.<br />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The power light will turn solid green
+                            when the modem finishes boot-up. The modem is ready to establish
+                            an internet connection.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_amber.png" /></td>
+                    <td>
+                            Blinking Amber
+                    </td>
+                    <td>
+                            The power light will blink amber during
+                            a Local firmware upgrade.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_amber_green.png" /></td>
+                    <td>
+                            Blinking Amber then Green
+                    </td>
+                    <td>
+                            The power light will cycle thru amber,
+                            off, green, off when a remote upgrade is in progress.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_amber_w_reset.png" width="42" height="52" /></td>
+                    <td>
+                            Solid Amber with Reset Button
+                    </td>
+                    <td>
+                            If the reset button is held in for
+                            10 seconds or more the power light will turn amber indicating
+                            the modem will be set to factory default settings.
+                    </td>
+                </tr>
+            </table>
+            </div>
+             <div class="stepWrapper">
+            <p><strong>Modem DSL Light</strong></p>
+            <p> The table below details the
+                different states of the DSL light. </p>
+            <table>
+                <tr>
+                    <th width="50">&nbsp;</th>
+                    <th width="106">
+                            State                    </th>
+                    <th>
+                            Definition                    </th>
+                </tr>
+                <tr>
+                  <td><img src="../_images/ml_solid_red.png" alt="" width="35" height="23" /></td>
+                  <td> Solid Red </td>
+                  <td> The Internet light will be red if the
+                    DSL signal is not detected on the line. A support representative will need to assist you in resolving the line issue.</td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_green.png" width="35" height="26" /></td>
+                    <td>
+                            Blinking Green
+                    </td>
+                    <td>
+                            The DSL light will blink green when
+                            searching for a signal from CenturyLink.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_green.png" width="35" height="26" /></td>
+                    <td>
+                            Blinking Green - Faster
+                    </td>
+                    <td>
+                            The DSL light will blink green at a faster pace when the CenturyLink signal has been found and modem is attempting to establish a connection.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The DSL connection has been established
+                            with CenturyLink.
+                    </td>
+                </tr>
+            </table>
+            </div>
+             <div class="stepWrapper">
+            <p><strong>Modem Internet Light</strong></p>
+            <p>The table below details the different states of the Internet light. </p>
+            <table>
+                <tr>
+                    <th width="50">&nbsp;</th>
+                    <th width="106">
+                            State                    </th>
+                    <th>
+                            Definition                    </th>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_off.png" width="35" height="23" /></td>
+                    <td>
+                            Off
+                    </td>
+                    <td>
+                            The Internet light will be off if no
+                            PPP credentials are programmed in the modem or the modem
+                            is in transparent bridging mode.
+                    </td>
+                </tr>
+                <tr>
+                  <td><img src="../_images/ml_blinking_red_green.png" alt="" /></td>
+                  <td> Blinking Red then Green </td>
+                  <td> The Internet light will cycle thru red,
+                    off, green, off when the modem is auto-detecting the network parameters. </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_amber.png" width="35" height="25" /></td>
+                    <td>
+                            Solid Amber
+                    </td>
+                    <td>
+                            The Internet light will be solid amber
+                            if the the modem is programmed with the CenturyLink default PPP
+                            credentials. In this state you will not be able to surf
+                            the Internet.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_red.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Red
+                    </td>
+                    <td>
+                            The Internet light will be red if the
+                            PPP authentication with the ISP fails. A red internet
+                            light indicates the PPP credentials were inserted into
+                            the modem wrong. Re-type the PPP credentials in the Quick
+                            Setup tab.
+                    In DHCP mode, the red internet light indicates a valid WAN IP was not obtained.</td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The Internet light will be green when
+                            the modem established an Internet connection with the ISP.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_green.png" width="35" height="26" /></td>
+                    <td>
+                            Blinking Green
+                    </td>
+                    <td>
+                            The Internet light will blink green
+                            after establishing a connection with the ISP indicating traffic
+                            on the Internet.
+                    </td>
+                </tr>
+            </table>
+            </div>
+             <div class="stepWrapper">
+            <p><strong>Modem Ethernet Light(s)</strong></p>
+            <p>The table below details the different states of the Ethernet light(s). </p>
+            <table>
+                <tr>
+                    <th width="50">&nbsp;</th>
+                    <th width="106">
+                            State                    </th>
+                    <th>
+                            Definition                    </th>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_off.png" width="35" height="23" /></td>
+                    <td>
+                            Off
+                    </td>
+                    <td>
+                            The Ethernet light(s) will be off when
+                            no devices is connected to the Ethernet port.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The Ethernet light(s) will be solid
+                            green when connected to a LAN device with an Ethernet cable.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_green.png" width="35" height="26" /></td>
+                    <td>
+                            Blinking Green
+                    </td>
+                    <td>
+                            The Ethernet light(s) will blink green
+                            indicating traffic on the Ethernet port.
+                    </td>
+                </tr>
+            </table>
+            </div>
+             <div class="stepWrapper">
+            <p><strong>Modem Wireless Light</strong></p>
+            <p>The table below details the different states of the Wireless light. </p>
+            <table>
+                <tr>
+                    <th width="50">&nbsp;</th>
+                    <th width="106">
+                            State                    </th>
+                    <th>
+                            Definition                    </th>
+                </tr>
+                
+                <tr>
+                    <td width="50"><img src="../_images/ml_off.png" width="35" height="23" /></td>
+                    <td>
+                            Off
+                    </td>
+                    <td>
+                            The Wireless light will be off when
+                            the wireless radio in the modem is disabled.
+                    </td>
+                </tr>
+                <tr>
+                  <td><img src="../_images/ml_solid_amber.png" alt="" width="35" height="25" /></td>
+                  <td> Solid Amber </td>
+                  <td> The Wireless light will be solid amber
+                    if the the wireless radio is disabled via the wireless access scheduler feature. </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The Wireless light will be solid green
+                            when the wireless radio is on in the modem.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_green.png" width="35" height="26" /></td>
+                    <td>
+                            Blinking Green
+                    </td>
+                    <td>
+                            The Wireless light will blink green
+                            indicating traffic via wireless thru the modem.
+                    </td>
+                </tr>
+            </table>
+            </div>
+             <div class="stepWrapper">
+            <p><strong>WPS Button  Light</strong></p>
+            <p>The table below details the different states of the WPS button  light.
+                Not all CenturyLink modems support WPS with a button at this time.
+                Your modem may not have a WPS button and light.</p>
+            <table>
+                <tr>
+                    <th width="50">&nbsp;</th>
+                    <th width="106">
+                            State                    </th>
+                    <th>
+                            Definition                    </th>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_off.png" width="35" height="23" /></td>
+                    <td>
+                            Off
+                    </td>
+                    <td>
+                            The WPS button will be off when WPS is disabled
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The WPS button will be illuminated
+                            when WPS is enabled.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_amber.png" width="35" height="27" /></td>
+                    <td>
+                            Blinking Amber
+                    </td>
+                    <td>
+                            WPS button will blink amber when a
+                            connection request is in process.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_solid_green.png" width="35" height="23" /></td>
+                    <td>
+                            Solid Green
+                    </td>
+                    <td>
+                            The WPS button will be green when a
+                            connection is established.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50"><img src="../_images/ml_blinking_red.png" width="35" height="28" /></td>
+                    <td>
+                            Blinking Red
+                    </td>
+                    <td>
+                            The WPS button will blink red when
+                            a connection errors out or a session overlap is detected.
+                    </td>
+                </tr>
+                <tr>
+                    <td width="50">&nbsp;</td>
+                    <td>
+                            LED Support
+                    </td>
+                    <td>
+                            Not all CenturyLink modems support WPS in
+                            the manor defined above at this time. Your WPS button lights
+                            may function differently.
+                    </td>
+                </tr>
+            </table>
+            </div>
+        
+        </div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

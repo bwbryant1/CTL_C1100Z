@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+         </div>	
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+		<div class="message" id="message">
+			<p>ACCESS DENIED!!</p>
+<script language= "javascript">
+var ischange = 1;
+function changecolor(){
+var obj = document.getElementById("message");
+	if(ischange){
+		obj.style.color = "";
+		ischange = 0;
+	}
+	else{
+		obj.style.color = "red";
+		ischange = 1;
+	}
+setTimeout( "changecolor() ",500);
+}
+changecolor();
+</script> 
+		</div>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+	</div>
+	<div id="content_right">
+		
+		<div id="content_right_contentarea">
+			<h1 class="thankyou">Access Restricted</h1>
+			<div class="stepWrapper">
+            <p>Access to the Internet has been restricted by
+			    your network administrator at this time. </p>
+			<p>Contact your network administrator for additional
+			    support.</p>
+			</div>
+		</div>
+		
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var timezoneArray = new Array();
+timezoneArray[0] = '-10:00';
+timezoneArray[1] = '-09:00';
+timezoneArray[2] = '-08:00';
+timezoneArray[3] = '-07:00';
+timezoneArray[4] = '-06:00';
+timezoneArray[5] = '-05:00';
+	
+function btnApply() {
+  var i = 0;
+  with( document.forms[0] ) {
+  	var tz_offset;
+  	for ( i = 0 ; i < timezone.length ; i++ ) {
+  		if ( timezone[i].selected ) {
+  			tz_offset=timezoneArray[i];
+  			break;
+  		}
+  	}
+
+		timezone_offset.value=tz_offset;
+		if ( daylight_saving[0].checked == true) {
+			use_dst.value=1;
+		}
+		else {
+			use_dst.value=0;
+		}
+  }
+  return true;
+}
+
+function doSubmit () {
+	if ( btnApply() ) {
+		document.forms[0].sessionKey.value = gblsessionKey;
+		document.forms[0].submit();
+	}
+}
+
+function checkdaylight()
+{
+	with (document.forms[0]) {
+		if(timezone[0].checked == true)
+		{
+			daylight_savings.checked = false;
+			daylight_savings.disabled = true;
+		}
+		else
+			daylight_savings.disabled = false;
+	}
+}
+
+function frmLoad() {		
+	var i = 0;
+	var tz_name = "<%ejGet(timezone)%>";
+	var daylightsaving = "<%ejGet(use_dst)%>";
+
+	with (document.forms[0]) {
+		if((tz_name.indexOf("M1") >= 0) || (tz_name.indexOf("M2") >= 0) || (tz_name.indexOf("M3") >= 0)
+			|| (tz_name.indexOf("M4") >= 0) || (tz_name.indexOf("M5") >= 0) || (tz_name.indexOf("M6") >= 0)
+			|| (tz_name.indexOf("M7") >= 0) || (tz_name.indexOf("M8") >= 0) || (tz_name.indexOf("M9") >= 0)
+			|| (tz_name.indexOf("M10") >= 0) || (tz_name.indexOf("M11") >= 0) || (tz_name.indexOf("M12") >= 0)) {
+			daylight_saving[0].checked = true;
+		}
+		/*if(daylightsaving == true){
+			daylight_saving[0].checked = true;
+		}*/
+		else
+			daylight_saving[1].checked = true;
+
+  	for ( i = 0 ; i < timezone.length ; i++ ) {
+		if(tz_name.indexOf(timezone[i].value) >= 0) {
+  			timezone.selectedIndex = i;
+  		}
+  	}
+	}
+}
+</SCRIPT>
+</head>
+
+<body onLoad='frmLoad()'>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+    <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteUtilitiesMenuHeader('timezone', '<%ejGet(HpnaFeature)%>');
+</script>
+       </ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			<div id="content_right_header"></div>
+			<div id="content_right_contentarea">
+				<h1 class="utilities_timezone">Time Zone</h1>
+				<form action="sntpcfg.cgi" method="post" onSubmit="return btnApply();">
+				<input type="hidden" name="sessionKey" id="sessionKey" value="">
+					
+				  <div class="stepWrapper">
+                    <p><strong>1. Select the time zone.</strong></p>
+                    <table>
+                        <tr>
+                          <td width="172">Time Zone:</td>
+                          <td width="301"><select name="timezone" id="timezone">
+                            <option value="Eastern Time">Eastern Time</option>
+                            <option value="Central Time">Central Time</option>
+                            <option value="Mountain Time">Mountain Time</option>
+                            <option value="Pacific Time">Pacific Time</option>
+                            <option value="Alaska">Alaska Time</option>
+                            <option value="Hawaii">Hawaii Time</option>
+                          </select></td>
+                        </tr>
+                      </table>
+				  </div>
+				  <div class="stepWrapper">
+                      <p><strong>2. Set  the clock mode below. </strong></p>
+                      <table>
+                        <tr>
+                          <td width="150">Clock Mode: </td>
+                          <td><input name="daylight_saving" type="radio" id="daylight_saving" value="1" />
+                            Daylight Saving Time</td>
+                          <td><input name="daylight_saving" type="radio" id="daylight_saving" value="0" />
+                            Standard Time</td>
+                        </tr>
+                      </table>
+                    </div>
+                    <div class="stepWrapper">
+						<p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+						<input type="hidden" id="ntp_enabled" name="ntp_enabled" value="1">
+						<input type="hidden" id="timezone_offset" name="timezone_offset" value="">
+						<input type="hidden" id="use_dst" name="use_dst" value="0">
+						<a href="#" onClick="doSubmit();" class="btn apply_btn">Apply</a>
+                    </div>	
+				</form>
+				<div class="clear_left"></div>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

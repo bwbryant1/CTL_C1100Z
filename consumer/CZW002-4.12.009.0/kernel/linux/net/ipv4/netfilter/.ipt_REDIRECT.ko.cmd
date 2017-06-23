@@ -1,0 +1,1 @@
+cmd_net/ipv4/netfilter/ipt_REDIRECT.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/ipv4/netfilter/ipt_REDIRECT.ko net/ipv4/netfilter/ipt_REDIRECT.o net/ipv4/netfilter/ipt_REDIRECT.mod.o

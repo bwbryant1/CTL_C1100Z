@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+
+var portForwarding = '<%ejGetOtherBig(portMap, portfd)%>';
+portForwardingall = '<%ejGetOtherBig(portMap, all)%>';
+var remoteport="<%ejGetOther(RemoteGUI)%>";
+var Rports = remoteport.split("|");
+var update = '<%ejFncCmd(updatestatic)%>';
+var activeusers = '<%ejGetOtherBig(activeusers)%>';
+var activeItems = activeusers.split("|");
+var inactiveusers = '<%ejGetOtherBig(inactiveusers)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var inactiveItems = inactiveusers.split("|");
+
+function ipChange() {
+	with ( document.forms[0] ) {
+		if ( select_device.selectedIndex != 0 ) {
+			//isrvAddr.disabled = true;
+			$('.manual_ip_address').hide();
+			isrvAddr.value=select_device.options[select_device.selectedIndex].value;
+		}
+		else {
+			//isrvAddr.disabled = false;
+			$('.manual_ip_address').show();
+			isrvAddr.value='';
+		}
+	}
+}
+
+function removeClick(index){
+	var info = portForwarding.split('|');
+	var names = info[index].split('/');
+	
+	with ( document.forms[0] ){
+		action.value="remove";
+		iStart.value=names[1];
+		iEnd.value=names[2];
+		isrvAddr.value=names[4];
+		eStart.value=names[5];
+		eEnd.value=names[6];
+		proto.value=names[3];
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+	return; 
+}
+
+function checkPortCover( cS, cE, rS, rE ) {
+	if ( cS >= rS && cS <= rE ) {
+		return true;
+	}
+	else if ( cE >= rS && cE <= rE ) {
+		return true;
+	}
+	else if ( rS >= cS && rS <= cE ) {
+		return true;
+	}
+	else if ( rE >= cS && rE <= cE ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function addClick(){
+	with ( document.forms[0]) {  
+		var i = 0;
+		action.value="add";
+
+		if (isValidIpAddress(isrvAddr.value) == false) {
+			AlertOpen('The LAN IP Address is invalid.');
+			return false;      
+		}
+		if (esrvAddr.value != '0.0.0.0' && esrvAddr.value != '' && !RemoteIpState[0].checked) {
+			if (isValidIpAddress(esrvAddr.value) == false) {
+				AlertOpen('The Remote IP Address is invalid.');
+				return false;      
+			}
+		}
+		else {
+			esrvAddr.value = "";
+		}
+
+		if ( proto.value == "GRE" ) {
+			iStart.value = "0";
+			iEnd.value = "0";
+			eStart.value = "0";
+			eEnd.value = "0";
+		}
+		else {
+			if (!isValidPort( iStart.value )){
+				AlertOpen('The starting port is invalid.');
+				return false;
+			}
+			if (!isValidPort( iEnd.value )){
+				AlertOpen('The ending port is invalid.');
+				return false;
+			}
+			if ( !isValidPort( iStart.value+":"+iEnd.value) ) {
+				AlertOpen('The port range is invalid.');
+				return false;
+			}
+	
+			if ( (eStart.value == '' && eEnd.value == '') || RemoteIpState[0].checked) {
+				eStart.value = '0';
+				eEnd.value = '0';
+			}
+			else {
+				if (!isValidPort( eStart.value )){
+					AlertOpen('The starting port is invalid.');
+					return false;
+				}
+				if (!isValidPort( eEnd.value )){
+					AlertOpen('The ending port is invalid.');
+					return false;
+				}
+				if ( !isValidPort( eStart.value+":"+eEnd.value) ) {
+					AlertOpen('The port range is invalid.');
+					return false;
+				}
+			}
+		}
+
+		if ( proto.value == "TCP" || proto.value == "TCP or UDP" ) {
+			var eS = parseInt(eStart.value);
+			var eE = parseInt(eEnd.value);
+			if ( eS == 0 && eE == 0 ) {
+				eS = parseInt(iStart.value);
+				eE = parseInt(iEnd.value);
+			}
+			if ( eS <= Rports[3] && eE >= Rports[3] && Rports[2] == "TRUE" ) {
+				AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+				return false;
+			}
+		}
+		
+		var info = portForwardingall.split('|');
+
+		if (info != '') {
+			var tmpeS;
+			var tmpeE;
+			var eS = parseInt(eStart.value);
+			var eE = parseInt(eEnd.value);
+			if ( eS == 0 && eE == 0 ) {
+				eS = parseInt(iStart.value);
+				eE = parseInt(iEnd.value);
+			}
+			for ( i = 0; i < info.length; i++ ) 
+			{
+				if (info[i] == '')
+					break;
+				var names = info[i].split('/');
+
+				if ( proto.value != "GRE" ) {
+					tmpeS = parseInt(names[5]);
+					tmpeE = parseInt(names[6]);
+					if ( tmpeS == 0 && tmpeE == 0 ) {
+						tmpeS = parseInt(names[1]);
+						tmpeE = parseInt(names[2]);
+					}
+					if ( names[3] == "TCP or UDP" || proto.value == "TCP or UDP") {
+						if ( checkPortCover(eS, eE, tmpeS, tmpeE ) ) {
+							AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+							return false;
+						}
+					}
+					else if ( proto.value == names[3] ) {
+						if ( checkPortCover(eS, eE, tmpeS, tmpeE ) ) {
+							AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+							return false;
+						}
+					}
+				}
+				else if ( names[3] == proto.value && ( isrvAddr.value != names[4] || (esrvAddr == '' && names[7] != "NA" ) || esrvAddr != names[7] ) ) {
+					AlertOpen('The defined rule is in use by another port forwarding or applications rule.');
+					return false;
+				}
+			}
+		}
+		document.forms[0].sessionKey.value = gblsessionKey;
+		document.forms[0].submit();
+		//Return false to avoid do submit twice.
+		return false;
+	}
+	//return;	
+}
+
+function protoChange () {
+	with ( document.forms[0]) {
+		if ( proto.value == "GRE" ) {
+			eStart.disabled = true;
+			eEnd.disabled = true;
+			iStart.disabled = true;
+			iEnd.disabled = true;
+		}
+		else {
+			eStart.disabled = false;
+			eEnd.disabled = false;
+			iStart.disabled = false;
+			iEnd.disabled = false;
+		}
+	}
+}
+
+function selisrvAddr()
+{
+	document.getElementById("isrvAddr").select();
+}
+
+function selesrvAddr()
+{
+	document.getElementById("esrvAddr").select();
+}
+
+function RemoteIpStateChange() {
+	with ( document.forms[0]) {
+		if (RemoteIpState[0].checked){
+			$('.define_ip_fields').hide();
+		} else {
+			$('.define_ip_fields').show();
+		}
+	}
+
+}
+
+function frmLoad() {
+	RemoteIpStateChange();
+	ipChange();
+}
+
+$(document).ready(function() {
+	frmLoad();
+});
+
+</SCRIPT>
+</head>
+
+<body id="advancedsetup_advancedportforwarding">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+        WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+<div id="content_left">
+		<ul id="subnav">
+ <script language="javascript">
+   WriteAdvancedSetupMenuHeader('advancedportforwarding');
+</script>
+	            </ul>
+            </li>
+		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_advancedportforwarding"> Port Forwarding <span>Enter ports or port ranges required to forward Internet applications to a LAN device below. </span></h1>
+				<form name="PortForwarding" action="portForwarding.cmd" METHOD="POST" onSubmit="return addClick();">
+				<input type="hidden" name="action" id="action" value="">
+				<input type="hidden" name="srvName" id="srvName" value="PORTFD_Rule">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+					<div class="stepWrapper">
+					<p><strong>1. Select device, or manually enter an IP address.</strong></p>
+                      <table>
+                        <tr>
+                          <td width="150"><label for="select_device">Select Device:</label></td>
+                          <td><select name="select_device" id="select_device" onChange='ipChange()'>
+                            <option value="Manually Enter IP Address" selected="selected">Manually Enter IP Address </option>
+<script language="javascript">
+<!-- hide
+	{
+		var i=0;
+		var hostname = '';
+		if (activeItems != '') {
+			for ( i = 0; i < activeItems.length; i++ ) 
+			{
+				if (activeItems[i] == '')
+					break;
+				var names = activeItems[i].split('/');
+				if ( names[1] != 'unknown' ) {
+					hostname = names[1];
+				}
+				else if ( names[2] != '' ) {
+					hostname = names[2];
+				}
+				else {
+					hostname = names[3];
+				}
+				document.writeln("<option value=\""+names[2]+"\">"+names[1]+" - "+names[2]+" </option>");
+			}
+		}
+	}
+//-->
+</script>	
+                          </select></td>
+                        </tr>
+                        <tr class="manual_ip_address">
+                          <td width="150">Enter IP Address:</td>
+                          <td><input name="isrvAddr" id="isrvAddr" type="text" value="" size="15"  onclick="selisrvAddr()"/></td>
+                        </tr>
+                      </table>
+                  </div>
+				  <div class="stepWrapper">
+                      <p><strong>2. Enter the LAN port  information.</strong></p>
+                      <table>
+                        <tr>
+                          <td width="150">Starting Port: </td>
+                          <td><input name="iStart" id="iStart" type="text" size="15" /></td>
+                        </tr>
+                        <tr>
+                          <td width="150">Ending Port: </td>
+                          <td><input name="iEnd" id="iEnd" type="text" size="15" /></td>
+                        </tr>
+                      </table>
+                    </div>
+					<div class="stepWrapper">
+                      <p><strong>3. Select the Protocol.</strong></p>
+                      <table>
+                        <tr>
+                          <td width="150">Protocol: </td>
+                          <td><select name="proto" id="proto" onChange="protoChange()">
+                            <option value="TCP" selected="selected">TCP</option>
+                            <option value="UDP">UDP</option>
+                            <option value="GRE">GRE</option>
+                            <option value="TCP or UDP">TCP,UDP</option>
+                          </select></td>
+                        </tr>
+                      </table>
+                    </div>
+					<div class="stepWrapper">
+                      <p><strong>4. Enter the remote port and IP information.</strong></p>
+							<table>
+							<tr>
+							  <td width="150">Remote Port and IP:</td>
+							  <td width="138"><input name="RemoteIpState" type="radio" id="RemoteIpState" value="on" checked="checked" onclick="RemoteIpStateChange()"/>
+								All  IP Addresses</td>
+							  <td width="181"><input name="RemoteIpState" type="radio" id="RemoteIpState" value="off" onclick="RemoteIpStateChange()"/>
+								Define IP Address</td>
+							</tr>
+							<tr class="define_ip_fields">
+								<td width="150">Starting Port:</td>
+								<td colspan="2" ><input name="eStart" id="eStart" type="text" size="35" /></td>
+							</tr>
+							<tr class="define_ip_fields">
+								<td width="150">Ending Port:</td>
+								<td colspan="2"><input name="eEnd" id="eEnd" type="text" size="35" /></td>
+							</tr>
+							<tr class="define_ip_fields">
+								<td width="150">Remote IP Address:</td>
+								<td colspan="2"><input name="esrvAddr" type="text" id="esrvAddr" value="" size="35" onclick="selesrvAddr()"/></td>
+							</tr>
+							</table>    
+                  </div>
+                    <div class="stepWrapper">
+					<p><strong>5.</strong><strong> Click &quot;Apply&quot; to save your settings.</strong></p>
+					<a href="#" class="btn apply_btn" onClick="addClick()">Apply</a>
+                    </div>
+	                <div class="stepWrapperdark">
+					<table>
+						<tr>
+							<th colspan="6" class="tableTitle">Port Forwarding List</th>
+						</tr>
+                      <tr>
+                        <th width="21%" align="center">LAN IP </th>
+                        <th width="16%">Protocol</th>
+                        <th width="24%">Ports <br />
+                        Forwarded</th>
+						<th width="24%">Remote <br />
+                        Ports</th>
+                        <th width="21%">Remote  Defined</th>
+                        <th width="18%">Edit</th>
+                      </tr>
+                       <script language="javascript">
+                        <!-- hide
+                        {
+													var i = 0;
+													var info = portForwarding.split('|');
+													
+													if (info != '') {
+														for ( i = 0; i < info.length; i++ ) 
+														{
+															if (info[i] == '')
+																break;
+															var names = info[i].split('/');
+															document.writeln("<tr align='center'>");
+															document.writeln("<td>"+names[4]+"</td>"); //LAN IP
+															if (names[3] == "TCP or UDP"){
+																document.writeln("<td>TCP/UDP</td>"); //proto
+															}
+															else{
+																document.writeln("<td>"+names[3]+"</td>"); //proto
+															}
+															if ( names[3] == "GRE" ) { //LAN port
+																document.writeln("<td>N/A</td>");	
+															}
+															else if(names[2] == 0 || names[1] == names[2]){
+																document.writeln("<td>"+names[1]+"</td>");
+															}
+															else{
+																document.writeln("<td>"+names[1]+" - "+names[2]+"</td>");
+															}	
+															if ( names[3] == "GRE" || (names[5] == '0' && names[6] == '0') ) { //remoto port
+																document.writeln("<td>N/A</td>");	
+															}
+															else if(names[6] == 0 || names[5] == names[6]){
+																document.writeln("<td>"+names[5]+"</td>");
+															}
+															else {
+																document.writeln("<td>"+names[5]+" - "+names[6]+"</td>");
+															}
+															if ( names[7] != "NA" ) { //remoto ip
+																document.writeln("<td>"+names[7]+"</td>");
+															}
+															else {
+																document.writeln("<td>N/A</td>");
+															}
+															document.writeln("<td><a href=\"#\" onClick='removeClick("+i+")' class='btn remove_btn'>Remove<a/></td>");
+															document.writeln("</tr>"); 
+														}
+													}
+													if ( i == 0 ) {
+														document.writeln("<tr align=\"center\" class=\"nattable\">");
+														document.writeln("<td colspan=6 style=\"padding:10px;\">No Rules Defined</td>");
+														document.writeln("</tr>");
+													}
+												}           
+                      //-->
+                      </script>
+                    </table>
+				  </div>
+			  </form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

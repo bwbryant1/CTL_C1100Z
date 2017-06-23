@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+
+<script language="JavaScript">
+var enbl = '<%ejGetOther(getWebActivityLogStatus)%>';
+var enable = parseInt(enbl);
+var timeValue;
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+</script>
+
+<script language="JavaScript">
+<!-- hide
+
+function getRefresh()
+{	
+   var objXMLHTTP = null;
+
+   if (window.XMLHttpRequest)
+   { 
+      objXMLHTTP=new XMLHttpRequest(); 
+   }// code for IE 
+   else if (window.ActiveXObject)
+   { 
+      objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+   }
+
+   if (objXMLHTTP != null) {
+      objXMLHTTP.open("GET", "./utilities_webactivitylogupdate.html", false);
+	  objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+      objXMLHTTP.onreadystatechange = function()
+		{
+			if (objXMLHTTP.readyState == 4) {
+				document.getElementById('webActivityInfo').innerHTML=objXMLHTTP.responseText;
+				setTimeout('getRefresh()',5000);
+			}
+		}
+		objXMLHTTP.send(null);
+	}
+}
+
+function webLogEnable(isEnable)
+{
+   with(document.forms[0]){
+      webActivityLogEnable.value = isEnable;
+      sessionKey.value = gblsessionKey;
+
+      submit();
+   }
+}
+
+function exportWebLogFile()
+{
+   var loc = 'webActLog.csv';
+   var code = 'location="' + loc + '"';
+   eval(code);
+}
+
+function frmLoad()
+{
+   with(document.forms[0])
+   {
+      if(enable == 0){
+         $('span.toggle-button-label').text('Click the button to enable the Web Activity Log.');
+         $('a.toggle-button').children('img').attr({
+            'src' : '../_images/h_wirelesssetup_wpsenable.png',
+            'alt' : 'Click the button to disable WPS in the modem.'		
+         });
+         $('a.toggle-button').parent().nextAll('.stepWrapper').hide();
+
+         clearTimeout(timeValue);
+      } else {
+         $('span.toggle-button-label').text('Click the button to disable the Web Activity Log.');
+         $('a.toggle-button').children('img').attr({
+            'src' : '../_images/h_wirelesssetup_wpsdisable.png',
+            'alt' : 'Click the button to enable the Web Activity Log.'
+         });
+         $('a.toggle-button').parent().nextAll('.stepWrapper').show();
+
+         timeValue = setTimeout('getRefresh()', 5000);
+      }
+   }
+}
+
+// done hiding -->
+</script>
+</head>
+<body id="utilities_webactivitylog" onload="frmLoad()">
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+      <a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<script language="javascript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left"></div>
+   <div id="content_left">
+      <ul id="subnav">
+<script language="javascript">
+   WriteUtilitiesMenuHeader('webactivitylog', '<%ejGet(HpnaFeature)%>');
+</script>		
+      </ul>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+            </div>
+      </div>
+   </div>
+
+   <div id="content_right">
+      <div id="content_right_header"></div>
+      <div id="content_right_contentarea">
+         <h1 class="utilities_webactivitylog">Web Activity Log </h1>
+
+         <!-- <form name="form1" action="configuring_applysettings.cgi" method="post" onkeypress="return handleEnter(this,event) ;"> -->
+         <form name="form1" action="utilities_webactivitylog.cgi" method="post">
+            <input size="15" type="hidden" name="sessionKey" id="sessionKey" value="" />
+            <input type="hidden" name="page_name" id="page_name" value="utilities_webactivitylog.cgi?pageAct=webActivityMain">
+            <input type="hidden" name="pageAct" id="pageAct" value="webActivityMain">
+            <input type="hidden" name="isSubmit" id="isSubmit" value="1">
+            <input type="hidden" name="webActivityLogEnable" id="webActivityLogEnable" value="">
+
+            <div id="webActivityLog_state_wrapper" class="stepWrapper">
+               <a class="toggle-button" href="#"><img alt="Click the button to enable the Web Activity Log." src="../_images/h_wirelesssetup_wpsenable.png"></a>
+               <span class="toggle-button-label">Click the button to enable the Web Activity Log.</span>
+            </div>
+
+            <div class="stepWrapper">
+               <p><strong>1. Click &quot;Download&quot; to save the web activity on your PC.</strong></p>
+               <a href="#" class="btn download_btn" onClick="exportWebLogFile()">Download</a></div>
+
+            <div class="stepWrapper">
+             <div id="webActivityInfo">
+               <table id='webLogTable'>
+                  <tr align="center">
+                     <th width="74">Date</th>
+                     <th width="78"> Time</th>
+                     <th width="101">IP Address</th>
+                     <th width="212">Website</th>
+                  </tr>
+                  <tbody id='webLogEntry'>
+<%ejGetOtherBig(getWebActivityLogEntry)%>
+                  </tbody>
+               </table>
+             </div>
+            </div>
+
+         </form>
+      </div>
+   </div>
+
+   <div class="clear_left"></div>
+
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
+

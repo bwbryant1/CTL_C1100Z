@@ -1,0 +1,443 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/dslStatusC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var g_l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';
+var g_dslStatus = '<%ejGetOther(sysInfo, status)%>';
+var g_bondingStatus = '<%ejGetOther(bondingStatus)%>';
+function setStatisticsValueToZero()
+{
+	document.getElementById("RETRAINS").innerHTML = 0;
+	document.getElementById("RETRAINS24HR").innerHTML = 0;
+
+	document.getElementById("linkFailLPR").innerHTML = 0;
+	document.getElementById("linkFailLOS").innerHTML = 0;
+	document.getElementById("linkFailLOM").innerHTML = 0;
+	document.getElementById("linkTrainErr").innerHTML = 0;
+	document.getElementById("DSLUAS").innerHTML = 0;
+
+	//DSL POWER
+	document.getElementById("DSLSNRDOWN").innerHTML = "0.0";
+	document.getElementById("DSLSNRUP").innerHTML = "0.0";
+	document.getElementById("DSLATTENDOWN").innerHTML = "0.0";
+	document.getElementById("DSLATTENUP").innerHTML = "0.0";
+	document.getElementById("DSLPOWERDOWN").innerHTML = "0.0";
+	document.getElementById("DSLPOWERUP").innerHTML = "0.0";
+
+	//DSL Transport Table
+	document.getElementById("dsldpkt").innerHTML = 0;
+	document.getElementById("dslupkt").innerHTML = 0;
+	document.getElementById("dslderrpkt").innerHTML = 0;
+	document.getElementById("dsluerrpkt").innerHTML = 0;
+	document.getElementById("dslRxByte1Day").innerHTML = 0;
+	document.getElementById("dslTxByte1Day").innerHTML = 0;
+	document.getElementById("dslRxByteTotal").innerHTML = 0;
+	document.getElementById("dslTxByteTotal").innerHTML = 0;
+	document.getElementById("dsldDiscard30M").innerHTML = 0;
+	document.getElementById("dsluDiscard30M").innerHTML = 0;
+
+	//DSL Channel Table
+	document.getElementById("CHANNELTYPE_NEAR").innerHTML = "N/A";
+	document.getElementById("CHANNELTYPE_FAR").innerHTML = "N/A";
+	document.getElementById("CRC_NEAR").innerHTML = 0;
+	document.getElementById("CRC_FAR").innerHTML = 0;
+	document.getElementById("CRC_NEAR30M").innerHTML = 0;
+	document.getElementById("CRC_FAR30M").innerHTML = 0;
+	document.getElementById("FEC_NEAR").innerHTML = 0;
+	document.getElementById("FEC_FAR").innerHTML = 0;
+	document.getElementById("FEC_NEAR30M").innerHTML = 0;
+	document.getElementById("FEC_FAR30M").innerHTML = 0;
+
+}
+
+function Clear() {
+    setStatisticsValueToZero();
+	BackgroundUrl("modemstatus_dslstatus_clear.cgi");
+	//setTimeout('updateValue_take()', 3000);
+}
+function frmLoad() {
+    var RMode = '<%ejGetOther(dslinfo, RMode)%>';
+	document.getElementById("DSLMODEDECT").innerHTML = RMode;
+	if(g_bondingStatus=='1' && g_dslStatus == 'CONNECTED'){
+		if ( g_l2Intf == 1 ) {
+			document.getElementById("DSLMODEDECT").innerHTML = 'ADSL2+ Bonding';
+		}else if(g_l2Intf == 2){
+			RMode = RMode.replace("VDSL2", "VDSL2 Bonding");
+			document.getElementById("DSLMODEDECT").innerHTML = RMode;
+		}
+	}
+}
+</SCRIPT>
+
+</head>
+<body id="modemstatus_dslstatus" onLoad='frmLoad();'>
+<div id="wrapper">
+	<div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+		
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+		WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+  </div>
+	<div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('dslstatus', '<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+			</ul>
+	  <div id="subnav_footer"></div>
+			<div id="connectionstatus_header"></div>
+      <div id="connectionstatus">
+        <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+         </div>
+      </div>
+			<div id="connectionstatus_footer"></div>
+  </div>
+		<div id="content_right">
+			<div id="content_right_header"></div>
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_wanstatus">DSL Status 
+					<span>
+					DSL Status reflects the status of the
+					<span class="greentext" style="display:inline;">GREEN</span>
+					DSL port located on the back of the router. The DSL light on the front of the router provides a visual status of the DSL port.
+					</span>
+				</h1>
+			  <form onSubmit="return false;">
+			  
+			  <div class="stepWrapper">
+			  <p><strong>DSL Status</strong></p>	
+				
+				  <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                    <th width="237"><div align="left"><strong>Connection</strong></div>
+                    </th>
+                    <th width="183">
+                      <div align="left"><strong>Status</strong></div>
+                    </th>
+                  </tr>
+                  <tr align="center">
+                    <td><div align="left">DSL Downstream:</div>
+                    </td>
+                    <td><div align="left"><strong><span id="dspeed">
+<script language="javascript">
+var downSpeed = '<%ejGetOther(lineRate, 1, 2)%>';
+if ( g_l2Intf != 3 ) {
+	document.writeln(downSpeed);
+}
+else {
+	document.writeln('N/A');
+}
+</script>
+                    
+                    
+                    </span> Mbps</strong></div>
+                    </td>
+                    </tr>
+                  <tr align="center">
+                    <td><div align="left">DSL Upstream:</div>
+                    </td>
+                    <td><div align="left"><strong><span id="uspeed">
+<script language="javascript">
+var upSpeed = '<%ejGetOther(lineRate, 0, 2)%>';
+if ( g_l2Intf != 3 ) {
+	document.writeln(upSpeed);
+}
+else {
+	document.writeln('N/A');
+}
+</script>
+                    </span> Mbps</strong></div>
+                    </td>
+                    </tr>
+                  <tr align="center" style="display: none;">
+                    <td><div align="left">DSL Line Status:</div></td>
+                    <td><div align="left"><span id="LINESTATUS">
+<script language="javascript">
+var dslStatus = '0';
+
+if (dslStatus == '1')
+	document.writeln('<div align="left"><font color=\"#015F2C\"><strong>GOOD</strong></font></div>');
+else if (dslStatus == '2')
+	document.writeln('<div align="left"><font color=\"#ff6319\"><strong>MARGINAL</strong></font></div>');	
+else if (dslStatus == '3')
+	document.writeln('<div align="left"><font color=\"#FF0000\"><strong>POOR</strong></font></div>');
+else if (dslStatus == '5')
+	document.writeln('<div align="left"><font color=\"#FF0000\"><strong>NO FILTER DETECTED</strong></font></div>');
+else
+	document.writeln('<div align="left"><font><strong>N/A</strong></font></div>');	
+</script></span></div>
+                    </td>
+                  </tr>
+                  </table>
+				</div><!--end of stepWrapper-->
+				<div class="stepWrapper"> 
+				  <p><strong>DSL Link </strong></p>
+		        <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                      <th width="260"><div align="left"><strong>Link Statistic</strong></div>
+                      </th>
+                      <th width="160">
+                        <div align="left"><strong>Status</strong></div>
+                      </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Broadband Mode Setting:</div>
+                      </td>
+                      <td><div align="left">
+                      <span id="DSLMODE"><%ejGetOther(dslinfo, Mode)%></span></div>
+                      </td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Broadband Mode Detected:</div>
+                      </td>
+                      <td><div align="left"><span id="DSLMODEDECT"></span></div>
+                      </td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">DSL Link Uptime:</div></td>
+                      <td><div align="left"><span id="DSLUPTIME"><%ejGetOther(dslinfo, RTimer)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Retrains:</div></td>
+                      <td><div align="left"><span id="RETRAINS">
+<script language="javascript">
+var Retrain = '<%ejGetOther(dslinfo, Retrain)%>';
+var intValue = parseInt(Retrain);
+if ( isNaN(intValue) ) {
+	document.writeln('N/A');
+}
+else {
+	document.writeln(Retrain);
+}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Retrains in Last 24 Hours:</div></td>
+                      <td><div align="left"><span id="RETRAINS24HR">
+<script language="javascript">
+var RetrainCurr24H = '<%ejGetOther(dslinfo, RetrainCurr24H)%>';
+var intValue = parseInt(RetrainCurr24H);
+if ( isNaN(intValue) ) {
+	document.writeln('N/A');
+}
+else if ( intValue < 3 ) {
+	document.writeln(RetrainCurr24H);
+}
+else {
+	document.writeln('<font color="#FF0000"><strong>'+RetrainCurr24H+'</strong></font>');
+}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Loss of Power Link Failures:</div></td>
+                      <td><div align="left"><span id="linkFailLPR"><%ejGetOther(dslinfo, linkFailLPR)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Loss of Signal Link Failure:</div></td>
+                      <td><div align="left"><span id="linkFailLOS"><%ejGetOther(dslinfo, linkFailLOS)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Loss of Margin Link Failure:</div></td>
+                      <td><div align="left"><span id="linkFailLOM"><%ejGetOther(dslinfo, linkFailLOM)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Link Train Errors:</div></td>
+                      <td><div align="left"><span id="linkTrainErr"><%ejGetOther(dslinfo, linkTrainErr)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Unavailable Seconds:</div></td>
+                      <td><div align="left"><span id="DSLUAS"><%ejGetOther(dslinfo, DSLUAS)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Estimated Loop Length:</div></td>
+                      <td><div align="left"><span id="LOOPLENGTH"><%ejGetOther(dslinfo, LOOPLENGTH)%></span> feet</div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Uncanceled Echo:</div></td>
+                      <td><div align="left"><span id="FILTERDETECT"><%ejGetOther(dslinfo, FILTERDETECT)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Transport Mode:</div></td>
+                      <td><div align="left"><span id="TRANSMODE">
+<script language="javascript">
+if ( g_l2Intf == 1 ) {
+	document.writeln('ATM');
+}
+else if ( g_l2Intf == 2 ) {
+	document.writeln('PTM');
+}
+else {
+	document.writeln('N/A');
+}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Path Parameter:</div></td>
+                      <td><div align="left"><span id="VPIVCI_VLAN"><%ejGetOther(sysInfo, VPIVCI_VLAN)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Priority:</div></td>
+                      <td><div align="left"><span id="PRIORITY"><%ejGetOther(sysInfo, ly2Pri)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Service Type:</div></td>
+                      <td><div align="left"><span id="SERVICETYPE"><%ejGetOther(sysInfo, serviceType)%></span></div></td>
+                    </tr>
+                </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+				  <p><strong>DSL Power </strong></p>
+                    <table>
+                      <tr>
+                         <th width="200"><div align="left"><strong>Levels</strong></div></th>
+                         <th><div align="left"><strong>Downstream</strong></div></th>
+                         <th><div align="left"><strong>Upstream</strong></div></th>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">SNR</div></td>
+                        <td><div align="left"><span id="DSLSNRDOWN"><%ejGetOther(dslinfo, RSNRDOWN)%></span> dB</div></td>
+                        <td><div align="left"><span id="DSLSNRUP"><%ejGetOther(dslinfo, RSNRUP)%></span> dB</div></td>
+                      </tr>                     
+                      <tr align="center">
+                        <td><div align="left">Attenuation</div></td>
+                        <td><div align="left"><span id="DSLATTENDOWN"><%ejGetOther(dslinfo, RATTENDOWN)%></span> dB</div></td>
+                        <td><div align="left"><span id="DSLATTENUP"><%ejGetOther(dslinfo, RATTENUP)%></span> dB</div>
+                        </td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Power</div></td>
+                        <td><div align="left"><span id="DSLPOWERDOWN"><%ejGetOther(dslinfo, RPOWERDOWN)%></span> dBm</div></td>
+                        <td><div align="left"><span id="DSLPOWERUP"><%ejGetOther(dslinfo, RPOWERUP)%></span> dBm</div></td>
+                      </tr>                                          
+                    </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+				  <p><strong>DSL Transport </strong></p>
+                    <table>
+                      <tr>
+                         <th width="200"><div align="left"><strong>Transport</strong></div></th>
+                         <th><div align="left"><strong>Downstream</strong></div></th>
+                         <th><div align="left"><strong>Upstream</strong></div></th>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Packets:</div></td>
+                        <td><div align="left"><span id="dsldpkt"><%ejGetOther(dslinfo, XTMPktRX)%></span></div></td>
+                        <td><div align="left"><span id="dslupkt"><%ejGetOther(dslinfo, XTMPktTX)%></span></div></td>
+                      </tr>                     
+                      <tr align="center">
+                        <td><div align="left">Error Packets:</div></td>
+                        <td><div align="left"><span id="dslderrpkt"><%ejGetOther(dslinfo, XTMPktRXERR)%></span></div></td>
+                        <td><div align="left"><span id="dsluerrpkt"><%ejGetOther(dslinfo, XTMPktTXERR)%></span></div>
+                        </td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Average Usage per Minute:</div></td>                        
+                        <td><div align="left"><span id="dslRxBitRate">
+<script language="javascript">
+    var rxByte = <%ejGetOther(sysInfo, dslRxByte1Day)%>;
+	document.writeln(parseFloat(rxByte / 60 / 24).toFixed(3));
+</script>
+                        </span> Mbps</div></td>
+                        <td><div align="left"><span id="dslTxBitRate">
+<script language="javascript">
+    var txByte = <%ejGetOther(sysInfo, dslTxByte1Day)%>;
+	document.writeln(parseFloat(txByte / 60 / 24).toFixed(3));
+</script>
+                        </span> Mbps</div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">24 Hour Usage:</div></td>
+                        <td><div align="left"><span id="dslRxByte1Day"><%ejGetOther(sysInfo, dslRxByte1Day)%></span> MB</div></td>
+                        <td><div align="left"><span id="dslTxByte1Day"><%ejGetOther(sysInfo, dslTxByte1Day)%></span> MB</div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Total Usage:</div></td>
+                        <td><div align="left"><span id="dslRxByteTotal"><%ejGetOther(sysInfo, dslRxByteTotal)%></span> MB</div></td>
+                        <td><div align="left"><span id="dslTxByteTotal"><%ejGetOther(sysInfo, dslTxByteTotal)%></span> MB</div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">30 Minute Discarded:</div></td>
+                        <td><div align="left"><span id="dsldDiscard30M"><%ejGetOther(dslinfo, RPKT30DROPDOWN)%></span></div></td>
+                        <td><div align="left"><span id="dsluDiscard30M"><%ejGetOther(dslinfo, RPKT30DROPUP)%></span></div></td>
+                      </tr>
+                    </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+				  <p><strong>DSL Channel  </strong></p>
+                    <table>
+                      <tr>
+                         <th width="200"><div align="left"><strong>Levels</strong></div></th>
+                         <th><div align="left"><strong>Near End</strong></div></th>
+                         <th><div align="left"><strong>Far End</strong></div></th>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Channel Type:</div></td>
+                        <td><div align="left"><span id="CHANNELTYPE_NEAR"><%ejGetOther(dslinfo, CHANNELTYPE)%></span></div></td>
+                        <td><div align="left"><span id="CHANNELTYPE_FAR"><%ejGetOther(dslinfo, CHANNELTYPE)%></span></div></td>
+                      </tr>                     
+                      <tr align="center">
+                        <td><div align="left">CRC Errors:</div></td>
+                        <td><div align="left"><span id="CRC_NEAR"><%ejGetOther(dslinfo, RNECRC)%></span></div></td>
+                        <td><div align="left"><span id="CRC_FAR"><%ejGetOther(dslinfo, RFECRC)%></span></div>
+                        </td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">30 Minute CRC:</div></td>
+                        <td><div align="left"><span id="CRC_NEAR30M"><%ejGetOther(dslinfo, RNE30CRC)%></span></div></td>
+                        <td><div align="left"><span id="CRC_FAR30M"><%ejGetOther(dslinfo, RFE30CRC)%></span></div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">RS FEC Corrections:</div></td>
+                        <td><div align="left"><span id="FEC_NEAR"><%ejGetOther(dslinfo, RNEFEC)%></span></div></td>
+                        <td><div align="left"><span id="FEC_FAR"><%ejGetOther(dslinfo, RFEFEC)%></span></div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">30 Minute FEC Corrections:</div></td>
+                        <td><div align="left"><span id="FEC_NEAR30M"><%ejGetOther(dslinfo, RNE30FEC)%></span></div></td>
+                        <td><div align="left"><span id="FEC_FAR30M"><%ejGetOther(dslinfo, RFE30FEC)%></span></div></td>
+                      </tr>
+                    </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+					<a href="#" onClick="Clear();" id="clear_btn" class="btn clear_btn">Clear</a>
+				</div><!--end of stepWrapper-->
+			  </form>
+			</div>
+  </div>
+
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

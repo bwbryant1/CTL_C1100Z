@@ -1,0 +1,982 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.hidepassword-1.0.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="javascript">
+<!-- hide
+var defPrctlv6 = '<%ejGetOther(sysInfo, defaultIPv6Prctl)%>';
+
+// MTU
+var mtusize = '<%ejGetOther(sysInfo, defaultMtuSize)%>';
+
+//dns
+var dns6type = '<%ejGetOther(sysInfo, dns6Type)%>'; if ( dns6type == '&nbsp' ) dns6type = '';
+var dns6pri = '<%ejGetOther(sysInfo, dns6Pri)%>'; if ( dns6pri == '&nbsp' ) dns6pri = '';
+var dns6sec = '<%ejGetOther(sysInfo, dns6Sec)%>'; if ( dns6sec == '&nbsp' ) dns6sec = '';
+var dns6pref = '<%ejGetOther(sysInfo, dns6Pref)%>'; if ( dns6pref == '&nbsp' ) dns6pref = '';
+
+var g_ipv6enable = '<%ejGet(enblv6)%>';
+var g_wanAddr6Type='<%ejGet(wanAddr6Type)%>';
+var g_wanAddr6='<%ejGet(wanAddr6)%>';
+var g_wanGtwy6='<%ejGet(wanGtwy6)%>';
+var g_wanAddr6PrefixLen='<%ejGet(wanAddr6PrefixLen)%>';
+var g_wanIpv6Mode='<%ejGet(wanIpv6Mode)%>';
+var g_tunnel6rd='<%ejGet(tunnel6rd)%>';
+var g_addr6rdEndpoint='<%ejGet(addr6rdEndpoint)%>';
+var g_addr6rdPrefix='<%ejGet(addr6rdPrefix)%>';
+var g_tunnel6rdMaskLen='<%ejGet(tunnel6rdMaskLen)%>';
+var g_tunnel6rdPrefixLen='<%ejGet(tunnel6rdPrefixLen)%>';
+var gblsessionKey = '<%ejGetOther(sessionKey)%>';
+var g_default = 0;
+
+function tunnel6rdDnsChange()
+{
+	with ( document.forms[0] ) 
+   {
+      if($('input#sixRD_dns_type_static').is(':checked'))
+      {
+         $('tr.sixRD_dns_type_dynamic_group').show();
+      }
+      else
+      {
+         $('tr.sixRD_dns_type_dynamic_group').hide();
+      }
+      $('input#sixRD_dns_type_dynamic, input#sixRD_dns_type_static').click(function(){ tunnel6rdDnsChange(); });
+   }
+}
+
+function dhcpv6DnsChange()
+{
+	with ( document.forms[0] ) 
+   {
+      if($('input#dhcpv6_dns_type_static').is(':checked'))
+      {
+         $('tr.dhcpv6_dns_type_dynamic_group').show();
+      }
+      else
+      {
+         $('tr.dhcpv6_dns_type_dynamic_group').hide();
+      }
+      $('input#dhcpv6_dns_type_dynamic, input#dhcpv6_dns_type_static').click(function(){ dhcpv6DnsChange(); });
+   }
+}
+
+function pppv6DnsChange()
+{
+	with ( document.forms[0] ) 
+   {
+     if($('input#pppv6_dns_type_static').is(':checked'))
+      {
+         $('tr.pppv6_dns_type_dynamic_group').show();
+      }
+      else
+      {
+         $('tr.pppv6_dns_type_dynamic_group').hide();
+      }
+      $('input#pppv6_dns_type_dynamic, input#pppv6_dns_type_static').click(function(){ pppv6DnsChange(); });
+   }
+}
+
+function staticIPv6DnsChange()
+{
+	with ( document.forms[0] ) 
+   {
+      if($('input#staticIPv6_dns_type_static').is(':checked'))
+      {
+         $('tr.staticIPv6_dns_type_dynamic_group').show();
+      }
+      else
+      {
+         $('tr.staticIPv6_dns_type_dynamic_group').hide();
+      }
+      $('input#staticIPv6_dns_type_dynamic, input#staticIPv6_dns_type_static').click(function(){ staticIPv6DnsChange(); });
+   }
+}
+
+function btnPppApply()
+{
+	with ( document.forms[0] ) {
+		ntwkPrtcl.value = 0;
+
+		if(ipv6enable[0].checked==true)
+		{
+			enblv6.value="1";
+         /*			
+         if(pppv6_dnsPrefer[0].checked==true)
+				dns6Pref.value = 4;
+			else
+				dns6Pref.value = 6;					
+         */
+		}
+      else
+      {
+			enblv6.value="0";			
+			dns6Pref.value = 0;				
+		}
+		
+		if (pppv6_dns_type[0].checked == true)
+		{
+			dns6Type.value="DHCP";
+			dns6Pri.value="";
+			dns6Sec.value="";
+			
+		}
+		else
+		{
+			dns6Type.value="Static";
+			if (pppv6_dns_primary.value == "" && pppv6_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (pppv6_dns_primary.value != "" && (isValidIpAddress6(pppv6_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (pppv6_dns_secondary.value != "" && (isValidIpAddress6(pppv6_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (pppv6_dns_primary.value == pppv6_dns_secondary.value){
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return;
+			}
+			
+			if (pppv6_dns_primary.value == ""){ //pppv6_dns_primary.value == ""
+				if (pppv6_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return;
+				}
+			}
+			
+			if (pppv6_dns_secondary.value == "")
+				pppv6_dns_secondary.value="";
+			dns6Pri.value = pppv6_dns_primary.value;
+			dns6Sec.value = pppv6_dns_secondary.value;
+		}
+
+		if (pppv6_ip_type[0].checked == true)
+		{
+			wanAddr6Type.value="DHCP";
+		}
+		else if (pppv6_ip_type[1].checked == true)
+		{
+			wanAddr6Type.value="Static";
+			if (isValidIpAddress6(pppv6_ip_static.value) == false) {
+				AlertOpen(" The IPv6 address entered is invalid.  ");
+				return;
+			}
+			if ( isValidPrefixLength(pppv6_ip_prefixLen_static.value)==false || pppv6_ip_prefixLen_static.value=='' || pppv6_ip_prefixLen_static.value=='0' || isValidDecKey(pppv6_ip_prefixLen_static.value)==false)
+			{
+				AlertOpen("  The IPv6 prefix length entered is invalid. ");
+				return;
+			}
+			wanAddr6.value = pppv6_ip_static.value+'/'+pppv6_ip_prefixLen_static.value;
+			wanAddr6PrefixLen.value = pppv6_ip_prefixLen_static.value;
+		}
+
+		if (mtusize > 1492)
+			mtuSize.value = 1492;
+		else
+			mtuSize.disabled = true;
+			
+		delayConfigType.value="none";
+      sessionKey.value = gblsessionKey;
+      document.forms[0].submit();
+	}
+}
+
+function btnStaticApply()
+{
+	with ( document.forms[0] ) {
+		ntwkPrtcl.value = 2;
+
+		if(ipv6enable[0].checked==true){
+			enblv6.value="1";
+			/*
+         if(staticIPv6_dnsPrefer[0].checked==true)
+				dns6Pref.value = 4;
+			else
+				dns6Pref.value = 6;
+         */
+		}
+      else
+      {
+			enblv6.value="0";
+			dns6Pref.value = 0;	
+		}
+
+		if (isValidIpAddress6(staticIPv6_ip.value)==false) {
+			AlertOpen(" The static IPv6 address entered is invalid. ");
+			return;
+		}
+		if( isValidPrefixLength(staticIPv6_prefixLen.value)==false || staticIPv6_prefixLen.value=='' || staticIPv6_prefixLen.value=='0' || isValidDecKey(staticIPv6_prefixLen.value)==false)
+		{
+			AlertOpen(" The subnet prefix length entered is invalid. ");
+			return;
+		}
+		wanAddr6.value = staticIPv6_ip.value+'/'+staticIPv6_prefixLen.value;
+		wanAddr6PrefixLen.value = staticIPv6_prefixLen.value;
+
+		if(isValidIpAddress6(staticIPv6_gw.value)==false)
+		{
+			AlertOpen(" The default gateway entered is invalid. ");
+			return;
+		}
+		wanGtwy6.value = staticIPv6_gw.value;
+
+		wanAddr6Type.value="Static";
+		mtuSize.disabled = true;
+		
+		if (staticIPv6_dns_type[0].checked == true)
+		{
+			dns6Type.value="DHCP";
+			dns6Pri.value="";
+			dns6Sec.value="";
+			
+		}
+		else
+		{
+			dns6Type.value="Static";
+			if (staticIPv6_dns_primary.value == "" && staticIPv6_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (staticIPv6_dns_primary != "" && (isValidIpAddress6(staticIPv6_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (staticIPv6_dns_secondary.value != "" && (isValidIpAddress6(staticIPv6_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (staticIPv6_dns_primary.value == staticIPv6_dns_secondary.value){
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return;
+			}
+			
+			if (staticIPv6_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+				if (staticIPv6_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return;
+				}
+			}
+			
+			if (staticIPv6_dns_secondary.value == "")
+				staticIPv6_dns_secondary.value="";
+			dns6Pri.value = staticIPv6_dns_primary.value;
+			dns6Sec.value = staticIPv6_dns_secondary.value;
+		}
+      sessionKey.value = gblsessionKey;
+      document.forms[0].submit();		
+	}
+}
+
+function btn6rdApply()
+{
+	with ( document.forms[0] ) {
+		ntwkPrtcl.value = 2;
+
+		enblv6.value="0";
+		
+		if(ipv6enable[0].checked==true)
+			tunnel6rd.value = "1";
+		else
+			tunnel6rd.value = "0";
+		/*	
+		if(t6rd_dnsPrefer[0].checked==true)
+			dns6Pref.value = 4;
+		else
+			dns6Pref.value = 6;					
+      */
+      
+      if (isValidIpAddress6(tunnel6rd_Prefix.value) == false) {
+         AlertOpen(" The 6rd prefix entered is invalid.  ");
+         return;
+      }
+		addr6rdPrefix.value = tunnel6rd_Prefix.value;
+			
+		if(isValidIpAddress(Border_Router_Address.value)==false)
+		{
+			AlertOpen(" The IPv4 boarder router address entered is invalid. ");
+			return;
+		}
+		addr6rdEndpoint.value = Border_Router_Address.value;
+      
+      if(IPv4_CE_Mask_Length.value == '' || isValidDecKey(IPv4_CE_Mask_Length.value)==false ){
+         msg = " The IPv4 CE mask length entered is invalid. ";
+         AlertOpen(msg);
+         return; 	            
+      }
+      tunnel6rdMaskLen.value = IPv4_CE_Mask_Length.value;
+      
+      if(tunnel6rd_Prefix_Length.value == '' || isValidDecKey(tunnel6rd_Prefix_Length.value)==false ){
+         msg = " The 6rd prefix length entered is invalid. ";
+         AlertOpen(msg);
+         return; 	            
+      }
+      tunnel6rdPrefixLen.value = tunnel6rd_Prefix_Length.value;
+		
+		tunnel6rdType.value = "Static";
+		wanIpv6Mode.value = "2";
+		mtuSize.disabled = true;
+		
+		if (t6rd_dns_type[0].checked == true)
+		{
+			dns6Type.value="DHCP";
+			dns6Pri.value="";
+			dns6Sec.value="";
+			
+		}
+		else
+		{
+			dns6Type.value="Static";
+			if (t6rd_dns_primary.value == "" && t6rd_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (t6rd_dns_primary != "" && (isValidIpAddress6(t6rd_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (t6rd_dns_secondary.value != "" && (isValidIpAddress6(t6rd_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (t6rd_dns_primary.value == t6rd_dns_secondary.value){
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return;
+			}
+			
+			if (t6rd_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+				if (t6rd_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return;
+				}
+			}
+			
+			if (t6rd_dns_secondary.value == "")
+				t6rd_dns_secondary.value="";
+			dns6Pri.value = t6rd_dns_primary.value;
+			dns6Sec.value = t6rd_dns_secondary.value;
+		}	
+      sessionKey.value = gblsessionKey;
+      document.forms[0].submit();      
+	}
+}
+
+function btnDhcpApply()
+{
+	with ( document.forms[0] ) {
+		ntwkPrtcl.value = 2;
+
+		if(ipv6enable[0].checked==true){
+			enblv6.value="1";
+			/*
+         if(dhcpv6_dnsPrefer[0].checked==true)
+				dns6Pref.value = 4;
+			else
+				dns6Pref.value = 6;						
+         */
+      }
+      else
+      {
+			enblv6.value="0";
+			dns6Pref.value = 0;
+		}
+		
+		if (dhcpv6_dns_type[0].checked == true)
+		{
+			dns6Type.value="DHCP";
+			dns6Pri.value="";
+			dns6Sec.value="";
+			
+		}
+		else
+		{
+			dns6Type.value="Static";
+			if (dhcpv6_dns_primary.value == "" && dhcpv6_dns_secondary.value == "") {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (dhcpv6_dns_primary.value != "" && (isValidIpAddress6(dhcpv6_dns_primary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (dhcpv6_dns_secondary.value != "" && (isValidIpAddress6(dhcpv6_dns_secondary.value) == false)) {
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				return;
+			}
+			
+			if (dhcpv6_dns_primary.value == dhcpv6_dns_secondary.value){
+				AlertOpen(' DNS server IP address 1 and/or 2 is invalid.  Please enter a valid DNS Server IP Address.');
+				// AlertOpen('DNS server IP address 1 is the same as DNS server IP address 2. Please enter a valid DNS Server 2');
+				return;
+			}
+			
+			if (dhcpv6_dns_primary.value == ""){ //dhcpv6_dns_primary.value == ""
+				if (dhcpv6_dns_secondary.value != ""){
+					AlertOpen('DNS server IP address 1 and/or 2 is invalid. Please enter a valid DNS Server IP Address.');
+					return;
+				}
+			}
+			
+			if (dhcpv6_dns_secondary.value == "")
+				dhcpv6_dns_secondary.value="";
+			dns6Pri.value = dhcpv6_dns_primary.value;
+			dns6Sec.value = dhcpv6_dns_secondary.value;
+		}
+		wanAddr6Type.value="DHCP";
+		mtuSize.disabled = true;
+      
+      sessionKey.value = gblsessionKey;
+      document.forms[0].submit();
+	}
+}
+
+function btnDisableApply()
+{
+	with ( document.forms[0] ) 
+   {
+      if ( defPrctlv6 == "DHCPv6" )
+      {
+         btnDhcpApply();
+      }
+      else if ( defPrctlv6 == "PPPv6" )
+      {
+         btnPppApply();
+      }
+      else if ( defPrctlv6 == "StaticIPv6" )
+      {
+         btnStaticApply();
+      }
+      else if ( defPrctlv6 == "6rd" )
+      {
+         btn6rdApply();
+      }        
+   }
+}
+
+function pppv6IpTypeChange()
+{
+	with ( document.forms[0] ) 
+   {
+      if($('input#pppoe_ip_type_static').is(':checked'))
+      {
+         $('tr.pppoe_ip_type_dynamic_group').show();
+      }
+      else 
+      {
+         $('tr.pppoe_ip_type_dynamic_group').hide();
+      }
+   }
+}
+
+function prtclIpv6Change()
+{
+	with ( document.forms[0] ) 
+   {
+      if ( g_default == 1 )
+      {
+         wan_ipV6_ip_protocol.value = "6rd";
+         g_default = 0;
+      }
+      
+		if (wan_ipV6_ip_protocol.value == "DHCPv6")
+      {
+			if (defPrctlv6 != 'DHCPv6' || g_ipv6enable == "0") 
+         {
+//show DHCPv6
+			}
+         else
+         {
+//show default DHCPv6 param
+//hide other prctl options
+				if (dns6type =='Static')
+            {
+					dhcpv6_dns_type[1].checked=true;
+					dhcpv6_dns_primary.value = dns6pri;
+					dhcpv6_dns_secondary.value = dns6sec;	
+				}
+            else
+					dhcpv6_dns_type[0].checked=true;		
+				/*
+            if (dns6pref==6)
+					dhcpv6_dnsPrefer[1].checked=true;
+				else
+					dhcpv6_dnsPrefer[0].checked=true;				
+            */
+			}
+         $('div#dhcpV6').show();
+         $('div#sixRD, div#pppV6, div#staticIPv6').hide();
+			dhcpv6DnsChange();
+		}
+      else if (wan_ipV6_ip_protocol.value == "PPPv6")
+      {
+			if (defPrctlv6 != "PPPv6" || g_ipv6enable == "0")
+         {
+			}
+         else
+         {
+				if(g_wanAddr6Type=="DHCP")
+				{
+					pppv6_ip_type[0].checked=true;
+				}
+				else
+				{
+					pppv6_ip_type[1].checked=true;
+					pppv6_ip_static.value=g_wanAddr6.substring(0,g_wanAddr6.indexOf("/"));
+					pppv6_ip_prefixLen_static.value=g_wanAddr6PrefixLen;
+				}
+            
+				if(dns6type =='Static')
+            {				
+					pppv6_dns_type[1].checked=true;
+					pppv6_dns_primary.value = dns6pri;
+					pppv6_dns_secondary.value = dns6sec ;		
+				}
+            else
+					pppv6_dns_type[0].checked=true;	
+				/*
+            if(dns6pref==6)
+					pppv6_dnsPrefer[1].checked=true;
+				else
+					pppv6_dnsPrefer[0].checked=true;
+            */
+			}
+         $('div#pppV6').show();
+         $('div#sixRD, div#dhcpV6, div#staticIPv6').hide();
+			pppv6DnsChange();
+			pppv6IpTypeChange();
+		}
+      else if (wan_ipV6_ip_protocol.value == "Static IPv6")
+      {
+			staticIPv6_dns_type[0].disabled = true;
+         if (defPrctlv6 != "StaticIPv6" || g_ipv6enable == "0")
+         {
+			}
+         else
+         {
+				staticIPv6_ip.value=g_wanAddr6.substring(0,g_wanAddr6.indexOf("/"));
+				staticIPv6_prefixLen.value=g_wanAddr6PrefixLen;
+				staticIPv6_gw.value=g_wanGtwy6;
+				
+				if (dns6type =='Static')
+            {				
+					staticIPv6_dns_type[1].checked=true;
+					staticIPv6_dns_primary.value = dns6pri;
+					staticIPv6_dns_secondary.value = dns6sec ;		
+				}
+            else
+					staticIPv6_dns_type[0].checked=true;					
+				/*
+            if (dns6pref==6)
+					staticIPv6_dnsPrefer[1].checked=true;
+				else
+					staticIPv6_dnsPrefer[0].checked=true;
+            */
+			}
+			staticIPv6DnsChange();
+         $('div#staticIPv6').show();
+         $('div#sixRD, div#dhcpV6, div#pppV6').hide();
+		}
+      else if (wan_ipV6_ip_protocol.value == "6rd")
+      {
+         t6rd_dns_type[0].disabled = true;
+			
+         if (defPrctlv6 != "6rd" || g_tunnel6rd=="0")
+         {
+			}
+         else
+         {
+				tunnel6rd_Prefix.value = g_addr6rdPrefix;
+				Border_Router_Address.value = g_addr6rdEndpoint;
+            IPv4_CE_Mask_Length.value = g_tunnel6rdMaskLen;
+            tunnel6rd_Prefix_Length.value = g_tunnel6rdPrefixLen;
+				
+				if (dns6type == 'Static')
+            {	
+					t6rd_dns_type[1].checked=true;
+					t6rd_dns_primary.value = dns6pri;
+					t6rd_dns_secondary.value = dns6sec ;		
+				}
+            else
+					t6rd_dns_type[0].checked=true;
+				/*
+            if (dns6pref==6)
+					t6rd_dnsPrefer[1].checked=true;
+				else
+					t6rd_dnsPrefer[0].checked=true;
+				*/
+			}
+         $('div#sixRD').show();
+         $('div#dhcpV6, div#pppV6, div#staticIPv6').hide();
+			tunnel6rdDnsChange();
+		}
+	}
+}
+
+function frmLoad()
+{
+	with ( document.forms[0] ) 
+   {
+		if(g_ipv6enable=="1")
+		{
+			ipv6enable[0].checked=true;
+         $('div#disabled').hide();
+         $('div#enabled').show();
+         $('select#wan_ipV6_ip_protocol').change();
+		}
+		else
+		{
+      	if( g_wanIpv6Mode=="2" && g_tunnel6rd=="1")
+			{
+            ipv6enable[0].checked=true;
+            $('div#disabled').hide();
+            $('div#enabled').show();
+            $('select#wan_ipV6_ip_protocol').change();
+			}
+         else
+         {
+            ipv6enable[1].checked=true;
+            $('div#enabled').hide();
+            $('div#disabled').show();
+            g_default = 1;
+         }
+		}
+      if ( defPrctlv6 == "DHCPv6" )
+         wan_ipV6_ip_protocol.value = "DHCPv6";
+      else if ( defPrctlv6 == "PPPv6" )
+         wan_ipV6_ip_protocol.value =  "PPPv6";
+      else if ( defPrctlv6 == "StaticIPv6" )
+         wan_ipV6_ip_protocol.value = "Static IPv6";
+      else if ( defPrctlv6 == "6rd" )
+         wan_ipV6_ip_protocol.value = "6rd";
+   
+      tunnel6rdDnsChange();
+      dhcpv6DnsChange();
+      pppv6DnsChange();
+      staticIPv6DnsChange();
+      prtclIpv6Change();
+      pppv6IpTypeChange();
+	}   
+}
+-->
+</script>
+
+<body id="advancedsetup_wanipv6address" onLoad="frmLoad()">
+<div id="wrapper">
+   <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+    
+            <!--li class="modemstatus"><a href="modemstatus_home.html">Modem Status</a></li>
+            <li class="quicksetup"><a href="quicksetup.html">Quick Setup</a></li>
+            <li class="wirelesssetup"><a href="wirelesssetup_basicsettings.html">Wireless Setup</a></li>
+            <li class="utilities"><a href="utilities_reboot.html">Utilities</a></li>
+            <li class="advancedsetup"><a href="advancedsetup_accessscheduler.html" id="selected">Advanced Setup</a></li-->
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left">
+    </div>
+	 <div id="content_left">
+		<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('IPv6wansettings');
+</script>
+		</ul>
+		<div id="connectionstatus">
+			<h1>Connection Status</h1>
+			<div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+    <div id="content_right">
+        <div id="content_right_contentarea">
+          <h1 class="advancedsetup_ipv6wansettings">IPv6 WAN Settings<span>IPv6 is the next generation of IP addressing.</span></h1>
+         <form action="advancedsetup_wanipv6address.cgi" method="post" onSubmit="return false;">
+				<input type="hidden" name="ntwkPrtcl" id="ntwkPrtcl" value="0">
+				<input type="hidden" name="defaultWanCfg" id="defaultWanCfg" value="1">
+				<input type="hidden" name="delayConfigType" id="delayConfigType" value="">
+				<input type="hidden" name="mtuSize" id="mtuSize" value="1500">
+				<input type="hidden" name="enblv6" id="enblv6" value="0">
+				<input type="hidden" name="dns6Type" id="dns6Type" value="DHCP">
+				<input type="hidden" name="dns6Pref" id="dns6Pref" value="">				
+				<input type="hidden" name="dns6Pri" id="dns6Pri" value="">
+				<input type="hidden" name="dns6Sec" id="dns6Sec" value="">
+				<input type="hidden" name="wanAddr6Type" id="wanAddr6Type" value="">
+				<input type="hidden" name="wanAddr6" id="wanAddr6" value="">
+				<input type="hidden" name="wanGtwy6" id="wanGtwy6" value="">
+				<input type="hidden" name="wanAddr6PrefixLen" id="wanAddr6PrefixLen" value="">
+				<input type="hidden" name="tunnel6rd" id="tunnel6rd" value="">
+				<input type="hidden" name="addr6rdPrefix" id="addr6rdPrefix" value="">
+				<input type="hidden" name="addr6rdEndpoint" id="addr6rdEndpoint" value="">
+				<input type="hidden" name="tunnel6rdType" id="tunnel6rdType" value="">
+				<input type="hidden" name="wanIpv6Mode" id="wanIpv6Mode" value="0">
+            <input type="hidden" name="tunnel6rdMaskLen" id="tunnel6rdMaskLen" value="0">
+            <input type="hidden" name="tunnel6rdPrefixLen" id="tunnel6rdPrefixLen" value="0">
+            <input type="hidden" name="sessionKey"  id="sessionKey" value=""/>
+          <form>
+            <div class="stepWrapper">
+              <p><strong>1. Set the IPv6 state. </strong></p>
+              <table>
+                <tr>
+                <td width="150">IPv6:</td>
+                <td><input name="ipv6enable" type="radio" id="ipV6_state_enable" value="enable" />
+                  Enable</td>
+                <td><input name="ipv6enable" type="radio" id="ipV6_state_disable" value="disable" checked="checked" />
+                  Disable</td>
+              </tr>
+              </table>
+            </div>
+            <div id="disabled">
+	            <div class="stepWrapper">
+	              <p><strong>2. Click &quot;Apply&quot; to save your changes. </strong></p>
+	              <a href="#" class="btn apply_btn" onClick='btnDisableApply()'>Apply</a>
+	            </div>
+            </div>
+            <div id="enabled">
+	            <div class="stepWrapper">
+	              <p><strong>2. Select the WAN IPv6 connection protocol.</strong></p>
+	              <table>
+	                <tr>
+	                  <td width="150"><label for="wan_ipV6_ip_protocol">WAN IPv6 IP Protocol:</label></td>
+	                  <td><select name="wan_ipV6_ip_protocol" id="wan_ipV6_ip_protocol" onChange="prtclIpv6Change()">
+	                    <option value="6rd" selected="selected">6rd</option>
+	                    <option value="DHCPv6">DHCPv6</option>
+	                    <option value="PPPv6">PPPv6</option>
+	                    <option value="Static IPv6">Static IPv6</option>
+	                  </select></td>
+	                </tr>
+	              </table>
+	            </div>
+	            
+	             <div id="pppV6">
+	             	<div class="stepWrapper">
+		              <p><strong>3. Set the WAN IP addressing type.</strong></p>
+		              <table>
+		                <tr>
+		                  <td width="150"><label for="pppv6_ip_type">WAN Address Type:</label></td>
+		                  <td><label>
+		                    <input name="pppv6_ip_type" type="radio" id="pppoe_ip_type_dynamic" value="pppoe_ip_type_dynamic" checked="checked" />
+		                    Dynamic IP</label></td>
+		                  <td><label>
+		                    <input name="pppv6_ip_type" type="radio" id="pppoe_ip_type_static" value="pppoe_ip_type_static" />
+		                    Static IP</label></td>
+		                </tr>
+		                <tr class="pppoe_ip_type_dynamic_group">
+		                  <td width="135"><label for="pppv6_ip_static">IPv6 Address:</label></td>
+		                  <td colspan="2"><input type="text" id="pppv6_ip_static" size="40" /></td>
+		                </tr>
+		                <tr class="pppoe_ip_type_dynamic_group">
+		                  <td width="135"><label for="pppv6_ip_prefixLen_static">IPv6 Prefix Length:</label></td>
+		                  <td colspan="2"><input type="text" id="pppv6_ip_prefixLen_static" size="5" /></td>
+		                </tr>
+		              </table>
+		            </div>
+		            <div class="stepWrapper">
+		              <p><strong>4. Set the WAN IPv6 DNS server.</strong></p>
+		              <table>
+		                <tr>
+		                  <td width="150"><label for="pppv6_dns_type"> IPv6 DNS Type:</label></td>
+		                  <td><label>
+		                    <input name="pppv6_dns_type" type="radio" id="pppv6_dns_type_dynamic" value="pppoe_dns_type_default" checked="checked" />
+		                    Default  Servers</label></td>
+		                  <td><label>
+		                    <input name="pppv6_dns_type" type="radio" id="pppv6_dns_type_static" value="pppoe_dns_type_custom" />
+		                    Custom  Servers</label></td>
+		                </tr>
+		                <tr class="pppv6_dns_type_dynamic_group">
+		                  <td width="135"><label for="pppv6_dns_primary">Primary DNS:</label></td>
+		                  <td colspan="2"><input type="text" id="pppv6_dns_primary" value="2001:428::1" size="40" /></td>
+		                </tr>
+		                <tr class="pppv6_dns_type_dynamic_group">
+		                  <td width="135"><label for="pppv6_dns_secondary">Secondary DNS:</label></td>
+		                  <td colspan="2"><input type="text" id="pppv6_dns_secondary" value="2001:428::2" size="40" /></td>
+		                </tr>
+		              </table>
+		            </div>
+		            <div class="stepWrapper">
+		              <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+		              <a href="#" class="btn apply_btn" onClick="btnPppApply()">Apply</a> 
+		            </div>
+	             </div>
+
+	             
+	             <div id="dhcpV6">
+	             	<div class="stepWrapper">
+		              <p><strong>3. Set the WAN IPv6 DNS server.</strong></p>
+		              <table>
+		                <tr>
+		                  <td width="150"><label for="dhcpv6_dns_type"> IPv6 DNS Type:</label></td>
+		                  <td><label>
+		                    <input name="dhcpv6_dns_type" type="radio" id="dhcpv6_dns_type_dynamic" value="pppoe_dns_type_dynamic" checked="checked" />
+		                    Default  Servers</label></td>
+		                  <td><label>
+		                    <input name="dhcpv6_dns_type" type="radio" id="dhcpv6_dns_type_static" value="pppoe_dns_type_static" />
+		                    Custom  Servers</label></td>
+		                </tr>
+		                <tr class="dhcpv6_dns_type_dynamic_group">
+		                  <td width="135"><label for="dhcpv6_dns_primary">Primary DNS:</label></td>
+		                  <td colspan="2"><input type="text" id="dhcpv6_dns_primary" value="2001:428::1" size="40" /></td>
+		                </tr>
+		                <tr class="dhcpv6_dns_type_dynamic_group">
+		                  <td width="135"><label for="dhcpv6_dns_secondary">Secondary DNS:</label></td>
+		                  <td colspan="2"><input type="text" id="dhcpv6_dns_secondary" value="2001:428::2" size="40" /></td>
+		                </tr>
+		              </table>
+		            </div>
+		            <div class="stepWrapper">
+		              <p><strong>4. Click &quot;Apply&quot; to save your changes. </strong></p>
+		              <a href="#" class="btn apply_btn" onClick='btnDhcpApply()'>Apply</a>
+		            </div>
+	             </div>
+
+	             <div id="staticIPv6">
+	             	<div class="stepWrapper">
+	                  <p><strong>3. Set the IPv6 static addressing values.</strong></p>
+	                  <table>
+	                    <tr>
+	                      <td width="165">Static IPv6 Address:</td>
+	                      <td width="255"><input name="staticIPv6_ip" type="text" id="staticIPv6_ip" size="40" /></td>
+	                    </tr>
+	                    <tr>
+	                      <td>Subnet Prefix Length:</td>
+	                      <td><input name="staticIPv6_prefixLen" type="text" id="staticIPv6_prefixLen" value="24" size="5" /></td>
+	                    </tr>
+	                    <tr>
+	                      <td>Default Gateway: </td>
+	                      <td><input name="staticIPv6_gw" type="text" id="staticIPv6_gw" size="40" /></td>
+	                    </tr>
+	                  </table>
+	                </div>
+	                <div class="stepWrapper">
+	                  <p><strong>4. Set the WAN IPv6 DNS server.</strong></p>
+	                  <table>
+	                    <tr>
+	                      <td width="150"><label for="staticIPv6_dns_type">IPv6 DNS Type:</label></td>
+	                      <td><label>
+	                        <input name="staticIPv6_dns_type" type="radio" id="staticIPv6_dns_type_dynamic" value="pppoe_dns_type_dynamic"/>
+	                        Default  Servers</label></td>
+	                      <td><label>
+	                        <input name="staticIPv6_dns_type" type="radio" id="staticIPv6_dns_type_static" value="pppoe_dns_type_static" checked="checked" />
+	                        Custom  Servers</label></td>
+	                    </tr>
+	                    <tr class="staticIPv6_dns_type_dynamic_group">
+	                      <td width="135"><label for="staticIPv6_dns_primary">Primary DNS:</label></td>
+	                      <td colspan="2"><input type="text" id="staticIPv6_dns_primary" value="2001:428::1" size="40" /></td>
+	                    </tr>
+	                    <tr class="staticIPv6_dns_type_dynamic_group">
+	                      <td width="135"><label for="staticIPv6_dns_secondary">Secondary DNS:</label></td>
+	                      <td colspan="2"><input type="text" id="staticIPv6_dns_secondary" value="2001:428::2" size="40" /></td>
+	                    </tr>
+	                  </table>
+	                </div>
+	                <div class="stepWrapper">
+	                  <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+	                  <a href="#" class="btn apply_btn" onClick="btnStaticApply()">Apply</a>
+	                </div>
+	             </div>
+	             
+
+
+	            <div id="sixRD">
+		            <div class="stepWrapper">
+		              <p><strong>3. Set the IPv6 addressing values.</strong></p>
+		              <table>
+		                <tr>
+		                  <td width="165">6rd Prefix:</td>
+		                  <td width="255"><input name="tunnel6rd_Prefix" type="text" id="tunnel6rd_Prefix" value="2602::" size="25" /></td>
+		                </tr>
+		                <tr>
+		                  <td>6rd Prefix Length:</td>
+		                  <td><input name="tunnel6rd_Prefix_Length" type="text" id="tunnel6rd_Prefix_Length" value="24" size="5" /></td>
+		                </tr>
+		                <tr>
+		                  <td>IPv4 CE Mask Length: </td>
+		                  <td><input name="IPv4_CE_Mask_Length" type="text" id="IPv4_CE_Mask_Length" value="0" size="5" /></td>
+		                </tr>
+		                <tr>
+		                  <td>IPv4 Border Router Address:</td>
+		                  <td><input name="Border_Router_Address" type="text" id="Border_Router_Address" value="205.171.2.64" size="25" /></td>
+		                </tr>
+		              </table>
+		            </div>
+		            <div class="stepWrapper">
+		              <p><strong>4. Set the WAN IPv6 DNS server.</strong></p>
+		              <table>
+		                <tr>
+		                  <td width="150"><label for="t6rd_dns_type">IPv6 DNS Type:</label></td>
+		                  <td><label>
+		                    <input name="t6rd_dns_type" type="radio" id="sixRD_dns_type_dynamic" value="sixRD_dns_type_dynamic" />
+		                    Default  Servers</label></td>
+		                  <td><label>
+		                    <input name="t6rd_dns_type" type="radio" id="sixRD_dns_type_static" value="sixRD_dns_type_static" checked="checked" />
+		                    Custom  Servers</label></td>
+		                </tr>
+		                <tr class="sixRD_dns_type_dynamic_group">
+		                  <td width="135"><label for="t6rd_dns_primary">Primary DNS:</label></td>
+		                  <td colspan="2"><input type="text" id="t6rd_dns_primary" value="2001:428::1" size="40" /></td>
+		                </tr>
+		                <tr class="sixRD_dns_type_dynamic_group">
+		                  <td width="135"><label for="t6rd_dns_secondary">Secondary DNS:</label></td>
+		                  <td colspan="2"><input type="text" id="t6rd_dns_secondary" value="2001:428::2" size="40" /></td>
+		                </tr>
+		              </table>
+		            </div>
+		            <div class="stepWrapper">
+		              <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+		              <a href="#" class="btn apply_btn" onClick="btn6rdApply()">Apply</a> 
+		            </div>
+	             </div>
+	             
+
+			</div>
+          </form>
+          </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

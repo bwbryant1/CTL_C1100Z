@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var noresponse = 0;
+var totalWaitSecond = 0;
+
+var blinkTime;
+var showimage = 0;
+
+function StopgetRefresh()
+{
+	clearTimeout(blinkTime);
+}
+
+function blink() {
+	clearTimeout(blinkTime);
+	if (showimage == 0)
+	{
+	  	document.getElementById("FontTesting").style.color = "#FF6319";
+		showimage = 1;
+	}
+	else
+	{
+		document.getElementById("FontTesting").style.color = "";
+		showimage = 0;
+	}
+	blinkTime = setTimeout("blink()", 500);
+}
+
+function addTestingRow()
+{
+	var tbody1 = document.getElementById("traceResult").getElementsByTagName("TBODY")[0];
+	var row = document.createElement("TR");
+
+	var td1 = document.createElement("TD")
+	td1.appendChild (document.createTextNode(""));
+	var td2 = document.createElement("TD");
+	td2.appendChild (document.createTextNode(""));
+	var td3 = document.createElement("TD");
+	td3.appendChild (document.createTextNode(""));
+	var td4 = document.createElement("TD");
+	td4.appendChild (document.createTextNode(""));
+	var td5 = document.createElement("TD");
+	var font = document.createElement("font");
+	font.id = "FontTesting";
+	font.setAttribute("style", "font-weight:bold");
+	font.appendChild(document.createTextNode("TESTING"));
+	td5.appendChild(font);
+	row.appendChild(td1);
+	row.appendChild(td2);
+	row.appendChild(td3);
+	row.appendChild(td4);
+	row.appendChild(td5);
+	tbody1.appendChild(row);
+}
+
+function pagePos()
+{
+ 	var pos;
+    if (document.documentElement && document.documentElement.scrollTop) {
+        pos = document.documentElement.scrollTop;
+    } else if (document.body) {
+        pos = document.body.scrollTop;
+    }
+	return pos;
+}
+
+function btnApply()
+{
+	var loc='utilities_traceroute.cgi?';
+	totalWaitSecond = 0;
+	StopgetRefresh();
+	with(document.forms[0])
+	{
+		if(tracertAddr.value.length>60){
+			AlertOpen("The length of IP or URL addr should not be more than 60!");
+			return false;
+		}
+
+		if (isIPv4[1].checked == true)
+		{
+			tracerouteIpVer.value = "6";
+		}
+		else
+		{
+			tracerouteIpVer.value = "4";
+		}
+
+		if(tracerouteIpVer.value == "4")
+	  	{ 
+			var isIP = false;
+			var ip = tracertAddr.value.split(".");
+			if (ip.length == 4)
+			{
+				isIP = true;
+				var i = 0;
+				for (i=0; i<4; i++)
+				{
+					if (isValidDecKey(ip[i]) != true)	
+					{
+						isIP = false;
+					}
+				}
+			}
+		
+			if (isIP)
+			{
+				if (isValidIpAddress(tracertAddr.value) == false)	    
+				{
+					AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.") ;
+					return false;
+				}
+			}
+
+			if (tracertAddr.value.indexOf(".") < 0)
+			{
+				AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.");
+				return false;
+			}
+
+			if((tracertAddr.value == '') || (isValidUrl(tracertAddr.value) == false) || (tracertAddr.value.indexOf("\/") >= 0))
+			{
+				AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.");
+				return false;
+			}
+		}
+		else if (tracerouteIpVer.value == "6")
+		{
+			/* IPv4 address? */
+			var isIP = false;
+		  	var ip = tracertAddr.value.split(".");
+		  	if (ip.length == 4)
+		  	{
+				isIP = true;
+				var i = 0;
+				for (i=0; i<4; i++)
+				{
+					if (isValidDecKey(ip[i])!=true)	
+					{	
+						isIP = false;
+					}
+	    		}
+	    		if (isIP == true)
+	    		{
+					AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.");
+					return false;
+	    		}
+			}
+
+			if ((tracertAddr.value.indexOf(".") < 0 && tracertAddr.value.indexOf(":") < 0) || (tracertAddr.value.indexOf(".") > 0 && tracertAddr.value.indexOf(":") > 0)) /* not URL or IPv6 address? */
+			{
+				AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.");
+				return false;
+			}
+			else if (tracertAddr.value.indexOf(":") > 0) /* not IPv6 address? */
+			{
+				if (isValidIpAddress6(tracertAddr.value) == false)
+				{
+					AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.");
+					return false; 
+				}
+			}
+			
+			/* other formats? */
+			if((tracertAddr.value=='') || (isValidUrl(tracertAddr.value)==false) || (tracertAddr.value.indexOf("\/")>=0))
+			{
+				AlertOpen("The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.");
+				return false;
+			}
+		}
+
+		loc+='tracertAddr='+tracertAddr.value;
+		loc+='&tracerouteIpVer='+tracerouteIpVer.value;
+	}
+
+	var tbody1 = document.getElementById("traceResult").getElementsByTagName("TBODY")[0];
+	var lastRow1 = tbody1.rows.length;
+	for ( i = lastRow1; i > 1 ; i-- ) {
+		tbody1.removeChild(tbody1.rows[i - 1]);
+	}
+	
+  addTestingRow();
+  blink();
+	showimage = 0;
+	UtilityBackgroundUrl(loc);
+	setTimeout("getRefresh();", 1000);
+	
+	//Return false to avoid do submit twice.
+	return false;
+}
+
+function watchDog () {
+	if ( noresponse ) {
+		getRefresh();
+	}
+}
+
+function getRefresh()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)  { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+		else if (window.ActiveXObject)  { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+		
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./diagResult.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since", "0");
+		objXMLHTTP.onreadystatechange = function()
+		{
+			if (objXMLHTTP.readyState == 4) {
+				noresponse = 0;
+				var tmpResult=objXMLHTTP.responseText;
+				if(tmpResult!=""){
+					showResult ( tmpResult );
+				}
+				else{
+					setTimeout("getRefresh();", 1000);
+				}
+			}
+		}
+		objXMLHTTP.send(null);
+		noresponse = 1;
+		setTimeout("watchDog();", 1000);
+	}
+}
+
+function showResult ( diagResult )
+{	
+	var i = 0;
+	
+	var tbody1 = document.getElementById("traceResult").getElementsByTagName("TBODY")[0];
+	var lastRow1 = tbody1.rows.length;
+	
+	totalWaitSecond += 1;
+	
+	for ( i = lastRow1; i > 1 ; i-- ) {
+		tbody1.removeChild(tbody1.rows[i - 1]);
+	}
+	
+	if ( diagResult.indexOf("Please check input address!") >= 0 && totalWaitSecond >=5) {
+	  StopgetRefresh();
+		AlertOpen('Unknown host name or network unreachable, please check the wan status is connected.');
+		var row = document.createElement("TR")
+	  	var td1 = document.createElement("TD")
+	  	td1.appendChild(document.createTextNode("N/A"))
+	  	var td2 = document.createElement("TD")
+	  	td2.appendChild (document.createTextNode("N/A"))
+	  	var td3 = document.createElement("TD")
+	  	td3.appendChild (document.createTextNode("N/A"))
+	  	var td4 = document.createElement("TD")
+	  	td4.appendChild (document.createTextNode("N/A"))
+	  	var td5 = document.createElement("TD")
+	  	td5.appendChild (document.createTextNode("N/A"))
+	  	row.appendChild(td1);
+	    row.appendChild(td2);
+	    row.appendChild(td3);
+	    row.appendChild(td4);
+	    row.appendChild(td5);
+		tbody1.appendChild(row);
+		return;
+	}
+	
+	if (diagResult =='') {
+		setTimeout("getRefresh();", 1000);
+		return;
+	}	
+
+	if( diagResult.indexOf("|") > 0 )
+	{
+		var names=diagResult.split("|");
+
+		for( i=0 ; i < names.length ; i++ ){
+			if ( names[i].indexOf("tracert_end")>=0 ) {
+			  StopgetRefresh();
+				return;
+			}
+			var items = names[i].split("/");
+			if ( items.length > 4 ) {
+				var k=0;
+				for(k=0;k<=5;k++)
+				{
+					if(items[k].indexOf('(null)')>=0)
+					{
+						items[k] = " ";
+					}
+				}
+
+        if(items[5] == " ")
+        {
+          addTestingRow();
+          setTimeout("getRefresh();", 1000);
+          return;
+        }
+        else
+        {
+				  var row = document.createElement("TR")
+	  		  var td1 = document.createElement("TD")
+	  		  td1.appendChild(document.createTextNode(items[0]))
+	  		  var td2 = document.createElement("TD")
+	  		  td2.appendChild (document.createTextNode(items[3]))
+	  		  var td3 = document.createElement("TD")
+	  		  td3.appendChild (document.createTextNode(items[4]))
+	  		  var td4 = document.createElement("TD")
+	  		  td4.appendChild (document.createTextNode(items[5]))
+	  		  var td5 = document.createElement("TD")
+	  		  td5.appendChild (document.createTextNode(items[1]+" "+items[2]))
+	  		  row.appendChild(td1);
+	    	  row.appendChild(td2);
+	    	  row.appendChild(td3);
+	    	  row.appendChild(td4);
+	    	  row.appendChild(td5);
+		      tbody1.appendChild(row);
+		    }
+		  }
+		}
+
+		addTestingRow();
+
+	}
+	else {
+		if ( diagResult.indexOf("tracert_end")>=0 ) {
+		  StopgetRefresh();
+			return;
+		}
+    addTestingRow();
+	}
+	setTimeout("getRefresh();", 1000);
+}
+
+//-->
+</SCRIPT>
+</head>
+
+<body>
+
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">   
+	WriteUtilitiesMenuHeader('traceroute', '<%ejGet(HpnaFeature)%>');
+</script>		
+			</ul>
+			<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+           WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+            </div>
+        	</div>
+	</div>
+		<div id="content_right">
+
+			<div id="content_right_contentarea">
+			  <h1 class="utilities_traceroute">Traceroute<span>Traceroute is used to determine the route taken by packets
+                  across a network.</span></h1>
+			  <form onSubmit="return btnApply();">
+			  	<input type="hidden" name="tracerouteIpVer" id="tracerouteIpVer" value="4">
+                <div class="stepWrapper">
+              		<p><strong>1. Set the IP type.</strong></p>
+                	<table>
+                    <tr>
+                       	<td width="150"><label for="isIPv4">IP Type:</label></td>
+                   		<td><input name="isIPv4" id="isIPv4" type="radio" value="1" checked="checked"/> IPv4</td>
+               			<td><input name="isIPv4" id="isIPv4" type="radio" value="0"/> IPv6</td>
+                    </tr>
+                  	</table>
+            	</div> 
+                <div class="stepWrapper">
+                <p><strong>2. Enter a URL or IP address below.</strong>
+		      </p><table>
+                  <tr>
+                      <td width="150"><label for="url_or_ip">URL or IP:</label>
+                  </td>
+                  <td>
+                      <input name="tracertAddr" type="text" id="tracertAddr" size="25" />
+                   </td>
+                </tr>
+              </table>
+		      </div>
+              <div class="stepWrapper">
+		      <p><strong>3. Click &quot;Test&quot; to begin the traceroute test.</strong></p>    
+		      <a href="javascript:scroll(0,pagePos())" class="btn test_btn" onCliCk="btnApply()">Test</a>
+		      </div>
+              <p>&nbsp;</p>
+              <div class="stepWrapperdark">
+			  <p align="center"><strong>Traceroute Results</strong></p>
+              <table id="traceResult">
+              <tbody>
+                  <tr>
+                  <th width="50">Hop</th>
+                  <th width="45">Time 1</th>
+                  <th width="45">Time 2</th>
+                  <th width="45">Time 3</th>
+                  <th>Host / IP Address</th>
+                </tr>
+                <tr>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                </tr>
+              </tbody>
+              </table>
+		      </div>
+              </form>
+		  </div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

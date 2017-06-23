@@ -1,0 +1,1 @@
+cmd_drivers/mtd/brcmnand/built-in.o :=  /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld  -m elf32btsmip   -r -o drivers/mtd/brcmnand/built-in.o drivers/mtd/brcmnand/bcm63xx-nand.o drivers/mtd/brcmnand/brcmnand_base.o drivers/mtd/brcmnand/brcmnand_bbt.o drivers/mtd/brcmnand/brcmnand_cet.o 

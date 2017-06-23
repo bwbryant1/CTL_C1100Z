@@ -1,0 +1,44 @@
+/*
+ * Styles for slider toggle control - see slider-toggle.js
+ */
+ 
+
+.slider-toggle {
+    position: relative;
+    background: url(../_images/toggle.png) no-repeat;
+    display: block;
+    width: 26px;
+    height: 21px;
+    padding: 0 18px;
+}
+
+.slider-toggle .ui-slider {
+    position: relative;
+    width: 26px;
+    height: 21px;
+}
+
+.slider-toggle .ui-slider-handle {
+    position: absolute;
+    top: 2px;
+    width: 33px;
+    margin-left: -16px;
+    height: 17px;
+    background: url(../_images/toggle.png) no-repeat 0 -21px;
+}
+
+.slider-toggle-enabled .ui-slider-handle {
+    background-position: 0 -38px;
+}
+
+
+/* alignment of label cells */
+#content_right td.toggle-label-enable {
+    width: 50%;
+    text-align: right;
+}
+#content_right td.toggle-label-disable {
+    width: 50%;
+    text-align: left;
+}
+

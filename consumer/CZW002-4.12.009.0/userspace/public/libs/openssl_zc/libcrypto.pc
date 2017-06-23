@@ -1,0 +1,11 @@
+prefix=/usr/local/ssl
+exec_prefix=${prefix}
+libdir=${exec_prefix}/
+includedir=${prefix}/include
+
+Name: OpenSSL-libcrypto
+Description: OpenSSL cryptography library
+Version: 0.9.8zc
+Requires: 
+Libs: -L${libdir} -lcrypto -ldl -L/opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/lib -L/opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/mips-linux-uclibc/lib -lgcc_s
+Cflags: -I${includedir} 

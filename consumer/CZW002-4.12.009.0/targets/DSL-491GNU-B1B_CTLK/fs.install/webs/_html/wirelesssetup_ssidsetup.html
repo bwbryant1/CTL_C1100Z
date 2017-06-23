@@ -1,0 +1,638 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+var syncNvram = '<%ejGetWl(wlSyncNvram)%>';
+var enblWireless ='<%ejGetWl(wlEnbl)%>';
+var ssidName ='<%ejGetWl(wlSsid)%>';
+var ssidIdx = parseInt('<%ejGetWl(wlSsidIdx)%>');
+var hide = '<%ejGetWl(wlHide)%>';
+var ssidArray = new Array('<%ejGetWl(wlSsid_wl0v0)%>','<%ejGetWl(wlSsid_wl0v1)%>','<%ejGetWl(wlSsid_wl0v2)%>','<%ejGetWl(wlSsid_wl0v3)%>');
+
+/*var enblsubnet='<%ejGetWl(wlEnblSubnet)%>';
+var minAddress='<%ejGetWl(wlMinAddress)%>';
+var maxAddress='<%ejGetWl(wlMaxAddress)%>';
+var subnetMask='<%ejGetWl(wlSubnetMask)%>';
+var gateway='<%ejGetWl(wlGateway)%>';
+
+var subDomain=new Array(4);
+subDomain[0]='<%ejGetWl(wlDomain0)%>';
+subDomain[1]='<%ejGetWl(wlDomain1)%>';
+subDomain[2]='<%ejGetWl(wlDomain2)%>';
+subDomain[3]='<%ejGetWl(wlDomain3)%>';*/
+
+var maxBandwidth='<%ejGetWl(wlMaxBandwidth)%>';
+var redirectType='<%ejGetWl(wlSsidRedirect)%>';
+var redirectUrl='<%ejGetWl(wlSsidRedirectUrl)%>';
+
+var gmode = '<%ejGetWl(wlgMode)%>';
+var nmode = '<%ejGetWl(wlNmode)%>'; 
+
+var wlAuthMode = '<%ejGetWl(wlAuthMode)%>';
+var wlWep = '<%ejGetWl(wlWep)%>';
+var wlKeyBit ='<%ejGetWl(wlKeyBit)%>';
+
+//wps
+var WscMode    = '<%ejGetWl(wlWscMode_wl0v0)%>';
+var WscAPMode  = '<%ejGetWl(wlWscAPMode_wl0v0)%>';
+
+var upRate = '<%ejGetOther(lineRate, 0, 0)%>';
+var g_sessionKey = '<%ejGetOther(sessionKey)%>';
+
+function frmLoad() {
+
+	with (document.forms[0]) {
+		ssid.options[ssidIdx].selected=true;
+		//ssidStatus
+		wlEnbl[enblWireless^1].checked=true;
+		wlHide1[hide].checked=true;
+		wlHide2[hide].checked=true;		
+		//ssidName
+		var tmpSsid = decodeSpecialChars(ssidName);
+		ssid_name.value = tmpSsid;
+		ssid_network_name.value = tmpSsid;
+		//ssidMaxBandwidth
+		ssid_network_max.value = maxBandwidth;
+
+		//ssidRedirect
+		if(redirectType != 0)
+		{
+			ssid_redirect_url.disabled = false;
+			ssid_redirect.options[redirectType].selected=true;
+			ssid_redirect_url.value = redirectUrl;
+		}
+		else
+			ssid_redirect_url.disabled = true;
+		
+		/*if(enblsubnet==1){
+			ssid_dhcp_subnet_on.checked=true;
+			ssid_dhcp_subnet_start.value=minAddress;
+			ssid_dhcp_subnet_end.value=maxAddress;
+			ssid_dhcp_subnet_mask.value=subnetMask;
+			ssid_dhcp_subnet_gateway.value=gateway;
+		}*/
+	}
+}
+
+function redirectTypeChange() {
+   with ( document.forms[0] ) {
+      if (ssid_redirect.value != 0) {
+         ssid_redirect_url.disabled = false;
+      } else {
+         ssid_redirect_url.disabled = true;
+      }
+   }
+}
+
+function btnApply(place){
+	var loc='';
+
+	with (document.forms[0]) {
+		loc += place+'?wlSsidIdx='+getSelect(ssid);		
+		switch (place){
+		case 'wirelesssetup_ssidsetup.wl':
+			var str = new String();
+			if(ssidIdx ==0){ //only for SSID1
+				if ( ssid_name.value=='' || isValidSSID(ssid_name.value)==false) {
+					clearInvalidSSID("ssid_name");
+					AlertOpen('The SSID must be alphanumeric with special characters excluding the use of a space.');					
+					return;
+				}		
+				str = ssid_name.value;
+				var tmp = '';
+				for(var j = 1; j < 4; j++) {
+				  tmp = decodeSpecialChars(ssidArray[j]);
+				  if (str == tmp) { 
+				     AlertOpen("The SSID name entered is in use with another SSID.  Please enter a unique SSID name.");
+					 return;
+				  }                     
+				}
+				
+				if(wlHide1[0].checked) loc+="&wlHide=0";		
+				if(wlHide1[1].checked) loc+="&wlHide=1";
+				loc+='&wlSsid=' + encodeUrlPSK(ssid_name.value);
+			    if ((WscMode=='enabled') && (WscAPMode=='0')) {
+		           loc += '&wsc_config_state=1';
+		    	}					
+			}else { //for SSID2.3.4
+				if ( ssid_network_name.value=='' || isValidSSID(ssid_network_name.value)==false) {
+					clearInvalidSSID("ssid_network_name");
+					AlertOpen('The SSID must be alphanumeric with special characters excluding the use of a space.');
+					return;
+				}
+				str = ssid_network_name.value;
+				var tmp = '';
+				for(var j = 0; j < 4; j++) {
+				  tmp = decodeSpecialChars(ssidArray[j]);
+				  if (j!=ssidIdx && str == tmp) { 
+				     AlertOpen("The SSID name entered is in use with another SSID.  Please enter a unique SSID name.");
+					 return;
+				  }                     
+				}				
+								
+				if(wlHide2[0].checked) loc+="&wlHide=0";		
+				if(wlHide2[1].checked) loc+="&wlHide=1";			
+				loc+='&wlSsid=' + encodeUrlPSK(ssid_network_name.value);	
+
+				if(wlEnbl[0].checked) loc+="&wlEnbl=1";
+				if(wlEnbl[1].checked) loc+="&wlEnbl=0";		
+			
+  			    if(checkMaxBandwidth()==false)return;
+				loc+="&wlMaxBandwidth="+ssid_network_max.value;
+				if(ssid_redirect.value != 0)
+				{
+					if ( ssid_redirect_url.value=='')
+					{
+						AlertOpen('URL field can not be empty.');
+						return;
+					}
+					
+					if ( isValidUrl(ssid_redirect_url.value) == false)
+					{
+						AlertOpen("The SSID URL is invalid");
+						return;
+					}
+				}
+				else
+					ssid_redirect_url.value = '';
+				loc+="&wlSsidRedirect="+ssid_redirect.value;
+				loc+="&wlSsidRedirectUrl="+ssid_redirect_url.value;
+				if(ssid_redirect_url.value == redirectUrl)
+				{
+				   loc+="&emptyMacList=0";
+				}
+				else
+				{
+				   loc+="&emptyMacList=1";
+				}
+			}			
+			//for all SSID			
+			
+			/*if(ssid_dhcp_subnet_on.checked==true){
+				var is_subnet_invalid=0;
+		  		is_subnet_invalid=checkSubnet();
+	  			if(is_subnet_invalid){
+	  				return;
+	  			}
+  			
+	  			loc+="&wlMinAddress="+ssid_dhcp_subnet_start.value;
+	  			loc+="&wlMaxAddress="+ssid_dhcp_subnet_end.value;
+	  			loc+="&wlSubnetMask="+ssid_dhcp_subnet_mask.value;
+	  			loc+="&wlGateway="+ssid_dhcp_subnet_gateway.value;
+	  			//wlEnblSubnet must be the last parameter for every ssid
+	  			loc+="&wlEnblSubnet=1";
+			}else{
+				loc+="&wlEnblSubnet=0";
+
+			}*/
+			loc+="&wlEnblSubnet=0";
+
+			loc += '&wlSyncNvram=1';
+			loc += '&sessionKey='+g_sessionKey;		
+			
+			//wait and stop message
+			/*if(ssid_dhcp_subnet_on.checked==true){
+				AlertOpen("The new subnet will not have access to the modem or users on the primary subnet.", function(){frmSubmit(loc);});
+				return;
+			}*/				
+			break;
+		default:
+			loc += '&sessionKey='+g_sessionKey;
+			break;	
+		}	
+		
+		
+	}
+   frmSubmit(loc);
+}
+
+function frmSubmit(loc){
+   //Please uses the following style to send this page.   
+   with (document.forms[0]) {
+      if(ssidIdx != 0){
+         if(wlEnbl[0].checked && (enblWireless == 0)){
+            checkSSIDSecurity(loc);   
+         }else {
+            submitFrm(loc);
+         }
+      }else {
+         submitFrm(loc);
+      }
+   }
+   //Don't do anything here. Because checkSSIDSecurity may reject to send out this form.//by LC
+}
+
+function checkSSIDSecurity(loc){
+	var divMode = parseInt(authModeDisplay(wlAuthMode,wlWep,wlKeyBit));						
+	if(divMode==0){						
+		ConfirmOpen('You have enabled a new SSID. Security is not set by default. Set WEP or WPA to secure the new SSID.',function(){submitFrm(loc);});
+	}else submitFrm(loc);	
+}
+
+function checkMaxBandwidth(){
+	with (document.forms[0]) {
+		if (upRate == '')
+			upRate = 0;
+
+		if(ssid_network_max.value!="" && 
+		 (ssid_network_max.value==0 || isValidDecKey(ssid_network_max.value)==false || parseInt(ssid_network_max.value)>parseInt(upRate) * 1000)){					
+			AlertOpen("Please enter a value lower than your upstream train rate of "+upRate);
+			return false;
+		}
+		return true;		
+	}
+}
+
+/*function checkSubnet(){
+	var invalid=0;
+	with (document.forms[0]) {
+		var ipstr1=ssid_dhcp_subnet_start.value;
+		var ipstr2=ssid_dhcp_subnet_end.value;
+		var maskstr=ssid_dhcp_subnet_mask.value;
+		var gatestr=ssid_dhcp_subnet_gateway.value;
+		ipa1 = ipstr1.split('.');;
+		ipa2 = ipstr2.split('.');;
+		maska = maskstr.split('.');;
+		gatea = gatestr.split('.');;
+  		
+		var is_invalid_ip_start=0;
+		var is_invalid_ip_end=0;
+		var is_invalid_ip_mask=0;
+		var is_invalid_ip_gate=0;
+
+
+      //check if ip valid  
+      if(!isValidIpAddress(ipstr1)){
+         is_invalid_ip_start=1;
+      }else if(!isValidIpAddress(ipstr2)){
+         is_invalid_ip_end=1;
+      }else if(!isValidSubnetMask(maskstr)){
+         is_invalid_ip_mask=1;
+      }else if(!isValidIpAddress(gatestr)){
+         is_invalid_ip_gate=1;
+      }
+	  
+	  //check if start and end address are the same with gateway address
+	  if((gatea[0]==ipa1[0])&&
+	     (gatea[1]==ipa1[1])&&
+	     (gatea[2]==ipa1[2])&&
+	     (gatea[3]==ipa1[3])){
+	  	is_invalid_ip_start=1;
+	  }	else
+	  if((gatea[0]==ipa2[0])&&
+	     (gatea[1]==ipa2[1])&&
+	     (gatea[2]==ipa2[2])&&
+	     (gatea[3]==ipa2[3])){
+	  	is_invalid_ip_end=1;
+	  }	
+	  
+	  //check if they are in the same subnet
+	  var is_dif_subnet=1;
+	  var is_dif_subnet_with_gate=1;
+	  if(((ipa1[0]&maska[0])==(ipa2[0]&maska[0]))&&
+	  ((ipa1[1]&maska[1])==(ipa2[1]&maska[1]))&&
+	  ((ipa1[2]&maska[2])==(ipa2[2]&maska[2]))&&
+	  ((ipa1[3]&maska[3])==(ipa2[3]&maska[3]))){
+	  	is_dif_subnet=0;
+	  }
+	  if(((ipa1[0]&maska[0])==(gatea[0]&maska[0]))&&
+	  ((ipa1[1]&maska[1])==(gatea[1]&maska[1]))&&
+	  ((ipa1[2]&maska[2])==(gatea[2]&maska[2]))&&
+	  ((ipa1[3]&maska[3])==(gatea[3]&maska[3]))){
+	  	is_dif_subnet_with_gate=0;
+	  }
+	  
+	  //check brocast address
+	  var inv_maska=new Array(4);
+	  inv_maska[0]=255-maska[0];
+	  inv_maska[1]=255-maska[1];
+	  inv_maska[2]=255-maska[2];
+	  inv_maska[3]=255-maska[3];
+	  
+	  var bro=new Array(4);
+	  bro[0]=ipa1[0]|inv_maska[0];
+	  bro[1]=ipa1[1]|inv_maska[1];
+	  bro[2]=ipa1[2]|inv_maska[2];
+	  bro[3]=ipa1[3]|inv_maska[3];
+	  
+	  var is_same_bro_start=0;
+	  if((ipa1[0]==bro[0])&&
+	  (ipa1[1]==bro[1])&&
+	  (ipa1[2]==bro[2])&&
+	  (ipa1[3]==bro[3])){
+	  	is_same_bro_start=1;
+	  }
+	  
+	  var is_same_bro_end=0;
+	  if((ipa1[0]==bro[0])&&
+	  (ipa2[1]==bro[1])&&
+	  (ipa2[2]==bro[2])&&
+	  (ipa2[3]==bro[3])){
+	  	is_same_bro_end=1;
+	  }
+	  
+	  var is_same_bro_gate=0;
+	  if((gatea[0]==bro[0])&&
+	  (gatea[1]==bro[1])&&
+	  (gatea[2]==bro[2])&&
+	  (gatea[3]==bro[3])){
+	  	is_same_bro_gate=1;
+	  }
+	  
+	  //check the start and end ip range
+	  var is_invalid_range=0;
+	  if((parseInt(ipa1[0])>parseInt(ipa2[0]))||
+	  (parseInt(ipa1[1])>parseInt(ipa2[1]))||
+	  (parseInt(ipa1[2])>parseInt(ipa2[2]))||
+	  (parseInt(ipa1[3])>parseInt(ipa2[3]))){
+	  	is_invalid_range=1;
+	  }
+	  
+	  //check if the gateway is in the start and end range
+	  if((ipa1[0]<=gatea[0] && ipa2[0]>=gatea[0])&&
+	     (ipa1[1]<=gatea[1] && ipa2[1]>=gatea[1])&&
+	     (ipa1[2]<=gatea[2] && ipa2[2]>=gatea[2])&&
+	     (ipa1[3]<=gatea[3] && ipa2[3]>=gatea[3])){
+	  	 is_invalid_ip_gate=1;
+	  }
+	  
+	  //check if defined subnet is in use by other wl
+	  var is_subnet_use=0;
+	  var setDomain=new Array(4);
+	  setDomain[0]=ipa1[0]&maska[0];
+	  setDomain[1]=ipa1[1]&maska[1];
+	  setDomain[2]=ipa1[2]&maska[2];
+	  setDomain[3]=ipa1[3]&maska[3];
+	  var i=0;
+	  var setDomainStr=setDomain[0]+"."+setDomain[1]+"."+setDomain[2]+"."+setDomain[3];
+	  for(i=0;i<subDomain.length;i++){
+	  	if(i!=ssidIdx){
+	  		if(setDomainStr==subDomain[i]){
+	  			is_subnet_use=1;
+	  		}
+	  	}
+	  }
+		
+		if(is_invalid_ip_start){
+			//Qwest
+			AlertOpen('The DHCP Start Address is invalid. Enter a valid address.');
+			invalid=1;
+		}else	
+		if(is_invalid_ip_end){
+			//Qwest
+			AlertOpen('The DHCP End Address is invalid. Enter a valid address.');
+			invalid=1;
+		}else	
+		if(is_invalid_ip_mask){
+			//Qwest
+			AlertOpen('The SSID Subnet is invalid.  Enter a valid subnet.');
+			invalid=1;
+		}else	
+		if(is_invalid_ip_gate){
+			//Qwest
+			AlertOpen('The SSID gateway address is invalid.  Enter a valid gateway address.');
+			invalid=1;
+		}else	
+		if(is_subnet_use){
+			//Qwest
+			AlertOpen('The defined subnet is in use.  Enter a unique subnet different than the subnet already in use with DHCP.');
+			invalid=1;
+		}else	
+		if(is_dif_subnet){
+			AlertOpen('The SSID Subnet is invalid.  Enter a valid subnet.');
+			invalid=1;
+		}else
+		if(is_dif_subnet_with_gate){
+			AlertOpen('The SSID Subnet is invalid.  Enter a valid subnet.');
+			invalid=1;
+		}else
+		if(is_same_bro_start){
+			AlertOpen('The DHCP Start Address is invalid. Enter a valid address.');
+			invalid=1;
+		}else
+		if(is_same_bro_end){
+			AlertOpen('The DHCP End Address is invalid. Enter a valid address.');
+			invalid=1;
+		}else
+		if(is_same_bro_gate){
+			AlertOpen('The SSID gateway address is invalid.  Enter a valid gateway address.');
+			invalid=1;
+		}else		
+	  if(is_invalid_range){
+			AlertOpen('The DHCP Start Address is invalid. Enter a valid address.');
+			invalid=1;
+		}
+	}
+	
+	return invalid;
+}
+*/
+
+//-->
+</script>
+</head>
+
+<body id="wirelesssetup_ssidsetup">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">			
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>   
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+
+			<ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('ssid', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="wirelesssetup_ssid">SSID Setup <span>Follow the steps below to set up  SSID's 1 thru 4. SSID's are also 
+				  referred to by network name.</span></h1>
+				
+			  	<form onkeypress="return handleEnter(this,event) ;">
+                <div class="stepWrapper">
+				<p><strong>1. Select the SSID (Network Name).</strong></p>
+				<table>
+                    <tr>
+                        <td width="150"><label for="ssid">SSID:</label></td>
+                        <td><select name="ssid" id="ssid" onchange="btnApply('wirelesssetup_ssidsetup_refresh.wl')"><%ejGetWl(wlSsidList)%>
+                            </select>
+                        </td>
+                    </tr>
+                </table>                
+				</div>
+                <div id="ssid_default">
+                	<div class="stepWrapper">
+                	<p><strong>2. Set SSID broadcast.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">SSID Broadcast:</td>
+                            <td width="130"><label><input name="wlHide1" id="default_ssid_broadcast_on" type="radio" value="default_ssid_broadcast_on" /> Broadcast SSID</label></td>
+                            <td><label><input name="wlHide1" id="default_ssid_broadcast_off" type="radio" value="default_ssid_broadcast_off" /> Hide SSID</label></td>
+                        </tr>
+                    </table>                    
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>3. Enter an SSID network name. </strong></p>                    
+                    <table>
+                        <tr>
+                            <td width="150"><label for="default_ssid_network_name">Network Name:</label></td>
+                            <td><input name="ssid_name" id="ssid_name" type="text" size="35" value="test" maxlength="32"/></td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>4. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_ssidsetup.wl')">Apply</a>
+                    </div>
+                </div>
+                <div id="ssid_2thru4">
+                	<div class="stepWrapper">
+                    <p><strong>2. Set  SSID state.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="ssid">SSID State:</label></td>
+                            <td width="130"><label><input name="wlEnbl" id="ssid_state_on" type="radio" value="ssid_state_on" /> Enable SSID</label></td>
+                            <td><label><input name="wlEnbl" type="radio" id="ssid_state_off" value="ssid_state_off" checked="checked" /> Disable SSID</label></td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>3. Set SSID broadcast.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">SSID Broadcast:</td>
+                            <td width="130"><label><input name="wlHide2" id="ssid_broadcast_on" type="radio" value="ssid_broadcast_on" /> Broadcast SSID</label></td>
+                            <td><label><input name="wlHide2" type="radio" id="ssid_broadcast_off" value="ssid_broadcast_off" checked="checked" />
+                             Hide SSID</label></td>
+                        </tr>
+                    </table>				
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>4. Set the SSID network name. </strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="ssid_network_name">Network Name:</label></td>
+                            <td><input name="ssid_network_name" id="ssid_network_name" type="text" size="35" maxlength="32"/></td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>5. Set Maximum Bandwidth Usage. </strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="ssid_network_max">SSID Bandwidth Usage:</label></td>
+                            <td><input name="ssid_network_max" id="ssid_network_max" type="text" size="10" maxlength='6' onchange="checkMaxBandwidth()"/> Kbps</td>
+                        </tr>
+                    </table>                
+                    </div>
+                    <!-- <div class="stepWrapper">
+                    <p><strong>6. Set SSID in Separate Subnet.</strong></p>
+                    <table>
+                        <tr>
+                            <td colspan="2">SSID Subnet:</td>
+                            <td><label><input name="ssid_dhcp_subnet" id="ssid_dhcp_subnet_on" type="radio" value="ssid_dhcp_subnet_on" /> Enable</label> 
+                            <label><input name="ssid_dhcp_subnet" type="radio" id="ssid_dhcp_subnet_off" value="ssid_dhcp_subnet_off" checked="checked" />
+                             Disable</label></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>DHCP Start Address:</td>
+                            <td><input id="ssid_dhcp_subnet_start" type="text" size="35" /></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>DHCP End Address:</td>
+                            <td><input id="ssid_dhcp_subnet_end" type="text" size="35" /></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>SSID Subnetmask:</td>
+                            <td><input id="ssid_dhcp_subnet_mask" type="text" size="35" /></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>Gateway Address:</td>
+                            <td><input id="ssid_dhcp_subnet_gateway" type="text" size="35" /></td>
+                        </tr>
+                    </table>
+                   </div> -->
+                   <div class="stepWrapper">
+                    <p><strong>6. Select SSID URL redirect. </strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="ssid_redirect">SSID URL Redirect:</label></td>
+                            <td>
+                                <select name="ssid_redirect" id="ssid_redirect" onchange="redirectTypeChange()">
+                                    <option value="0">Disabled</option>
+                                    <option value="1">Default Start URL</option>
+                                    <option value="2">URL Lock</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="ssid_redirect_url_group">
+                            <td width="150"><label for="ssid_redirect_url">URL:</label></td>
+                            <td><input name="ssid_redirect_url" type="text" size="35" maxlength="35"/></td>
+                        </tr>
+                    </table> 
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>7. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_ssidsetup.wl')">Apply</a>
+                    </div>
+                </div>
+				
+				</form>				
+			</div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<script language="JavaScript">
+<!--hide
+frmLoad();
+// done hiding -->
+</script>
+</body>
+</html>

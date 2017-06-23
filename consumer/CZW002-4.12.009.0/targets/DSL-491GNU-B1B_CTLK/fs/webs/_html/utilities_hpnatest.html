@@ -1,0 +1,670 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+<!-- hide
+var doTesting = 0;
+var noresponse = 0;
+var testType = -1; /* -1: None, 0: Quality Test, 1: Device Discovery */
+var qualityResult;
+var devDisResult;
+
+var PASS = '<font color=#0090><b>PASS</b></font>';			//spec can't use on IE
+var TESTING = '<font color=#FF6319><b>TESTING</b></font>';
+var FAILED = '<font color=#FF0000><b>FAILED</b></font>';	//spec can't use
+
+function addOption(id, text)
+{
+	var x = document.getElementById(id);
+	var option = document.createElement("option");
+	option.text = text;
+	try
+	{
+		/* for IE earlier than version 8 */
+		x.add(option, x.options[null]);
+	}
+	catch (e)
+	{
+		x.add(option,null);
+	}
+}
+function removeOption(id)
+{
+	var x = document.getElementById(id);
+	var i = 0;
+	var len = x.length;
+	
+	for (i = 0; i < len; i++)
+	{
+		x.remove(0);
+	}
+}
+function addTableHeadData(id, text)
+{
+	var table = document.getElementById(id);
+	var tObj = table.tBodies[0];
+	var row = document.createElement('tr');
+	var cell = document.createElement('th');
+	cell.innerHTML = text;
+	row.appendChild(cell);
+	tObj.appendChild(row);
+}
+function addTableData(id, textArray)
+{
+	var table = document.getElementById(id);
+	var tObj = table.tBodies[0];
+	var row = document.createElement('tr');
+	var i = 0;
+	
+	for (i = 0; i < textArray.length; i++)
+	{
+		var cell = document.createElement('td');
+		cell.innerHTML = textArray[i];
+		row.appendChild(cell);
+	}
+	tObj.appendChild(row);
+}
+function removeTableData(id, start)
+{
+	var num = document.getElementById(id).rows.length;
+	var i = 0;
+	
+	/* avoid delete title */
+	for (i = start; i < num; i++)
+	{
+		document.getElementById(id).deleteRow(-1);	/* delete last one */
+	}
+}
+function btnApply()
+{
+	var loc;
+	var i;
+
+	if(doTesting == 1){
+	  return;
+	}
+	doTesting = 1;
+
+	/* get test type */
+	var seletcTest = document.getElementById("select_hpna_test");
+	if (seletcTest.selectedIndex == 0)
+	{
+		testType = 0;
+	}
+	else if (seletcTest.selectedIndex == 1)
+	{
+		testType = 1;
+	}
+	else
+	{
+		testType = -1;
+		return;
+	}
+
+	/* Clear test result */
+	if (testType == 0)
+	{
+		/***** HPNA Test Results *****/
+		removeTableData('table_hpna_test_results', 1);
+		addTableHeadData('table_hpna_test_results', '<center>' + TESTING + '</center>');
+		
+		/***** HPNA Quality Test Device Results *****/
+		removeOption('select_hpna_quality_device');
+		removeTableData('table_hpna_quality_device', 3);
+		
+		/***** HPNA Quality Test Results *****/
+		removeOption('select_hpna_from_station');
+		removeOption('select_hpna_to_station');
+		document.getElementById('dataRate').innerHTML = 'N/A';						/* Data Rate */
+		//document.getElementById('estimatedDist').innerHTML = 'N/A';				/* Estimated Distance */
+		document.getElementById('snrDownstream').innerHTML = 'N/A';				/* SNR Downstream */
+		document.getElementById('snrUpstream').innerHTML = 'N/A';					/* SNR Upstream */
+		document.getElementById('attenuationUpstream').innerHTML = 'N/A';		/* Attenuation Upstream */
+		document.getElementById('attenuationDownstream').innerHTML = 'N/A';		/* Attenuation Downstream */	
+		document.getElementById('packetsDroppedTx').innerHTML = 'N/A';			/* Packets Dropped Tx */
+		document.getElementById('packetsDroppedRx').innerHTML = 'N/A';			/* Packets Dropped Rx */
+		document.getElementById('crcTx').innerHTML = 'N/A';							/* CRC Tx */
+		document.getElementById('crcRx').innerHTML = 'N/A';							/* CRC Rx */
+		document.getElementById('packetsTx').innerHTML = 'N/A';						/* Packets Tx */
+		document.getElementById('packetsRx').innerHTML = 'N/A';						/* Packets Rx */
+	}
+	else if (testType == 1)
+	{
+		/***** HPNA Device Discovery Results *****/
+		removeTableData('table_hpna_device_discovery_results',2);
+	}
+	
+	loc = 'utilities_hpnatest.cgi?';
+	loc += 'hpnaTestType=' + testType;
+	BackgroundUrl(loc);
+	setTimeout("getRefresh();", 2000);
+}
+
+/* function return index of array */
+function findQualityResult(from, to)
+{
+	var nodeInfo;
+	var resultActSum = qualityResult.length - 2;	/* sum of actually test result */
+	var i;
+	for (i = 1; i <= resultActSum; i++)
+	{
+		nodeInfo = qualityResult[i].split('/');
+		if ((from == nodeInfo[0]) && (to == nodeInfo[1]))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+function updateQualityResultTable(from, to, nodeList)
+{
+	var nullArray = 'N/A,N/A,N/A,N/A,N/A,N/A,N/A';
+	
+	/* A-->B */
+	var upIndex;			/* A-->B index */
+	var downIndex;			/* B-->A index */
+	var upNodeInfo;		/* A-->B info array */
+	var downNodeInfo;		/* B-->A info array */
+	var upDroped;			/* A Tx Droped  */
+	var downDroped;		/* B Rx Droped  */
+	var crcTxStr;			/* hard code */
+	var crcRxStr;			/* hard code */
+	var rateStr;			/* hard code */
+	
+	upIndex = findQualityResult(nodeList[from], nodeList[to]);
+	downIndex = findQualityResult(nodeList[to], nodeList[from]);
+	if (upIndex >= 0)
+	{
+		upNodeInfo = qualityResult[upIndex].split('/');
+		upDroped = (1000 - parseInt(upNodeInfo[2])).toString();		/* default packetsTx is 1000 */
+		crcTxStr = '0';
+		rateStr = '200 Mbps';
+	}
+	else
+	{
+		upNodeInfo = nullArray.split(',');
+		upDroped = 'N/A';
+		crcTxStr = 'N/A';
+		rateStr = 'N/A';
+	}
+	
+	if (downIndex >= 0)
+	{
+		downNodeInfo = qualityResult[downIndex].split('/');
+		downDroped = (parseInt(upNodeInfo[2]) - parseInt(upNodeInfo[3])).toString();
+		crcRxStr = '0';
+	}
+	else
+	{
+		downNodeInfo = nullArray.split(',');
+		downDroped = 'N/A';
+		crcRxStr = 'N/A';
+	}
+
+	document.getElementById('dataRate').innerHTML = rateStr;								/* Data Rate */
+	//document.getElementById('estimatedDist').innerHTML = 'N/A';							/* Estimated Distance */
+	document.getElementById('snrDownstream').innerHTML = downNodeInfo[4];				/* SNR Downstream */
+	document.getElementById('snrUpstream').innerHTML = upNodeInfo[4];					/* SNR Upstream */
+	document.getElementById('attenuationUpstream').innerHTML = upNodeInfo[6];			/* Attenuation Upstream */
+	document.getElementById('attenuationDownstream').innerHTML = downNodeInfo[6];	/* Attenuation Downstream */
+	document.getElementById('packetsDroppedTx').innerHTML = upDroped;					/* Packets Dropped Tx */
+	document.getElementById('packetsDroppedRx').innerHTML = downDroped;					/* Packets Dropped Rx */
+	document.getElementById('crcTx').innerHTML = crcTxStr;									/* CRC Tx */
+	document.getElementById('crcRx').innerHTML = crcRxStr;									/* CRC Rx */
+	document.getElementById('packetsTx').innerHTML = upNodeInfo[2];						/* Packets Tx */
+	document.getElementById('packetsRx').innerHTML = upNodeInfo[3];						/* Packets Rx */
+}
+
+function showQualityResult(result)
+{
+	if (result != "testing")
+	{
+		qualityResult = result.split('|');
+		var nodeList = qualityResult[0].split('/');
+		var i, j;
+		
+		
+		/***** HPNA Test Results *****/
+		var resultCalSum = nodeList.length * (nodeList.length - 1);
+		var resultActSum = qualityResult.length - 2;	/* sum of actually test result */
+
+		removeTableData('table_hpna_test_results', 1);
+		
+		if (resultActSum == resultCalSum)
+		{
+			addTableHeadData('table_hpna_test_results', '<center>' + PASS + '</center>');
+		}
+		else
+		{
+			var text;
+			
+			addTableHeadData('table_hpna_test_results', '<center>' + FAILED + '</center>');
+			for (i = 0; i < nodeList.length; i++)
+			{
+				for (j = i+1; j < nodeList.length; j++)
+				{
+					if (findQualityResult(nodeList[i], nodeList[j]) == -1)
+					{
+						text = '<center>' + nodeList[i] + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + nodeList[j] + '</center>';
+						addTableHeadData('table_hpna_test_results', text);
+					}
+					if (findQualityResult(nodeList[j], nodeList[i]) == -1)
+					{
+						text = '<center>' + nodeList[j] + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + nodeList[i] + '</center>';
+						addTableHeadData('table_hpna_test_results', text);
+					}
+				}
+			}
+		}
+		
+		/***** HPNA Quality Test Device Results *****/
+		var textArray = new Array(2);
+		
+		removeOption('select_hpna_quality_device');
+		
+		for (i = 0; i < nodeList.length; i++)
+		{
+			addOption('select_hpna_quality_device', nodeList[i]);
+		}
+		
+		removeTableData('table_hpna_quality_device', 3);
+		
+		/* default select is 0 */
+		for (i = 1; i < nodeList.length; i++)
+		{
+			textArray[0] = nodeList[i];
+			if (findQualityResult(nodeList[0], nodeList[i]) == -1)
+			{
+				textArray[1] = FAILED;
+			}
+			else
+			{
+				textArray[1] = PASS;
+			}
+			addTableData('table_hpna_quality_device', textArray);
+		}
+		
+		/***** HPNA Quality Test Results *****/
+		removeOption('select_hpna_from_station');
+		removeOption('select_hpna_to_station');
+		
+		for (i = 0; i < nodeList.length; i++)
+		{
+			addOption('select_hpna_from_station', nodeList[i]);
+			addOption('select_hpna_to_station', nodeList[i])
+		}
+		
+		if (nodeList.length > 1)
+		{
+			/* default select: from:0, to:1 */
+			document.getElementById('select_hpna_from_station').selectedIndex = 0;
+			document.getElementById('select_hpna_to_station').selectedIndex = 1;
+			updateQualityResultTable(0, 1, nodeList);
+		}
+		
+		doTesting = 0;
+		return;
+	}
+	setTimeout("getRefresh();", 2000);
+}
+
+function showDeviceDiscoveryResult(result)
+{
+	devDisResult = result.split('|');
+	var resultActSum = devDisResult.length - 1;
+	var devInfo;
+	var textArray = new Array(6);
+	var i;
+	
+	removeTableData('table_hpna_device_discovery_results',2);
+	
+	if (result == 'N/A')
+	{
+		textArray[0] = 'N/A';
+		textArray[1] = 'N/A';
+		textArray[2] = 'N/A';
+		textArray[3] = 'N/A';
+		textArray[4] = 'N/A';
+		textArray[5] = 'N/A';
+		addTableData('table_hpna_device_discovery_results', textArray);
+	}
+	else
+	{
+		for (i = 0; i < resultActSum; i++)
+		{
+			devInfo = devDisResult[i].split('/');
+			textArray[0] = devInfo[0];
+			textArray[1] = devInfo[1];
+			textArray[2] = devInfo[2];
+			textArray[3] = devInfo[3];
+			textArray[4] = devInfo[4];
+			textArray[5] = devInfo[5];
+			addTableData('table_hpna_device_discovery_results', textArray);
+		}
+	}
+	
+	doTesting = 0;
+	return;
+}
+
+function watchDog ()
+{
+    if ( noresponse ) {
+        getRefresh();
+    }
+}
+
+function getRefresh()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)
+	{ 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}/* code for IE */
+	else if (window.ActiveXObject)
+	{ 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+
+	if ( objXMLHTTP != null )
+	{
+		objXMLHTTP.open("GET","./hpnaTestResult.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+		objXMLHTTP.onreadystatechange = function()
+		{
+			if (objXMLHTTP.readyState == 4)
+			{
+				noresponse = 0;
+				var tmpResult=objXMLHTTP.responseText;
+				if (tmpResult != "")
+				{
+					if (testType == 0)
+					{
+						showQualityResult(tmpResult);
+					}
+					else
+					{
+						showDeviceDiscoveryResult(tmpResult);
+					}	
+				}
+				else
+				{
+					setTimeout("getRefresh();", 2000);
+				}
+			}
+		}
+		objXMLHTTP.send(null);
+		noresponse = 1;
+		setTimeout("watchDog();", 2000);
+	}
+}
+
+function deviceResultChange()
+{
+	var selected = document.getElementById('select_hpna_quality_device').selectedIndex;
+	var nodeList = qualityResult[0].split('/');
+	var textArray = new Array(2);
+	
+	removeTableData('table_hpna_quality_device', 3);
+	
+	for (i = 0; i < nodeList.length; i++)
+	{
+		if (i == selected)
+		{
+			continue;
+		}
+		
+		textArray[0] = nodeList[i];
+		if (findQualityResult(nodeList[selected], nodeList[i]) == -1)
+		{
+			textArray[1] = FAILED;
+		}
+		else
+		{
+			textArray[1] = PASS;
+		}
+		addTableData('table_hpna_quality_device', textArray);
+	}
+}
+
+function testResultChange()
+{
+	var fromSelected = document.getElementById('select_hpna_from_station').selectedIndex;
+	var toSelected = document.getElementById('select_hpna_to_station').selectedIndex;
+	var nodeList = qualityResult[0].split('/');
+	
+	if (nodeList.length < 2)
+	{
+		return;
+	}
+	
+	if (fromSelected == toSelected)
+	{
+		if (fromSelected != 0)
+		{
+			document.getElementById('select_hpna_to_station').selectedIndex = 0;
+			toSelected = 0;
+		}
+		else
+		{
+			document.getElementById('select_hpna_to_station').selectedIndex = 1;
+			toSelected = 1;
+		}
+	}
+	updateQualityResultTable(fromSelected, toSelected, nodeList);
+}
+
+function frmLoad()
+{
+	/* do nothing */
+}
+// done hiding -->
+</script>
+</head>
+
+<body id="utilities_hpnatest" onload="frmLoad()">
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+      <div id="subnav_header"></div>
+      <ul id="subnav">
+<script language="javascript">
+   //WriteUtilitiesMenuHeader('hpnatest','<%ejGetOther(sysInfo, l2Intf)%>');
+   WriteUtilitiesMenuHeader('hpnatest', '<%ejGet(HpnaFeature)%>');
+</script>
+      </ul>
+      <div id="subnav_footer"></div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+         </div>
+      </div>
+    </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+			  <h1 class="utilities_traceroute">HPNA Test <span>The HPNA test tools below are used to test the HPNA connection status.</span></h1>
+			  <form onSubmit="return btnApply();">
+			    <div class="stepWrapper">
+			      <p><strong>1. Set the HPNA test to run. </strong></p>
+			      <table>
+			        <tr>
+			          <td width="150"><label for="select_hpna_test">HPNA Test:</label></td>
+			          <td><select name="select_hpna_test" id="select_hpna_test">
+			            <option value="quality_test">Quality Test</option>
+			            <!-- hide <option value="collision_test" selected="selected">Collision Test</option> // done hiding -->
+			            <option value="device_discovery">Device Discovery</option>
+                      </select></td>
+		            </tr>
+		          </table>
+                </div>
+
+			    <div class="stepWrapper">
+                  <p><strong><span class="quality_test">2</span><span class="collision_test">2</span><span class="device_discovery">2</span>. Click &quot;Test&quot; to begin the test.</strong></p>
+                <a href="#" onClick="btnApply()" class="btn test_btn">Test</a></div>
+				  
+				  <span class="quality_test">
+              <div class="stepWrapperdark">
+				  <div id="hpnaTestResults">
+              <table id="table_hpna_test_results">
+                	<tr>
+							<th colspan="2" class="tableTitle">HPNA Test Results</th>
+						</tr>
+              </table>
+				  </div>
+				  </div>
+				  
+              <div class="stepWrapperdark">
+				  <div id="hpnaQualityDeviceResults">
+              <table id="table_hpna_quality_device">
+                	<tr>
+							<th colspan="2" class="tableTitle">HPNA Quality Test Device Results</th>
+						</tr>
+                  <tr>
+							<th width="229">Device</th>
+							<th width="244">Test Result</th>
+						</tr>
+                  <tr>
+							<th width="229">HPNA Device:</th>
+							<th width="244">
+							<select name="select_hpna_quality_device" id="select_hpna_quality_device" onchange="deviceResultChange()">
+                     </select>
+							</th>
+						</tr>
+              </table>
+				  </div>
+				  </div>
+				  
+              <div class="stepWrapperdark">
+				  <div id="hpnaQualityTestResults">
+              <table id="table_hpna_quality_test_results">
+                	<tr>
+							<th colspan="2" class="tableTitle">HPNA Quality Test Results</th>
+						</tr>
+                  <tr>
+							<th width="229">Test</th>
+							<th width="244">Result</th>
+						</tr>
+                  <tr>
+							<th width="229">From Station: 
+							<select name="select_hpna_from_station" id="select_hpna_from_station" onchange="testResultChange()">
+                     </select>
+							</th>
+							<th width="224">To Station: 
+							<select name="select_hpna_to_station" id="select_hpna_to_station" onchange="testResultChange()">
+                     </select>
+							</th>
+						</tr>
+						<tr>
+                    <td>Data Rate:</td>
+                    <td><span id="dataRate">N/A</span></td>
+						</tr>
+<!-- hide
+						<tr>
+                    <td>Estimated Distance:</td>
+                    <td><span id="estimatedDist">N/A</span></td>
+						</tr>
+// done hiding -->
+						<tr>
+                    <td>SNR Downstream:</td>
+                    <td><span id="snrDownstream">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>SNR Upstream:</td>
+                    <td><span id="snrUpstream">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>Attenuation Upstream:</td>
+                    <td><span id="attenuationUpstream">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>Attenuation Downstream:</td>
+                    <td><span id="attenuationDownstream">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>Packets Dropped Tx:</td>
+                    <td><span id="packetsDroppedTx">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>Packets Dropped Rx:</td>
+                    <td><span id="packetsDroppedRx">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>CRC Tx:</td>
+                    <td><span id="crcTx">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>CRC Rx:</td>
+                    <td><span id="crcRx">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>Packets Tx:</td>
+                    <td><span id="packetsTx">N/A</span></td>
+						</tr>
+						<tr>
+                    <td>Packets Rx:</td>
+                    <td><span id="packetsRx">N/A</span></td>
+						</tr>
+              </table>
+				  </div>
+				  </div>
+				  </span>
+				  
+				  <span class="device_discovery">
+              <div class="stepWrapperdark">
+				  <div id="hpnaDeviceDiscoveryResults">
+              <table id="table_hpna_device_discovery_results">
+                	<tr>
+							<th colspan="6" class="tableTitle">HPNA Device Discovery Results</th>
+						</tr>
+                  <tr>
+							<th>Device Discovered</th>
+							<th>MAC Address</th>
+							<th>HPNA Version</th>
+							<th>HW Config</th>
+							<th>Packets Sent</th>
+							<th>Packets Received</th>
+						</tr>
+              </table>
+				  </div>
+				  </div>
+				  </span>
+              </form>
+		  </div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2012, CenturyLink Communications International Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

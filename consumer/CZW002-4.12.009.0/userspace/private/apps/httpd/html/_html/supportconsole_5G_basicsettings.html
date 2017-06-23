@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--hide
+var ssid = '<%ejGetExtWl(wlSsid_wl0v0)%>';
+var enbl = '<%ejGetExtWl(wlEnbl_wl0v0)%>';
+
+var authMode = '<%ejGetExtWl(wlAuthMode)%>'; // "open" / "shared" / "wpa" / "wpa2" /.. 
+var wpaPskKey = '<%ejGetExtWl(wlWpaPsk)%>';
+var vht = '<%ejGetExtWl(wlVhtMode)%>';
+//wps
+var WscMode = '<%ejGetExtWl(wlWscMode)%>';
+//channel
+var wlCurrentChannel  = '<%ejGetExtWl(wlCurrentChannel)%>';
+var channel 		  = '<%ejGetExtWl(wlChannel)%>';
+
+function btnApply() {
+	with ( document.forms[0] ) {
+		// basic settings
+		var str = new String();
+		str = wlSsid.value;
+		if (str =='' || isValidSSID(str)==false){
+			clearInvalidSSID("single_ssid_name");
+			AlertOpen("An unsupported character is included in the SSID.  Please rename the SSID.");
+			return;
+		}		
+		wlWscState.value = "0";
+		sessionKey.value='<%ejGetOther(sessionKey)%>';	
+	}	
+	document.forms[0].submit();
+}
+
+
+function frmLoad() {		
+	with (document.forms[0]) {
+	
+		if (enbl=='1') {			
+			wlEnbl[0].checked = true; 
+			raioEnbl ="Enabled";
+		}else{			
+			wlEnbl[1].checked = true;
+			raioEnbl ="Disabled";
+		}					
+
+		wlSsid.value = ssid;			
+		
+		document.getElementById("lb_wlRadio").innerHTML=raioEnbl;
+		document.getElementById("lb_wlSsid").innerHTML=ssid;
+		
+		var temp_chan='';
+		if(channel=='0')
+			temp_chan = "Auto Select - " + wlCurrentChannel;
+		else
+			temp_chan = wlCurrentChannel;
+		document.getElementById("channel").innerHTML = ((enbl==1) ? temp_chan:'N/A');
+		
+		if(vht =='1')
+			document.getElementById("mode").innerHTML = "802.11n or 802.11ac";
+		else
+			document.getElementById("mode").innerHTML = "802.11n Only";
+		
+		if(authMode == "open") {
+			document.getElementById("lb_wlAuthMode").innerHTML="Security Off";			
+		}else if(authMode == "psk2") {
+			document.getElementById("lb_wlAuthMode").innerHTML="WPA2-AES";		
+		}else if(authMode == "psk psk2") {
+			document.getElementById("lb_wlAuthMode").innerHTML="WPA - WPA2 Personal";	
+		}
+		
+		document.getElementById("lb_wlKey").innerHTML=wpaPskKey;
+		
+		if(enbl==1){
+			if(WscMode == 'enabled'){
+				document.getElementById("wpsState").innerHTML= "PBC Enabled";
+			}else{
+				document.getElementById("wpsState").innerHTML= "Disabled";
+			}
+		}else{
+			document.getElementById("wpsState").innerHTML= "Disabled";
+		}
+	}	
+}
+
+function strWarp(inStr,lineWord){
+		var i = 0;
+		var outStr = "";
+		var bound = 0;
+		for(i = 0;i < inStr.length;i+=lineWord){			
+			if(i+lineWord<inStr.length){
+				outStr= outStr+inStr.substring(i,i+lineWord)+"<br>";
+			}else{
+				outStr= outStr+inStr.substring(i,inStr.length);
+			}
+		}
+		return outStr;
+}
+// done hiding -->
+
+</script>
+
+</head>
+<body id="supportconsole_5G_basicsettings">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+        <a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">        	
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>          
+		</div>  
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>		 
+    <div class="clear_left"> </div>
+    <div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteSupportConsoleMenuHeader('5gbasic', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+// done hiding -->
+</script>
+        </ul>
+                <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="supportconsole_5G_basicsettings">Wireless 5G Settings <span>The following settings are hidden from end users disallowing the manipulation of the wireless SSID for Prism services. The settings below are for support personnel only. The ability to disable or broadcast the Prism SSID is not provided.</span></h1>
+                    <!--onkeypress="return handleEnter(this,event) ;"-->
+            <form name="form1" action="supportconsole_5G_basicsettings.wl" method="post" onkeypress="return handleEnter(this,event) ;">			             	
+				<input type="hidden" name="sessionKey" value="">               					
+				<input type="hidden" name="wlWscState" id="wlWscState" value="">
+                <div class="stepWrapper">
+                <p><strong>1. Set the 5G wireless radio state.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Wireless Radio:</td>
+                        <td><input name="wlEnbl" id="enabled" type="radio" value="1" checked="checked" />Enable </td>
+                        <td><input name="wlEnbl" id="disabled" type="radio" value="0" />Disable </td>
+                    </tr>
+                </table>
+                </div>
+<div id="enabled">
+                <div class="stepWrapper">
+                <p><strong>2. Change the network name for the hidden video SSID(NOT RECOMENDED).</strong></p>
+                <table>
+                    <tr>
+                        <td width="150">Network Name:</td>
+                        <td>
+                                <input name="wlSsid" type="text" id="single_ssid_name" value="" size="32" maxlength='32'/>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                    <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+</div>
+<div id="disabled">
+                <div class="stepWrapper">
+		        <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+                <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+</div>    
+            <div class="stepWrapperdark">
+                <table>
+                    <tr>
+                        <th colspan="7" class="tableTitle">5G Prism SSID Wireless Settings Table</th>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Wireless Parameter</th>
+                        <th>Setting</th>
+                    </tr>
+                    <tr>
+                       <td><img src="../_images/h_wirelesssetup_basic.png" width="45" height="45" /></td>
+                        <td> 5G Wireless Radio: </td>
+						<td>
+                               <Label id=lb_wlRadio></Label>
+                         </td>
+                    </tr>
+                    <tr>
+                        <td><img src="../_images/h_wirelesssetup_channel.png" width="45" height="45" /></td>
+                        <td> Network Name:</td>
+                        <td>
+                                <Label id=lb_wlSsid></Label>
+                            </td>
+                    </tr>
+                    <tr>
+                     <td><img src="../_images/h_wirelesssetup_channel.png" width="45" height="45" /></td>
+                     <td width="50%">5G Channel: </td>
+                     <td width="50%" align="center"><span id="channel"></span></td>
+                    </tr>
+                    <tr>
+                     <td><img src="../_images/h_wirelesssetup_channel.png" width="45" height="45" /></td>
+                     <td width="50%">Mode Selected: </td>
+                     <td width="50%" align="center"><span id="mode"></span></td>
+                    </tr>
+                    <tr>
+                        <td width='57'><img src="../_images/h_wirelesssetup_wep.png" width="45" height="45" /></td>
+                        <td> Security Type:</td>
+                        <td  width='245'>
+                                <Label id=lb_wlAuthMode></Label>
+                            </td>
+                    </tr>
+                    <tr>
+                        <td width='57'><img src="../_images/h_wirelesssetup_wep.png" width="45" height="45" /></td>
+                        <td> Security Key/Passphrase:</td>
+                        <td  width='245'>
+                                <Label id=lb_wlKey></Label>
+                            </td>
+                    </tr>
+                    <tr>
+                     <td><img src="../_images/h_wirelesssetup_wep.png" width="45" height="45" /></td>
+                     <td width="50%">WPS State: </td>
+                     <td width="50%" align="center"><span id="wpsState"></span></td>
+                    </tr>		                   
+                </table>
+                </div>
+            </form>
+        </div>        
+    </div>
+    <div class="clear_left"></div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+<script language="JavaScript">    
+<!--
+frmLoad();
+//showFullPath('Network > Wireless LAN > General');
+//-->
+
+</script>
+</html>
+

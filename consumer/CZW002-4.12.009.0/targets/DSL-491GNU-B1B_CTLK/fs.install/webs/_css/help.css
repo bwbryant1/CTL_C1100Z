@@ -1,0 +1,35 @@
+/*
+-----------------------------------------------
+CenturyLink Modem Configurator Help Stylesheet
+author:		KC Dunstan 
+date: 08.04.2007  
+----------------------------------------------- */
+*{margin:0; padding:0; font:12px/14px Verdana, Helvetica, sans-serif; color:#FFF;}
+body{background:url(../_images/help_body_bg.png);}
+#help_wrapper{width:513px; margin:25px auto 0 auto;}
+#help_wrapper h1{margin:0 0 15px 12px; font:14px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.help_content_header{margin:0 auto; width:513px; height:8px; background:url(../_images/help_header_bg.png) no-repeat; overflow:hidden;}
+.help_contentarea{margin:0 auto; width:513px; background:url(../_images/help_content_bg.png) repeat-y;}
+.help_content_footer{margin:0 auto 20px auto; width:513px; height:8px; background:url(../_images/help_footer_bg.png) no-repeat; overflow:hidden;}
+.help_contentarea h2{margin:0 0 0 12px; font:14px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.help_contentarea h3{margin:0 0 0 12px; font:11px/16px Verdana, Arial, Helvetica, sans-serif; font-weight:bold;}
+.help_contentarea p{margin:0 12px; padding:0 0 15px 0; font:11px/16px Verdana, Arial, Helvetica, sans-serif;}
+.help_contentarea a{color:#FFF; font-weight:bold; font:11px/16px Verdana, Arial, Helvetica, sans-serif;}
+.help_contentarea a:hover{text-decoration:none;}
+.help_contentarea .btn{margin:0 12px 0 0; float:right; clear:right;}
+ul{margin:0 24px 24px 24px; width:auto; list-style:none; float:left;}
+#help_wrapper ul li a, a{text-decoration:none; font-weight:bold;}
+#help_wrapper ul li a:hover, a:hover{text-decoration:underline;}
+
+.btn{margin:15px 15px 0 0; }
+#CenturyLinkcom_btn{width:91px; height:20px; background:url(../_images/btn_CenturyLinkcom.png); display:block; float:right;}
+#help_btn{width:74px; height:20px; background:url(../_images/btn_help.png); display:block; float:right;}
+#close_btn{width:74px; height:20px; background:url(../_images/btn_close.png); display:block; float:right;}
+#open_btn{width:74px; height:20px; background:url(../_images/btn_open.png); display:block; float:right;}
+
+#CenturyLinkcom_btn:hover,#help_btn:hover,#close_btn:hover,#open_btn:hover{background-position:0 -20px;}
+#CenturyLinkcom_btn:active,#help_btn:active,#close_btn:active,#open_btn:active{background-position:0 -40px;}
+
+#footer{margin:50px 0 50px 0; text-align:center; font:11px/11px Arial, Helvetica, sans-serif; color:#FFF;}
+
+.clear_both{height:0; clear:both;}

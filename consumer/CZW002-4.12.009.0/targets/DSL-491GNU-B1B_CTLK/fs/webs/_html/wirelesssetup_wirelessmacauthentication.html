@@ -1,0 +1,459 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT></head>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+var update = '<%ejFncCmd(updatestatic)%>';
+var wlFltMacMode='<%ejGetWl(wlFltMacMode)%>';
+var ssidIdx = parseInt('<%ejGetWl(wlSsidIdx)%>');
+var enblWireless = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var g_sessionKey = '<%ejGetOther(sessionKey)%>';
+
+function frmLoad(){
+	with (document.forms[0]) {
+		ssid.options[ssidIdx].selected = true;
+		switch (wlFltMacMode){
+		case 'disabled':		
+			authentication_on[1].checked=true;
+			authentication_list[0].disabled=1;	
+			authentication_list[1].disabled=1;
+			mac_address.disabled =1;
+			manual_mac_address.disabled=1;			
+			break;
+		case 'allow':
+			authentication_on[0].checked=true;		
+			authentication_list[0].checked=true;
+			authentication_list[0].disabled=0;	
+			authentication_list[1].disabled=0;
+			mac_address.disabled =0;
+			manual_mac_address.disabled=0;				
+			break;
+		case 'deny':
+			authentication_on[0].checked=true;		
+			authentication_list[1].checked=true;			
+			authentication_list[0].disabled=0;	
+			authentication_list[1].disabled=0;
+			mac_address.disabled =0;
+			manual_mac_address.disabled=0;				
+			break;
+		default:
+			AlertOpen("Please check MAC Authentication status is correct or not.");
+			break;
+		}
+		
+		//station List;
+	}
+}
+
+function removeMAC(rml){
+/*
+   if ( enblWireless  == 0 ) {
+      AlertOpen('Cannot remove MAC filter address since wireless is currently disabled.');
+      return;
+   }*/
+
+   var lst = '';
+/* 
+   var removable=ConfirmOpen("Remove MAC address '"+rml+"' ?",removeMACsubmit);
+   
+   if(removable!=true) return;*/
+   lst = rml;
+
+   var loc = 'wlmacfilteraction.cmd?action=remove&rmLst=' + lst;
+   loc += '&sessionKey='+g_sessionKey;				
+//   var code = 'location="' + loc + '"';
+//   eval(code); 
+	submitFrm(loc);	
+}
+
+function checkMacAuthMode(){
+    var loc='';
+	with (document.forms[0]) {
+		if(authentication_on[1].checked) loc+='&wlFltMacMode=disabled';
+		else {
+			if(authentication_list[0].checked)loc+='&wlFltMacMode=allow';
+			else loc+='&wlFltMacMode=deny';
+		}
+	}
+	return loc;
+}
+
+function displayMacAuthMode(){
+	with (document.forms[0]) {
+		if(authentication_on[1].checked==true){ //disabled
+			authentication_list[0].disabled=1;	
+			authentication_list[1].disabled=1;
+			mac_address.disabled =1;
+			manual_mac_address.disabled=1;					
+		}else {//enabled
+			authentication_list[0].disabled=0;	
+			authentication_list[1].disabled=0;
+			mac_address.disabled =0;
+			manual_mac_address.disabled=0;						
+		}
+	}
+}
+
+function macAuthModeChange(){
+   var loc = 'wlmacfilteraction.cmd?action=apply';
+	with (document.forms[0]) {
+			loc+=checkMacAuthMode();
+	}	
+
+//   var code = 'location="' + loc + '"';	
+//	eval(code);
+	submitFrm(loc);	
+}
+
+function showErrorMsg(flag){
+	if(flag==1){
+		AlertOpen("The MAC address entered is not valid.  Please enter a valid MAC address.");		
+	}
+}
+
+function checkMacAddress(){
+	with (document.forms[0]) {
+	    var addrParts = manual_mac_address.value.split(':');
+	    var addrParts2 = manual_mac_address.value.split('-');  	
+
+		if(manual_mac_address.value.length>=12 && authentication_on[0].checked==true 
+		&& addrParts.length==1 && addrParts2.length==1){
+				if(verifyMacAddress(manual_mac_address.value)==""){
+				manual_mac_address.value = manual_mac_address.value.slice(0,12);
+				showErrorMsg(1);
+			}
+		}else if(addrParts.length>1 && addrParts2.length>1){
+				manual_mac_address.value = manual_mac_address.value.slice(0,manual_mac_address.length-1);
+				showErrorMsg(1);
+		}else if(manual_mac_address.value.length>=17 && (addrParts.length==6 || addrParts2.length==6)){
+				if(verifyMacAddress(manual_mac_address.value)==""){
+				manual_mac_address.value = manual_mac_address.value.slice(0,17);
+				showErrorMsg(1);		
+			    } 		
+		}else if(manual_mac_address.value.length>=17) {
+				manual_mac_address.value = manual_mac_address.value.slice(0,17);
+				showErrorMsg(1);
+		}
+	}
+}
+
+function verifyMacAddress(mac){
+    var addrParts = mac.split(':');
+    var addrParts2 = mac.split('-');    
+    var targetMac ="";
+
+    if (addrParts2.length==1 && (addrParts.length==1)){ //Just MAC charters, no dashes, no colons
+       if (mac.length>12) { return ""; }
+       else{
+			var str1 = mac.slice(0,2);    
+			var str2 = mac.slice(2).slice(0,2);    	
+			var str3 = mac.slice(4).slice(0,2);    		
+			var str4 = mac.slice(6).slice(0,2);    		
+			var str5 = mac.slice(8).slice(0,2);    		
+			var str6 = mac.slice(10).slice(0,2);    			
+			targetMac = str1.concat(':').concat(str2).concat(':').concat(str3).concat(':').concat(str4).concat(':').concat(str5).concat(':').concat(str6);       
+       }
+    }else if(addrParts.length!= 6 && addrParts2.length!= 6) return "";
+    else if(mac.length==17&&addrParts.length ==6 ){ //colons
+    	targetMac = mac;
+    }else if(mac.length==17&&addrParts2.length ==6 ){ //dashes
+		for (var i=0;i<6;i++){
+			mac = mac.replace("-", ":");
+	    }    	
+	    targetMac = mac;
+    }else {
+    	return "";    
+    }
+
+	if (isValidMacAddress(targetMac))return targetMac;
+	else return "";
+
+	
+}
+
+function btnApply(btnAction){
+	var loc='wlmacfilteraction.cmd?';
+
+	with (document.forms[0]) {	
+		switch (btnAction){
+		case 'refreshApply':
+			//loc='wlmacflt.cmd?';
+			loc += 'wlSsidIdx='+getSelect(ssid);		
+			loc+="&action=refreshApply";
+			loc += '&sessionKey='+g_sessionKey;				
+			//loc+="&wlSsidIdx="+getSelect(ssid);
+			break;
+		case 'apply':
+/*
+			if (enblWireless==0){
+				AlertOpen("Cannot apply the change since wireless is currently disabled.");
+				return;
+			}*/
+			loc += 'wlSsidIdx='+getSelect(ssid);	
+			loc+="&action=apply";	
+			loc+=checkMacAuthMode();
+
+			
+			if(mac_address.disabled!=1){
+				if(mac_address.value=='manually'){
+				    if(manual_mac_address.value==''){// no data is ok to change only the status of the authentication list 				        
+					}else if ((targetMac=verifyMacAddress(manual_mac_address.value))!=""){ //verify the input data
+						loc+="&wlFltMacAddr="+targetMac;									
+					}else { 
+						showErrorMsg(1);
+						return;			
+					}
+				}else {
+					loc+="&wlFltMacAddr="+getSelect(mac_address);				
+				}
+			}
+			
+			loc += '&sessionKey='+g_sessionKey;				
+			
+			break;
+		}	
+	}
+/*	
+	var code = 'location="' + loc + '"'; 
+	alert(code);	
+	eval(code);	*/
+	submitFrm(loc);			
+}
+
+//-->
+</script>
+<body id="wirelesssetup_wirelessmacauthentication">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">			
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>   
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>	
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('mac', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="wirelesssetup_wirelessmacauthentication">Wireless MAC Authentication <span>Limit access to the Qwest Broadband Modem by using the MAC address of specific wireless devices.</span></h1>
+				
+				<form method="post" onkeypress="return handleEnter(this,event) ;">
+                <div class="stepWrapper">
+				<p><strong>1. Select the SSID (Network Name).</strong></p>
+				<table>
+                  <tr>
+                    <td width="150">SSID:                    </td>
+                    <td>
+                        <select name="ssid" id="select" onchange="btnApply('refreshApply')"><%ejGetWl(wlSsidList)%>
+                        <script language="javascript">/*
+                          <option value="SSID 1" selected="selected"><%ejGetWl(wlSsid)%></option>
+                          <option value="SSID 2"><%ejGetWl(wlSsid_wl0v1)%></option>
+                          <option value="SSID 3"><%ejGetWl(wlSsid_wl0v2)%></option>
+                          <option><%ejGetWl(wlSsid_wl0v3)%></option>
+                        </select>*/
+                        </script>
+                    </td>
+                  </tr>
+                </table>
+				</div>
+                <div class="stepWrapper">
+				<p><strong>2. Set MAC authentication state. </strong></p>
+				<table>
+                  <tr>
+                    <td width="150">MAC Authentication:                    </td>
+                    <td>
+                        <input name="authentication_on" id="enabled" type="radio" value="on" checked="checked" onclick="displayMacAuthMode()//macAuthModeChange()"/>
+        Enable
+                    </td>
+                    <td>
+                        <input name="authentication_on" id="disabled" type="radio" value="off" onclick="displayMacAuthMode()//macAuthModeChange()"/>
+        Disable
+                    </td>
+                  </tr>
+                </table>
+				</div>
+
+<div id="enabled">
+                <div class="stepWrapper">
+				<p><strong>3. Set the list type below.
+				    </strong></p>
+				<table>
+                  <tr>
+                    <td width="150">
+      <input name="authentication_list" id="radio5" type="radio" value="on" checked="checked" onclick="//macAuthModeChange()"/>
+  Allow Device List</td>
+                    <td>Allows only the devices added in step 4</td>
+                  </tr>
+                  <tr>
+                    <td width="150"><input name="authentication_list" id="radio6" type="radio" value="off" onclick="//macAuthModeChange()"/>
+Deny Device List
+                    </td>
+                    <td>Denies only the devices added in step 4                    </td>
+                  </tr>
+                </table>
+				</div>
+                <div class="stepWrapper">
+				<p><strong>4. Enter the MAC address of the device.
+			    </strong></p>
+				<table>
+                  <tr>
+                    <td width="172">Select Device Name:</td>
+                    <td width="301">
+                      <select name="mac_address" id="mac_address">
+                        <option selected="selected" value="manually">Manually Enter MAC</option>
+						<%ejGetWl(wlStationList)%>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="172">Manually Add MAC Address:                    </td>
+                    <td>
+                      <input name="manual_mac_address" id="manual_mac_address" type="text" size="26" maxlength='17' onkeyup="checkMacAddress()"/>
+                    </td>
+                  </tr>
+                </table>
+				</div>
+                <div class="stepWrapper">
+				<p><strong>5. Click &quot;Apply&quot; to save your changes.</strong></p>
+					<a href="#" class="btn apply_btn" onclick="btnApply('apply')">Apply</a>
+					</div>
+                    <p>&nbsp;</p>
+                    <div class="stepWrapperdark">
+					<table>
+                	<tr>
+							<th colspan="6" class="tableTitle">MAC Authentication Device List</th>
+						</tr>
+                  <tr>
+                    <th align="center">&nbsp;</th>
+                    <th>Device Name</th>
+                    <th>IP Address</th>
+                    <th>MAC Address</th>
+                    <th>Access</th>
+                    <th>Edit</th>
+                  </tr>
+<script language="javascript">
+<!-- hide
+{
+   var i = 0;
+   //'name~192.168.0.2~00:11:22:33:44:55|name2~192.168.0.2~00:11:22:33:44:55'
+   var list = '<%ejGetWl(wlMacFilterList)%>';
+   var info = list.split('|');
+   var str = '';
+     
+
+   if (info != '') {
+      for ( i = 0; i < info.length; i++ ) {
+	      if (info[i] != '') {
+			 var perLine = info[i].split('~');
+			 var hostName =perLine[0];
+			 var hostIP =perLine[1];
+			 var hostMAC =perLine[2];
+		     
+	            str += "<tr>";
+	            str += "<td><img src=\"../_images/icon_computer.png\" width=\"39\" height=\"39\" /></td>";												
+				temp_name = processLongName(hostName, 7);								
+				str += "<td>"+ temp_name +"</td>";				
+	            str += "<td>"+ hostIP +"</td>";            
+				str += "<td>" + hostMAC  + "</td>";            
+	            if(wlFltMacMode=='allow'){
+		            str += "<td class=\"access_allowed\">Access Allowed</td>";
+	            }else if(wlFltMacMode=='deny'){
+		            str += "<td class=\"access_denied\">Access Denied</td>";            
+	            }else {
+		            str += "<td></td>";                        
+	            }
+	            str += "<td><a href=\"#\" class=\"btn remove_btn\" onclick=\"removeMAC(\'"+hostMAC+"\')\">Remove</a></td>";
+	            str += "</tr>";	     
+		  }
+      }
+   }else{
+	            str += "<tr>";
+	            str += "<td></td>";
+	            str += "<td>No Rules Defined</td>";
+	            str += "<td></td>";            
+	            str += "<td></td>";            
+	            str += "<td></td>";                        
+	            str += "<td></td>";
+	            str += "</tr>";	        
+   }
+   if (str!=''){
+	   	document.write(str);
+   }
+}
+
+
+/*                  
+                  <tr>
+                    <td><img src="../_images/icon_computer.png" width="39" height="39" /></td>
+                    <td>myComputer</td>
+                    <td>1.2.3.4</td>
+                    <td>3e-5d-00-32-e0-41</td>
+                    <td class="access_allowed">Access&nbsp;Allowed</td>
+                    <td><a href="#" class="btn remove_btn"></a></td>
+                  </tr>
+*/
+// done hiding -->
+</script>                                  
+                </table>
+                </div>
+</div>
+<div id="disabled">
+    <div class="stepWrapper">
+        <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+        <a href="#" class="btn apply_btn" onclick="btnApply('apply')">Apply</a>
+    </div>
+</div>
+				</form>				
+		  </div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<script language="javascript">
+<!-- hide
+frmLoad();
+// done hiding -->
+</script>
+</body>
+</html>

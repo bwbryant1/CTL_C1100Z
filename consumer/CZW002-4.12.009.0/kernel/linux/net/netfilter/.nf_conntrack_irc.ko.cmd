@@ -1,0 +1,1 @@
+cmd_net/netfilter/nf_conntrack_irc.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/netfilter/nf_conntrack_irc.ko net/netfilter/nf_conntrack_irc.o net/netfilter/nf_conntrack_irc.mod.o

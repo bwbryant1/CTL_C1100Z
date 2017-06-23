@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Support Utilities - DNS Cache</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+<script language="javascript" src="../_js/util.js"></script>
+</head>
+<script language="javascript">
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+function btnApplySave() {
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+}
+
+function frmLoad() {
+   with ( document.forms[0] ) {
+      var dproxyInfo = '';
+      dproxyInfo = '<%ejGetOther(dnsProxy)%>';
+
+      if (dproxyInfo == '1')
+         cache[0].checked = true;
+      else 
+         cache[1].checked = true;
+   }
+}
+
+</script>
+
+<body onLoad='frmLoad()'>
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+			<script language="javascript">
+			WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+			</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+		<script language="javascript">
+       		 WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+		</script>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+                <script language="javascript">
+				WriteSupportConsoleMenuHeader('dnscache', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+		</script>        
+        </ul>
+        <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+             	<script language="javascript">
+				   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+					  </script>
+            </div>
+        </div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="supportconsole_dnscache">DNS Cache<span>DNS cache in some cases provides quicker DNS responses from your DNS
+                        server. Although DNS cache can resolve an Internet request
+                        quicker, it also has several risks such as DNS poisoning.
+                        Do not enable DNS cache unless instructed to do so by
+                        a network administrator.</span></h1>
+            <div id="content_right_contentarea">
+                <form id="form1" name="form1" method="post" action="dnsProxy.cmd">
+                <input size="15" type="hidden" name="sessionKey" id="sessionKey" value="" />
+                <input type=hidden name="Submit" id="Submit" value="apply">
+                    <div class="stepWrapper">
+                    <p><strong>1. Set the DNS cache state below.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">DNS Cache:</td>
+                            <td><input name="cache" id="cache" type="radio" value="1"/> Enable</td>
+                            <td><input name="cache" id="cache" type="radio" value="0"/> Disable </td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick='btnApplySave()'>Apply</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+    <div class="clear_left">
+    </div>
+
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

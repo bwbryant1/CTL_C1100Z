@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script language="Javascript" src="../_js/jquery.min.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/jquery.popupWindow.js" type="text/javascript"></script>
+<script language="Javascript" src="../_js/functionsC1000Z.js" type="text/javascript"></script>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+var dslversion = "<%ejGetOther(getDslVersion)%>";
+var items = dslversion.split('.');
+var datapump = items[0];
+var dsldriver = items[1];
+
+var activeusers = '<%ejGetOtherBig(activeusers)%>';
+var activeItems = activeusers.split("|");
+var inactiveusers = '<%ejGetOtherBig(inactiveusers)%>';
+var inactiveItems = inactiveusers.split("|");
+var staticiplease = '<%ejGetOther(staticiplease)%>';
+var leases = staticiplease.split('|');
+var submitFlag = 0;
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var ntpStatusTable = "<%ejGetOther(ntpTable)%>";
+var dslPhyAttr = '<%ejGetOther(getDslPhyAttr)%>';
+
+function removeClick(macAddr) {
+   with ( document.forms[1] ) {
+      if(submitFlag == 0)
+      {
+         submitFlag = 1;
+         action.value = "remove";
+         rmLst.value = macAddr;
+         SC_modemoverview.value = "1";
+
+         sessionKey.value = gblsessionKey;
+         submit();
+      }
+   }
+}
+
+function frmLoad()
+{
+	with ( document.forms[0] ) {
+		var phyAttrs = dslPhyAttr.split('|');
+		if (phyAttrs != '') {
+			var phyEnbl = '<font color="#090">ENABLED</font>';
+			var phyDis = '<font color="#F00">DISABLED</font>';
+
+			document.getElementById("dslVector").innerHTML = (phyAttrs[0] == '1')? phyEnbl:phyDis;
+			document.getElementById("dslSra").innerHTML = (phyAttrs[1] == '1')? phyEnbl:phyDis;
+			if(phyAttrs[2] == '3') {
+				document.getElementById("dslGInp").innerHTML = phyEnbl;
+			} else if(phyAttrs[2] == '2') {
+				document.getElementById("dslGInp").innerHTML = '<font color="#090">US:DISABLED, DS:ENABLE</font>';
+			} else if(phyAttrs[2] == '1') {
+				document.getElementById("dslGInp").innerHTML = '<font color="#090">US:ENABLE, DS:DISABLED</font>';
+			} else {
+				document.getElementById("dslGInp").innerHTML = phyDis;
+			}
+			document.getElementById("dslUS0").innerHTML = (phyAttrs[3] == '1')? phyEnbl:phyDis;
+			document.getElementById("sesDrop").innerHTML = (phyAttrs[4] == '1')? phyEnbl:phyDis;
+			document.getElementById("dslV43").innerHTML = (phyAttrs[5] == '1')? phyEnbl:phyDis;
+		}
+	}
+}
+
+</script>
+</head>
+<body onLoad="frmLoad();">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+<div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+        <div class="clear_left"></div>
+    <div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('modemoverview', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+       </ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+    </div>
+		<div id="content_right">
+		  
+			<div id="content_right_contentarea">
+			  <h1 class="supportconsole_tr069">Modem Overview <span>The modem overview provides an overview of the hardware and software specifications of the router.</span></h1>
+			  <div class="stepWrapper">
+			    <p align="center"><strong>Hardware Overview</strong></p>
+			    <table>
+			      <tr>
+			        <td>Manufactured Date:</td>
+			        <td>
+<script language="javascript">
+					var serialNumber = "<%ejGet(serialNo)%>";
+ 					if (serialNumber.match(/S(\d{3})Y(\d{2})([a-zA-Z0-9]{6})/))
+ 					{
+ 						var yearStr = serialNumber.substring(1,3);
+						var weekStr = serialNumber.substring(5,7);
+						if (parseInt(weekStr) > 52 || parseInt(weekStr) < 0)
+						{
+							weekStr = '00';
+						}
+						document.write("20"+yearStr+", Week:"+weekStr);						
+ 					}
+					else
+					{
+						document.write("2012, Week:00");
+					}
+ </script>
+
+			        </td> <!--October 15th, 2010-->
+		          </tr>
+			      <tr>
+			        <td>Processor:</td>
+			        <td>BCM63168 at 400MHz</td>
+		          </tr>
+			      <tr>
+			        <td width="150">AFE 1:</td>
+			        <td>BCM6302</td>
+		          </tr>
+			      <tr>
+			        <td width="150">AFE 2:</td>
+			        <td>N/A</td>
+		          </tr>
+			      <tr>
+			        <td>4 Port Chipset:</td>
+			        <td>BCM 53124S</td>
+		          </tr>
+			      <tr>
+			        <td width="150">WiFi Radio:</td>
+			        <td>BCM63168 - 802.11b/g/n</td>
+		          </tr>
+			      <tr>
+			        <td>Crystal Oscillator:</td>
+			        <td>TXC (7M20070002)</td>
+		          </tr>
+			      <tr>
+			        <td>SDRAM:</td>
+			        <td>Samsung at 128M</td>
+		          </tr>
+			      <tr>
+			        <td width="150">Flash:</td>
+			        <td>Toshiba at 128M</td>
+		          </tr>
+		        </table>
+			  </div>
+			  <form>
+                <div class="stepWrapper">
+                <p align="center"><strong>Firmware Overview</strong></p>
+                <table>
+                    <tr>
+                      <td width="150">Broadcom SDK:</td>
+                      <td>4.12L.08</td>
+                  </tr>
+                  <tr>
+                      <td>Wireless Driver:</td>
+                      <td><%ejGetWl(wlVersion)%></td>
+                  </tr>
+                  <tr>
+                    <td width="150">Broadcom Data Pump:</td>
+                    <td>
+				    <SCRIPT LANGUAGE="JavaScript">
+					<!--
+					document.write(datapump);	     
+					-->
+				    </SCRIPT>
+					</td><!--4.6.3.5-->
+                  </tr>
+                  <tr>
+                    <td width="150">Broadcom xDSL Driver:</td>
+                    <td>
+					<SCRIPT LANGUAGE="JavaScript">
+					<!--
+					document.write(dsldriver);	     
+					-->
+				    </SCRIPT>
+					</td><!--4.4.7.12.0.1-->
+                  </tr>
+                  <tr>
+                    <td width="150">Linux Kernal:</td>
+                    <td>2.6.30</td>
+                  </tr>
+<!--DSL_ChipSetHWVersion=1.2 DSL_ChipSetType=Ifx-AR9 DSL_DriverVersionMeiBsp=5.1.3-->
+                </table>
+                </div>
+
+                <div class="stepWrapper">
+                <p align="center"><strong>NTP Server Status</strong></p>
+                <table>
+<script language="javascript">
+<!-- hide
+{
+   setInterval(function(){
+      $('blink').each(function(){
+         $(this).css('visibility' , $(this).css('visibility') === 'hidden' ? '' : 'hidden')
+      });
+   }, 500);
+
+   var ntpStatusTables = ntpStatusTable.split(';');
+   var reTryCnt = ntpStatusTables[0];
+
+   for(var i = 1 ; i < ntpStatusTables.length ; i++ )
+   {
+      var tblEntry = ntpStatusTables[i].split('|');
+
+      if(tblEntry.length != 3)
+      {
+         continue;
+      }
+
+      document.writeln("<tr>");
+      if(tblEntry[0] == '0') {
+         document.writeln("<td width=\"150\">" + tblEntry[1] + "</td>");
+      } else {
+         document.writeln("<td width=\"150\">DHCP Option 42</td>");
+      }
+	  if(tblEntry[2] == 'NA') {
+	     document.writeln("<td>N/A</td>");
+	  } else if(tblEntry[2] == 'FAILED') {
+	     document.writeln("<td><font color=\"#ff0000\"><strong>FAILED</strong></font></td>");
+	  } else if(tblEntry[2] == 'NEGOCIATING') {
+	     document.writeln("<td><blink><font color=\"#FF6319\"><strong>NEGOCIATING NTP</strong></font></blink></td>");
+	  } else {
+	     document.writeln("<td><font color=\"#009900\"><strong>" + tblEntry[2] + "</strong></font></td>");
+	  }
+      document.writeln("</tr>");
+   }
+
+   // retry count
+   document.writeln("<tr>");
+   document.writeln("  <td width=\"150\">Repeat to #1</td>");
+   if(reTryCnt == '0') {
+      document.writeln("  <td>N/A</td>");
+   } else {
+      document.writeln("  <td>" + reTryCnt + "</td>");
+   }
+   document.writeln("</tr>");
+}
+// done hiding -->
+</script>
+                </table>
+                </div>
+
+                <div class="stepWrapper">
+                <p align="center"><strong>Physical Layer Attributes</strong></p>
+                <table>
+                  <tr>
+                    <td width="80">BIT 14</td>
+                    <td width="281">DSL_FEATURE_CNTL_0 0x00202208</td>
+                    <td width="129"><font color="#F00">DISABLED</font></td>
+                  </tr>
+                  <tr>
+                    <td width="80">SES Retrain</td>
+                    <td width="281">Broadcom RetrainOnSes Phy Attribute</td>
+                    <td width="129"><span id="sesDrop"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="80">Vectoring</td>
+                    <td width="281">G.993.5 Self FEXT Cancellation</td>
+                    <td width="129"><span id="dslVector"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="80">SRA</td>
+                    <td width="281">Seamless Rate Adaption</td>
+                    <td width="129"><span id="dslSra"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="80">G.INP</td>
+                    <td width="281">G.998.4 for Improved Impulse Noise Protection</td>
+                    <td width="129"><span id="dslGInp"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="80">US0</td>
+                    <td width="281">Upstream 0 Tones for 12a and 17a profiles</td>
+                    <td width="129"><span id="dslUS0"></span></td>
+                  </tr>
+                  <tr>
+                    <td width="80">V43</td>
+                    <td width="281">Upstream Carrier BITS for VDSL1 over POTS</br>(Feature Enabled to disable)</td>
+                    <td width="129"><span id="dslV43"></span></td>
+                  </tr>
+                </table>
+                </div>
+			  </form>
+
+				<form action="dhcpdstaticlease.cmd" method="post">
+					<input type="hidden" name="action" id="action">
+					<input type="hidden" name="rmLst" id="rmLst">
+					<input name="sessionKey" type="hidden" id="sessionKey" value=""/>
+					<input type="hidden" name="SC_modemoverview" id="SC_modemoverview" value="0">
+
+					<div class="stepWrapperdark">
+						<table>
+							<tr>
+								<th colspan=5 align="center">
+									<p align="center"><strong>Special Configurations</strong></p>
+								</th>
+							</tr>
+							<tr>
+								<th width="39" align="center">&nbsp;</th>
+								<th width="60">Device<br /> Name</th>
+								<th width="91">IP &nbsp;Address</th>
+								<th width="91">Configuration &nbsp;Type</th>
+								<th width="92">EDIT</th>
+							</tr>
+<script language="javascript">
+<!-- hide
+{
+   var i = 0, match;
+   var parts;
+   var Num_count = 0;
+/*   var staticiplease = '00:19:cb:11:22:33/192.168.1.100|00:11:22:ab:12:13/192.168.1.200'; */
+
+      for (var i = 0 ; i < leases.length ; i++ ) {
+         var names = leases[i].split('/');
+         match = 0;
+         for (var j = 0 ; j < activeItems.length ; j++) {
+            if (activeItems[j] != '') {
+               parts = activeItems[j].split('/');
+               if (parts[3].toUpperCase().indexOf(names[0]) != -1) {
+                  match = 1;
+                  break;
+               }
+            }
+         }
+
+         if (match == 0) {
+            for (var j = 0 ; j < inactiveItems.length ; j++) {
+               if (inactiveItems[j] != '') {
+                  parts = inactiveItems[j].split('/');
+                  if (parts[3].toUpperCase().indexOf(names[0]) != -1) {
+                     match = 1;
+                     break;
+                  }
+               }
+            }
+         }
+
+         if (match == 1 && parts[0] == "settop") {
+            // var parts = allLanItems[j].split('/');
+            document.writeln("<tr align=\"center\">");
+            document.writeln("<td><img src=\"../_images/icon_" + parts[0] + ".png\" width=\"39\" height=\"39\" /></td>");
+            var hostname = 'unknown';
+            hostname = processLongName(parts[1], 13);
+            document.writeln("<td>" + hostname + "</td>");
+            document.writeln("<td>" + names[1] + "</td>");
+            document.writeln("<td>DHCP Reservations</td>");
+            document.writeln("<td><a href=\"#\" class=\"btn remove_btn\" onclick=\"removeClick('" + names[0] + "')\">Remove</a></td>");
+            document.writeln("</tr>");
+            Num_count++;
+         }
+      }
+
+      if( Num_count == 0 ){
+         document.writeln("<tr align=\"center\">");
+         document.writeln("<td colspan=\"5\" style=\"padding:10px;\">No Rules Defined</td>");
+         document.writeln("</tr>");
+      }
+}
+// done hiding -->
+</script>
+						</table>
+					</div>
+				</form>
+
+					<div class="clear_left"></div>
+		  </div>
+			
+  </div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

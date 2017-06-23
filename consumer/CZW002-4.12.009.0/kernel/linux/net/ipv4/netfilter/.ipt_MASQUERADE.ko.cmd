@@ -1,0 +1,1 @@
+cmd_net/ipv4/netfilter/ipt_MASQUERADE.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/ipv4/netfilter/ipt_MASQUERADE.ko net/ipv4/netfilter/ipt_MASQUERADE.o net/ipv4/netfilter/ipt_MASQUERADE.mod.o

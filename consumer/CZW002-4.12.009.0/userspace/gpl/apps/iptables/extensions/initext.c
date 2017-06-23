@@ -1,0 +1,47 @@
+
+extern void ipt_icmp_init(void);
+extern void ipt_LOG_init(void);
+extern void ipt_DNAT_init(void);
+extern void ipt_MASQUERADE_init(void);
+extern void ipt_REDIRECT_init(void);
+extern void ipt_SNAT_init(void);
+extern void ipt_REJECT_init(void);
+extern void xt_TCPMSS_init(void);
+extern void xt_SKIPLOG_init(void);
+extern void xt_limit_init(void);
+extern void xt_standard_init(void);
+extern void xt_state_init(void);
+extern void xt_tcp_init(void);
+extern void xt_udp_init(void);
+extern void xt_NFQUEUE_init(void);
+extern void xt_dscp_init(void);
+extern void xt_DSCP_init(void);
+extern void xt_mac_init(void);
+extern void xt_mark_init(void);
+extern void xt_MARK_init(void);
+extern void xt_policer_init(void);
+extern void xt_length_init(void);
+void init_extensions(void) {
+	ipt_icmp_init();
+	ipt_LOG_init();
+	ipt_DNAT_init();
+	ipt_MASQUERADE_init();
+	ipt_REDIRECT_init();
+	ipt_SNAT_init();
+	ipt_REJECT_init();
+	xt_TCPMSS_init();
+	xt_SKIPLOG_init();
+	xt_limit_init();
+	xt_standard_init();
+	xt_state_init();
+	xt_tcp_init();
+	xt_udp_init();
+	xt_NFQUEUE_init();
+	xt_dscp_init();
+	xt_DSCP_init();
+	xt_mac_init();
+	xt_mark_init();
+	xt_MARK_init();
+	xt_policer_init();
+	xt_length_init();
+}

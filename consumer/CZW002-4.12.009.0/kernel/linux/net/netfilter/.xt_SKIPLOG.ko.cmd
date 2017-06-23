@@ -1,0 +1,1 @@
+cmd_net/netfilter/xt_SKIPLOG.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/netfilter/xt_SKIPLOG.ko net/netfilter/xt_SKIPLOG.o net/netfilter/xt_SKIPLOG.mod.o

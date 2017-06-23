@@ -1,0 +1,820 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+
+//var update = '<%ejFncCmd(updatestatic)%>';
+var activeusers = '<%ejGetOtherBig(activeusers)%>';
+var activeItems = activeusers.split("|");
+var inactiveusers = '<%ejGetOtherBig(inactiveusers)%>';
+var inactiveItems = inactiveusers.split("|");
+var staticiplease = '<%ejGetOther(staticiplease)%>';
+var leases = staticiplease.split('|');
+var dhcpStart = '<%ejGet(beginningDHCPReservationIP)%>';
+var dhcpEnd = '<%ejGet(endDHCPReservationIP)%>';
+var mode = '<%ejGet(usePublicIP)%>';
+var staticmacip = '<%ejGetOtherBig(getstaticmac)%>';
+var staticip;
+var ipAddress = '<%ejGet(ethIpAddress)%>';
+var submitFlag = 0;
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+
+var dhcpEnbl = '<%ejGet(enblDhcpReservation)%>';
+var oldSubnetMask = '<%ejGet(ethSubnetMask)%>';
+var oldEthIpAddress = '<%ejGet(ethIpAddress)%>';
+var lan2IpAddress = '<%ejGet(lan2IpAddress)%>';
+var lan2SubnetMask = '<%ejGet(lan2SubnetMask)%>';
+var proto = '<%ejGetOther(sysInfo, noBrPrtcl)%>';
+var dhcpReservation = '<%ejGet(autoDHCPReservation)%>';
+var wlDomain = new Array( "<%ejGetWl(wlDomain1)%>", "<%ejGetWl(wlDomain2)%>", "<%ejGetWl(wlDomain3)%>" );
+var PrivateStart = '<%ejGet(dhcpEthStart)%>';
+var PrivateEnd = '<%ejGet(dhcpEthEnd)%>';
+var publicStart = '<%ejGet(publicDhcpEthStart)%>';
+var publicEnd = '<%ejGet(publicDhcpEthEnd)%>';
+
+$(function(){
+	if(dhcpReservation == '1'){
+		$('#enabled').attr("checked", "checked");
+
+	}else{
+		$('#disabled').attr("checked", "checked");
+	}
+		function EnableDisable(){
+		var checkAble = function(){
+			if($('input#enabled').is(':checked')){
+				$('.showenable').show();
+				$('.showdisable').hide();
+			} else {
+				$('.showenable').hide();
+				$('.showdisable').show();
+			}		
+		}
+		$('input#enabled, input#disabled').click(function(){
+			checkAble();
+		});
+		checkAble();
+	}
+	EnableDisable();
+});
+
+function isStaticMac(mac, ip)
+{
+   var macip = staticmacip.split('|');
+   if(macip != ''){
+      for ( i = 0; i < macip.length; i++ ) {
+         var names = macip[i].split('/');
+         if (names[0] == mac && names[1] != ip) {
+            staticip = names[1];
+            return false;
+         }
+      }
+   }
+}
+
+function isStaticIp(mac, ip)
+{
+   var macip = staticmacip.split('|');
+   if(macip != ''){
+      for ( i = 0; i < macip.length; i++ ) {
+         var names = macip[i].split('/');
+         if(names[0] != mac && names[1] == ip) {
+            return false;
+         }
+      }
+   }
+}
+
+function isDuplicateRecord(mac, ip)
+{
+   if (leases != '') {
+      for ( i = 0; i < leases.length; i++ ) {
+         var names = leases[i].split('/');
+         if (names[0] == mac || names[1] == ip) {
+            return false;
+         }
+      }
+   }
+}
+
+function encapChange() {
+	with ( document.forms[0] ) 
+	{
+	      if (mac_address.value=="Manually Enter MAC") 
+	      {
+	      	mac_address_manual.disabled = false;
+	      	mac_address_manual.style.background = "#FFF";
+			$('.manualmac').show();
+	      }
+	      else
+	      {
+	      mac_address_manual.disabled = true;
+	      mac_address_manual.style.background = "gray";
+		  $('.manualmac').hide();
+	      }
+	} 
+}
+
+function IPnumber(IPaddress) {
+	var ip = IPaddress.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+	if(ip) {
+		return (+ip[1]<<24) + (+ip[2]<<16) + (+ip[3]<<8) + (+ip[4]);
+	}
+    return null;
+}
+
+function btnSave() {
+   with ( document.forms[0] ) {
+      var msg = "";
+      var start, end, total;
+
+      start = convertIPtoNumber(dhcpStart);
+      end = convertIPtoNumber(dhcpEnd);
+
+      total = end - start + 1;
+      if (staticiplease_count >= total && mac_address_manual.value.length > 0) {
+         msg = 'All IP Address is allocated statically or manually to clients. Please remove enties from DHCP Reservation List';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if (ip_address.disabled == true && mac_address_manual.value.length > 0) {
+         msg = 'All IP Address is allocated statically or manually to clients. Please remove enties from DHCP Reservation List';
+         AlertOpen(msg);
+         return false;
+      }
+
+      action.value = "add";
+      if (mac_address.selectedIndex == 0) {
+         if (mac_address_manual.value.indexOf("-") != -1) {
+            mac.value = substituteCharacter(mac_address_manual.value, '-', ':');
+         } else if (mac_address_manual.value.indexOf(":") != -1) {
+            mac.value = mac_address_manual.value;
+         } else {
+            if (mac_address_manual.value.length == 12 ||mac_address_manual.value.length == 0) {
+               mac.value = generateMacByCharacters(mac_address_manual.value);
+            } else {
+               msg = 'The MAC address entered is not valid.  Please enter a valid MAC address. ';
+               AlertOpen(msg);
+               return false;
+            }
+         }
+      } else
+         mac.value = mac_address[mac_address.selectedIndex].value;
+
+	  beginningDHCPReservationIP.value = tmpDhcpEthStart.value;
+      endDHCPReservationIP.value = tmpDhcpEthEnd.value;
+
+      if((isValidIpAddress(tmpDhcpEthStart.value) == false) || (isValidIpAddress(tmpDhcpEthEnd.value) == false))
+      {
+         msg = 'The IP Address is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      if((IPnumber(oldEthIpAddress) & IPnumber(oldSubnetMask)) != (IPnumber(tmpDhcpEthStart.value) & IPnumber(oldSubnetMask))) {
+         msg = 'The IP Address range is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+
+      static_ip.value = ip_address.value;
+if(mac_address_manual.value.length > 0){
+      if (isValidIpAddress(static_ip.value) == false ) {
+         msg = 'The IP Address is invalid.';
+         AlertOpen(msg);
+         return false;
+      }
+      else if (isValidMacAddress(mac.value) == false) {
+         msg = 'The MAC address entered is not valid.  Please enter a valid MAC address. ';
+         AlertOpen(msg);
+         return false;
+      } 
+      else if (isDuplicateRecord(mac.value.toUpperCase(), static_ip.value) == false) {
+         msg = 'An existing DHCP reservation rule is associated with the defined MAC address.  Press Ok to overwrite the existing rule or Cancel to keep existing rule.';
+         //AlertOpen(msg);
+         ConfirmOpen(msg,modifyRule);
+         return false;
+      }
+      else if (isStaticMac(mac.value,static_ip.value) == false) {
+         var ip = ipAddress.split('.');
+         msg ='The selected device has a static IP address allocated to it in the '+ip[0]+'.'+ip[1]+'.'+ip[2]+'.xxx range. You must select the static address associated to the device.';
+         AlertOpen(msg);
+         static_ip.value = staticip;
+         return false;
+      }
+      else if (isStaticIp(mac.value,static_ip.value) == false) {
+         msg ='The selected IP address has been used by another PC. You must select another IP address.';
+         AlertOpen(msg);
+         return false;
+      }
+}
+      //else {
+         mac.value = mac.value.toUpperCase();
+
+         mac_address.disabled = true;
+         mac_address_manual.disabled = true;
+         ip_address.disabled = true;
+         rmLst.disabled = true;
+//         submit();
+         return true;
+      //}
+     
+  }
+
+   return true;
+}
+
+function modifyRule()
+{
+   with ( document.forms[0] ) {
+      mac.value = mac.value.toUpperCase();
+
+      mac_address.disabled = true;
+      mac_address_manual.disabled = true;
+      ip_address.disabled = true;
+      rmLst.disabled = true;
+      sessionKey.value = gblsessionKey;
+      submit();
+   }
+}
+
+function btnApply() {
+   if (btnSave()) {
+      if(submitFlag == 0)
+      {
+         submitFlag = 1;
+         document.forms[0].sessionKey.value = gblsessionKey;
+         document.forms[0].submit();
+      }
+   }
+}
+
+function removeClick(macAddr) {
+   with ( document.forms[0] ) {
+      if(submitFlag == 0)
+      {
+         submitFlag = 1;
+         action.value = "remove";
+         rmLst.value = macAddr;
+
+         mac.disabled = true;
+         static_ip.disabled = true;
+         mac_address.disabled = true;
+         mac_address_manual.disabled = true;
+         ip_address.disabled = true;
+         sessionKey.value = gblsessionKey;
+         submit();
+      }
+   }
+}
+
+//YCT implement Remove All function
+function removeAllClick(macAddr) {
+   with ( document.forms[0] ) {
+      if(submitFlag == 0)
+      {
+         submitFlag = 1;
+         action.value = "RemoveAll";
+         rmLst.value = macAddr;
+
+         mac.disabled = true;
+         static_ip.disabled = true;
+         mac_address.disabled = true;
+         mac_address_manual.disabled = true;
+         ip_address.disabled = true;
+         sessionKey.value = gblsessionKey;
+         submit();
+      }
+   }
+}
+
+function frmLoad() {
+   with ( document.forms[0] ) {
+     if (dhcpEnbl == '1')
+	 	enblDhcpReservation[0].checked = true;
+	 else
+	 	enblDhcpReservation[1].checked = true;
+
+      ethIpAddress.value = ipAddress;
+
+         tmpDhcpEthStart.value = dhcpStart;
+         tmpDhcpEthEnd.value = dhcpEnd;
+         ethSubnetMask.value = oldSubnetMask;        
+
+      if (dhcpReservation ==  '1')
+         autoDHCPReservation[0].checked = true;
+      else
+         autoDHCPReservation[1].checked = true;
+   }
+}
+
+
+function setDhcpAddresses() {
+   var ipArr = [0, 0, 0, 0],  maskArr = [0, 0, 0, 0], startArr = [0, 0, 0, 0],  endArr = [0, 0, 0, 0];
+   
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+      
+      lanIp = ethIpAddress.value;
+      subnetMask = ethSubnetMask.value;
+      var msg = "";
+      if ( isValidIpAddress(lanIp) == false ) {
+         // alert('Address "' + lanIp + '" is invalid IP address.');
+         msg = 'The modem IP address entered in step 2 is invalid.';
+         AlertOpen(msg);
+         return;
+      }
+      if ( isValidIpAddress(subnetMask) == false ) {
+         // alert('Address "' + subnetMask + '" is invalid IP address.');
+         msg = 'The subnetmask entered in step 2 is invalid.';
+         AlertOpen(msg);
+         return;
+      }      
+      addrParts = lanIp.split('.');
+      maskParts = subnetMask.split('.');       
+      if ( addrParts.length != 4 || maskParts.length != 4) {
+         msg = 'The Modem IP Address or Modem Subnet Mask is invalid.';
+         AlertOpen(msg);
+         return;
+      }         
+      for (i = 0; i < 4; i++) {
+        ipArr[i] = parseInt(addrParts[i]);
+        startArr[i] = parseInt(addrParts[i]);
+        endArr[i] = parseInt(addrParts[i]);
+        maskArr[i] = parseInt(maskParts[i]);
+      }
+      m3 = maskArr[3];
+      bcast = 255;
+      n3 = 0;
+/*
+      if (maskArr[0] == 255 && maskArr[1] == 0 &&  maskArr[2] == 0 && maskArr[3] == 0) {
+        // 255.0.0.0 is only class A supported
+        endArr[1] = 255;
+        endArr[2] = 255;
+      }
+      else if (maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 0 && maskArr[3] == 0) 
+        // 255.255.0.0 is only class B supported
+        endArr[2] = 255;
+      else */ if ((maskArr[0] == 255 && maskArr[1] == 255 &&  maskArr[2] == 255 ) &&
+               (m3 == 0 || m3 == 128 || m3 == 192 || m3 == 224 || m3== 240 || m3 == 248 ||  m3 == 252)) {
+        // 255.255.255.0/128/192... class C supported
+        n3 = ipArr[3] & m3;
+        hosts = 255 - m3;
+        bcast = n3 + hosts;
+      }
+      else {
+        // alert("Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.");
+        // msg = "Only support subnet mask: Class A: 255.0.0.0; Class B: 255.255.0.0 and Class C: 255.255.255.0/255.255.255.128/255.255.255.192/255.255.255.224/255.255.255.240/255.255.255.248/255.255.255.252.";
+        msg = "Only support subnet mask: Class C: 255.255.255.0/255.255.255.128/<br>255.255.255.192/255.255.255.224/<br>255.255.255.240/255.255.255.248/<br>255.255.255.252.";
+        AlertOpen(msg);
+        return;         
+      }
+      if (ipArr[3] == bcast) {
+        // alert('Ip address cannot be same as the broadcast ip address.');
+        msg = 'The Modem IP Address cannot be same as the broadcast IP address.';
+        AlertOpen(msg);
+        return;
+      }
+      tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";      
+      for (i = 0; i < 3; i++) {
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[i] + ".";
+      }
+      if (ipArr[3] == (bcast-1)) {
+        startArr[3] = n3 + 1;
+        endArr[3] = bcast -2;
+      }
+      else {
+        startArr[3] = ipArr[3] + 1;
+        endArr[3] = bcast -1;
+      }      
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + startArr[3];
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + endArr[3];
+   }
+}
+
+function changeEthEnd(ip) {
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+
+      if ( isValidIpAddress(ip) == false ) {
+         AlertOpen('The Beginning DHCP IP address entered in step 2 is invalid.');
+         return;
+      }
+
+      if (ethIpAddress.value == ip) {
+         AlertOpen('The Beginning IP Address cannot be the same as the LAN IP address of the modem. Please enter a valid IP address.');
+         return;
+      }
+
+      addrParts = ip.split('.');
+      endParts = tmpDhcpEthEnd.value.split('.');
+      ipParts = ethIpAddress.value.split('.');
+
+      if ( addrParts.length != 4 )
+         return false;
+
+      t1 = parseInt(addrParts[3]);
+      t2 = parseInt(endParts[3]);
+      t3 = parseInt(ipParts[3]);
+
+      if (tmpDhcpEthStart.value != '' && t1 >= 255) {
+         AlertOpen("Last portion of IP Address has to be less than 254 for Enabled DHCP Server");
+         return false;
+      }
+
+      if (t3 > t1 && t3 < t2)
+      {
+         AlertOpen("Modem IP Address cannot be between Beginning IP Address and Ending IP Address.");
+         return false;
+      }
+
+      ethIpAddress.value = tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + addrParts[i] + ".";
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + addrParts[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + addrParts[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + t3;
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + t1;
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + t2;
+   }
+}
+
+function changeEthStart(ip) {
+   with ( document.forms[0] ) {
+      if (mode == '1') return;
+
+      if ( isValidIpAddress(ip) == false ) {
+         AlertOpen('The Ending DHCP IP address entered in step 2 is invalid.');
+         return;
+      }
+
+      if (ethIpAddress.value == ip) {
+         AlertOpen('The Ending IP Address cannot be the same as the Modem IP address of the modem. Please enter a valid IP address.');
+         return;
+      }
+
+      addrParts = ip.split('.');
+      startParts = tmpDhcpEthStart.value.split('.');
+      ipParts = ethIpAddress.value.split('.');
+
+      if ( addrParts.length != 4 )
+         return;
+      t1 = parseInt(addrParts[3]);
+      t2 = parseInt(startParts[3]);
+      t3 = parseInt(ipParts[3]);
+
+      if (tmpDhcpEthStart.value != '' && t1 >= 255) {
+         AlertOpen("Last portion of IP Address has to be less than 254 for Enabled DHCP Server");
+         return;
+      }
+
+      if (t3 > t2 && t3 < t1)
+      {
+         AlertOpen("Modem IP Address cannot be between Beginning IP Address and Ending IP Address.");
+         return false;
+      }
+
+      ethIpAddress.value = tmpDhcpEthStart.value = tmpDhcpEthEnd.value = "";
+      for (i = 0; i < 3; i++) {
+         ethIpAddress.value = ethIpAddress.value + addrParts[i] + ".";
+         tmpDhcpEthStart.value = tmpDhcpEthStart.value + addrParts[i] + ".";
+         tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + addrParts[i] + ".";
+      }
+      ethIpAddress.value = ethIpAddress.value + t3;
+      tmpDhcpEthStart.value = tmpDhcpEthStart.value + t2;
+      tmpDhcpEthEnd.value = tmpDhcpEthEnd.value + t1;
+   }
+}
+
+
+
+
+</script>
+</head>
+<body id="advancedsetup_dhcpreservation" onLoad='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('dhcpreservation');
+</script>
+      </ul>
+      <div id="subnav_footer">
+      </div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+         </div>
+      </div>
+   </div>
+   <div id="content_right">
+      <div id="content_right_header">
+      </div>
+      <div id="content_right_contentarea">
+         <h1 class="advancedsetup_dhcpres">DHCP Reservation <span>DHCP reservation  leases a permanent DHCP allocated address to a client.</span></h1>
+         <form action="dhcpdstaticlease.cmd" method="post" onSubmit="return btnSave();">
+            <input type="hidden" name="action" id="action">
+            <input type="hidden" name="rmLst" id="rmLst">
+            <input name="sessionKey" type="hidden" id="sessionKey" value=""/>
+            <input name="mac" type="hidden" />
+            <input name="static_ip" type="hidden" />
+			
+            <input size="15" type="hidden" name="beginningDHCPReservationIP" />
+            <input size="15" type="hidden" name="endDHCPReservationIP" />
+			
+			<div class="stepWrapper">
+               <p><strong>1. Set the DHCP Reservation State. </strong></p>
+               <table>
+                  <tr>
+                     <td width="150">DHCP Reservation State: </td>
+                     <td><input name="enblDhcpReservation"  type="radio"  value="1" /> Enable</td>
+                     <td><input name="enblDhcpReservation"  type="radio"  value="0" /> Disable</td>
+                  </tr>
+               </table>
+            </div>
+			<div class="stepWrapper">
+               <p><strong>2. Automatically set DHCP reservations on DHCP IP allocation.</strong></p>
+               <table>
+                  <tr>
+                     <td width="150"> DHCP Reservation:</td>
+                     <td width="181"><input name="autoDHCPReservation" id="enabled" type="radio" value="1" /> Enable</td>
+                     <td width="181"><input name="autoDHCPReservation" id="disabled" type="radio" value="0" /> Disable</td>
+                  </tr>
+               </table>
+            </div> 
+ <div class="showenable">
+            <div class="stepWrapper">
+               <p><strong>3. Enter the automatic DHCP reservation IP address pool allocation.</strong></p>
+               <table>
+                  <!--<tr>
+                     <td width="165" >Modem IP Address:</td>
+                     <td width="255" >--><input maxlength="15" size="18" name="ethIpAddress" onChange="setDhcpAddresses()" type="hidden"/><!--<tr></td>
+                  </tr>-->
+                  <tr>
+                     <td>Beginning DHCP Reservation IP:</td>
+                     <td><input maxlength="15" size="18" name="tmpDhcpEthStart" onChange="changeEthEnd(this.value)" /></td>
+                  </tr>
+                  <tr>
+                     <td>Ending DHCP Reservation IP: </td>
+                     <td><input maxlength="15" size="18" name="tmpDhcpEthEnd" onChange="changeEthStart(this.value)" /></td>
+                  </tr>
+                  <!--<tr>
+                     <td >Subnetmask: </td>
+                     <td>--><input maxlength="15"  size="18" name="ethSubnetMask" onChange='setDhcpAddresses()' type="hidden"/><!--</td>
+                  </tr>-->
+               </table>
+            </div>
+            <div id="step3_disabled" class="greyed_out" style="display:none;">
+               <div class="stepWrapper">
+               </div>
+            </div>
+</div>
+            <div class="stepWrapper">
+<div class="showenable">
+               <p><strong>4. Select MAC Address, or manually enter a MAC address.</strong></p>
+</div>
+
+<div class="showdisable"> 
+		<p><strong>3. Select MAC Address, or manually enter a MAC address.</strong></p>
+</div>
+               <table>
+                  <tr>
+                     <td width="178"><label for="mac_address">Select MAC Address:</label></td>
+                     <td width="295">
+                        <select name="mac_address" id="mac_address" onChange="encapChange()">
+                           <option value="Manually Enter MAC" selected="selected">Manually Enter MAC</option>
+<script language="javascript">
+<!-- hide
+
+   for (var i = 0 ; i < activeItems.length ; i++) {
+      if (activeItems[i] != '') {
+         var names = activeItems[i].split("/");
+         var toUpperCaseactiveItems = names[3].toUpperCase();
+         var tempMac = toUpperCaseactiveItems.split(":");
+         if( names[1] != 'unknown' ){
+            document.writeln("<option value=" + names[3] + ">" + names[1] + " - " + tempMac[0] + ":"+ tempMac[1] + ":" + tempMac[2] + ":"  + tempMac[3] + ":" + tempMac[4] + ":" + tempMac[5] + "</option>");
+         }
+		 else{
+            document.writeln("<option value=" + names[3] + ">" + names[2] + " - " + tempMac[0] + ":"+ tempMac[1] + ":" + tempMac[2] + ":"  + tempMac[3] + ":" + tempMac[4] + ":" + tempMac[5] + "</option>");
+         }
+      }
+   }
+// done hiding -->
+</script>
+                        </select>
+                     </td>
+                  </tr>
+                  <tr class="manualmac">
+                     <td width="178"><label for="mac_address_manual">Manually Add MAC Address:</label></td>
+                     <td><input name="mac_address_manual" id="mac_address_manual" type="text" size="35" maxlength="17" /></td>
+                  </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+<div class="showenable">
+               <p><strong>5. Select an IP address to associate with a MAC address.</strong></p>
+</div>
+<div class="showdisable"> 
+		<p><strong>4. Select an IP address to associate with a MAC address.</strong></p>
+</div>
+               <table>
+                  <tr>
+                     <td width="178"><label for="ip_address">IP Address:</label></td>
+                     <td width="295">
+                        <select name="ip_address" id="ip_address">
+<script language="javascript">
+<!-- hide
+   var start_part, end_part;
+
+   if(mode =='1')
+   {
+      	start_part = convertIPtoNumber(publicStart);
+   	end_part = convertIPtoNumber(publicEnd);
+   }else{
+   	start_part = convertIPtoNumber(PrivateStart);
+   	end_part = convertIPtoNumber(PrivateEnd);	
+   }
+   
+   var i = 0, len = 0, j = 0, match = 0;
+   while (start_part != end_part) {
+      if (i != 0) 
+         start_part += 1;
+      else
+         i++;
+
+      ip = convertNumbertoIP(start_part);
+	  if (leases != '') {
+         for ( j = 0; j < leases.length; j++ ) {
+            var names = leases[j].split('/');
+            if (names[1].localeCompare(ip) != 0) {
+               match = 0;
+            }
+			else
+			{
+ 			   match = 1;
+			   break;
+			}
+         }
+      }
+      if(match == 0)
+      {
+         document.writeln("<option value=" + ip + ">" + ip +"</option>");
+         len++;
+      }
+   }
+
+   if (len == 0)
+      document.forms[0].ip_address.disabled = true;
+   
+// done hiding -->
+</script>
+                        </select>
+                     </td>
+                  </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+<div class="showenable">
+               <p><strong>6. Click &quot;Apply&quot; to save your changes. </strong></p>
+               <a href="#" class="btn apply_btn" onClick="btnApply();">Apply</a>
+</div>
+<div class="showdisable"> 
+		<p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+		<a href="#" class="btn apply_btn" onClick="btnApply();">Apply</a>
+</div>
+            </div>
+            <p>&nbsp;</p>
+            <div class="stepWrapperdark">
+               <p align="center"><strong>DHCP Reservation List</strong></p>
+               <table>
+                  <tr>
+                     <th width="39" align="center">&nbsp;</th>
+                     <th width="60">Device<br /> Name</th>
+                     <th width="118">MAC Address</th>
+                     <th width="91">IP &nbsp;Address</th>
+                     <th width="92">EDIT</th>
+                  </tr>
+<script language="javascript">
+<!-- hide
+{
+   var i = 0, match;
+   var parts;
+/*   var staticiplease = '00:19:cb:11:22:33/192.168.1.100|00:11:22:ab:12:13/192.168.1.200'; */
+
+   staticiplease_count = 0;
+   if (staticiplease != '') {
+      for (var i = 0 ; i < leases.length ; i++ ) {
+         var names = leases[i].split('/');
+         match = 0;
+         for (var j = 0 ; j < activeItems.length ; j++) {
+            if (activeItems[j] != '') {
+               parts = activeItems[j].split('/');
+               if (parts[3].toUpperCase().indexOf(names[0]) != -1) {
+                  match = 1;
+                  break;
+               }
+            }
+         }
+
+         if (match == 0) {
+            for (var j = 0 ; j < inactiveItems.length ; j++) {
+               if (inactiveItems[j] != '') {
+                  parts = inactiveItems[j].split('/');
+                  if (parts[3].toUpperCase().indexOf(names[0]) != -1) {
+                     match = 1;
+                     break;
+                  }
+               }
+            }
+         }
+
+         if (match == 1) {
+            // var parts = allLanItems[j].split('/');
+            document.writeln("<tr align=\"center\">");
+            document.writeln("<td><img src=\"../_images/icon_" + parts[0] + ".png\" width=\"39\" height=\"39\" /></td>");
+            var hostname = 'unknown';
+            hostname = processLongName(parts[1], 13);
+            document.writeln("<td>" + hostname + "</td>");
+            document.writeln("<td>" + names[0] + "</td>");
+            document.writeln("<td>" + names[1] + "</td>");
+            if(parts[0] == "settop"){
+               document.writeln("<td></td>");
+            }
+            else{
+               document.writeln("<td><a href=\"#\" class=\"btn remove_btn\" onclick=\"removeClick('" + names[0] + "')\">Remove</a></td>");
+            }
+            document.writeln("</tr>");
+         } else {
+            document.writeln("<tr align=\"center\">");
+            document.writeln("<td><img src=\"../_images/icon_computer.png\" width=\"39\" height=\"39\" /></td>");
+            document.writeln("<td>unknown</td>");
+            document.writeln("<td>" + names[0] + "</td>");
+            document.writeln("<td>" + names[1] + "</td>");
+            document.writeln("<td><a href=\"#\" class=\"btn remove_btn\" onclick=\"removeClick('" + names[0] + "')\">Remove</a></td>");
+            document.writeln("</tr>");
+         }
+
+         staticiplease_count++;
+      }
+	  //YCT implement Remove All function
+	document.writeln("<tr>");	
+	document.writeln("<td></td>");
+	document.writeln("<td></td>");
+	document.writeln("<td></td>");
+	document.writeln("<td></td>");
+	document.writeln("<td><a href=\"#\" class=\"btn remove_btn\" onclick=\"removeAllClick('" + names[0] + "')\">Remove All</a></td>");
+	document.writeln("</tr>");
+   } else {
+      document.writeln("<tr align=\"center\">");
+      document.writeln("<td colspan=\"5\" style=\"padding:10px;\">No Rules Defined</td>");
+      document.writeln("</tr>");
+   }
+}
+// done hiding -->
+</script>
+               </table>
+            </div>
+         </form>
+      </div>
+   </div>
+   &nbsp;
+   <p></p>
+   <div class="clear_left">
+   </div>
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

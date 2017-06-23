@@ -1,0 +1,595 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/internetStatus.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var g_wanStatus = '<%ejGetOther(sysInfo, defaultWan)%>';
+var tunnelStatus = '<%ejGetOther(dslinfo, TUNNELSTATUS)%>';
+var g_ispType = '<%ejGetOther(dslinfo, Protocol)%>';
+var defPrctlv6 = '<%ejGetOther(sysInfo, defaultIPv6Prctl)%>';
+var ipv4Uptime = '<%ejGetOther(dslinfo, IPV4UPTIME)%>';
+var ipv4Sent = '<%ejGetOther(dslinfo, PktTX)%>';
+var ipv4Received = '<%ejGetOther(dslinfo, PktRX)%>';
+function setStatisticsValueToZero()
+{
+	document.getElementById("authfail").innerHTML=0;
+	document.getElementById("pkttx").innerHTML=0;
+	document.getElementById("pktrx").innerHTML=0;
+	document.getElementById("pkttx2").innerHTML=0;
+	document.getElementById("pktrx2").innerHTML=0;
+}
+
+function Clear() {
+	setStatisticsValueToZero();
+	BackgroundUrl("modemstatus_internetstatus_clear.cgi");
+	//setTimeout('updateValue_take()', 3000);
+}
+
+$(document).ready(function(){
+
+    if (g_ispType != 'PPPoE' || g_ispType == 'PPPoA')
+    {
+        $('.class_hide_ipoe').hide();
+    }
+});
+</SCRIPT>
+
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+		
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+		WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+  </div>
+	<div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('internetstatus','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+			</ul>
+	  <div id="subnav_footer"></div>
+			<div id="connectionstatus_header"></div>
+      <div id="connectionstatus">
+        <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+         </div>
+      </div>
+			<div id="connectionstatus_footer"></div>
+  </div>
+		<div id="content_right">
+			<div id="content_right_header"></div>
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_wanstatus">Internet Status 
+					<span>Internet Status reflects the status of the ISP connection. The Internet light on the front of the router provides a visual indicator of the Internet connection. </span>
+				</h1>
+			  <form onSubmit="return false;">
+			  
+			  <div class="stepWrapper">
+			  <p><strong>Internet Status</strong></p>	
+				
+				  <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                    <th width="237"><div align="left"><strong>Connection</strong></div>
+                    </th>
+                    <th width="183">
+                      <div align="left"><strong>Status</strong></div>
+                    </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Internet Connection:</div></td>
+                      <td><div align="left"><span id="ISPSTATS">
+<script language="javascript">
+<!-- hide
+if (g_wanStatus == 'CONNECTED')
+	document.writeln('<div align="left"><font color=\"#015F2C\"><strong>'+'CONNECTED'+'</strong></font></div>');
+else if (g_wanStatus == 'WALLED GARDEN')
+	document.writeln('<div align="left"><font color=\"#EDAB12\"><strong>'+g_wanStatus+'</strong></font></div>');	
+else if (g_wanStatus == 'CONNECTING')
+	document.writeln('<div align="left"><font color=\"#D7DB24\"><strong>'+g_wanStatus+'</strong></font></div>');	
+else
+	document.writeln('<div align="left"><font color=\"#FF0000\"><strong>'+g_wanStatus+'</strong></font></div>');	
+// done hiding -->
+</script></span>
+                      </div></td>
+                    </tr>
+                  </table>
+				</div><!--end of stepWrapper-->
+				<div class="stepWrapper"> 
+				  <p><strong>Internet Settings </strong></p>
+		        <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                      <th width="260"><div align="left"><strong>Internet Setting</strong></div>
+                      </th>
+                      <th width="160">
+                        <div align="left"><strong>Status</strong></div>
+                      </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">WAN Protocol:</div>
+                      </td>
+                      <td><div align="left">
+                      <span id="ISPTYPE">
+<script language="javascript">
+document.writeln(g_ispType);
+</script>
+                      </span></div>
+                      </td>
+                    </tr>
+                    <tr align="center" class='class_hide_ipoe'>
+                      <td><div align="left">User Name:</div>
+                      </td>
+                      <td><div align="left"><span id="USERNAME">
+<script language="javascript">
+var pppuser = '<%ejGetOther(sysInfo, pppUserName)%>';
+if (pppuser == null || pppuser == 'N/A' ) {
+	document.writeln('N/A');
+}
+else {
+	document.writeln(pppuser);
+}
+</script>
+                      </span></div>
+                      </td>
+                    </tr>
+                    <tr align="center" class='class_hide_ipoe'>
+                      <td><div align="left">LCP State:</div></td>
+                      <td><div align="left"><span id="LCPUP">
+<script language="javascript">
+var LCPState = '<%ejGetOther(dslinfo, LCPUP)%>';
+if ( LCPState == "1" ) {
+	document.writeln('<font color="#015F2C">UP</font>');
+}
+else if (LCPState == "0") {
+	document.writeln('<font color="#FF0000"><strong>DOWN</strong></font>');
+}
+else if ( LCPState == "2" ) {
+	document.writeln('<font color="#D7DB24">CONNECTING</font>');
+}
+else {
+	document.writeln('N/A');
+}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center" class='class_hide_ipoe'>
+                      <td><div align="left">IPCP State:</div></td>
+                      <td><div align="left"><span id="IPCPUP">
+<script language="javascript">
+var IPCPState = '<%ejGetOther(dslinfo, IPCPUP)%>';
+if ( IPCPState == "1" ) {
+	document.writeln('<font color="#015F2C">UP</font>');
+}
+else if ( IPCPState == "0" ) {
+	document.writeln('<font color="#FF0000"><strong>DOWN</strong></font>');
+}
+else if ( IPCPState == "2" ) {
+	document.writeln('<font color="#D7DB24">CONNECTING</font>');
+}
+else {
+	document.writeln('N/A');
+}
+</script>
+                      </span></div></td>
+                    </tr>
+                   <tr align="center" class='class_hide_ipoe'>
+                      <td><div align="left">Authentication Failures:</div></td>
+                      <td><div align="left"><span id="authfail">
+<script language="javascript">
+var AuthFailure = '<%ejGetOther(dslinfo, AUTHFAIL)%>';
+var intValue = parseInt(AuthFailure);
+
+if ( isNaN(intValue) ) {
+	document.writeln('N/A');
+}
+else if (intValue >= 4) {
+	document.writeln('<font color=\"#FF0000\"><strong>'+AuthFailure+'</strong></font>');
+}
+else {
+	document.writeln(AuthFailure);
+}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Session Time:</div></td>
+                      <td><div align="left"><span id="ppptimer">
+<script language="javascript">
+	var ppp_uptime = '<%ejGetOther(dslinfo, PPPTIMER)%>';
+
+	if ( ppp_uptime != 'N/A' ) {
+		document.writeln(ppp_uptime);
+	}
+	else if ( ipv4Uptime == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( ipv4Uptime );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Packets Sent:</div></td>
+                      <td><div align="left"><span id="pkttx">
+<script language="javascript">
+
+	if ( ipv4Sent == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( ipv4Sent );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Packets Received:</div></td>
+                      <td><div align="left"><span id="pktrx">
+<script language="javascript">
+
+	if ( ipv4Received == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( ipv4Received );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Modem Uptime:</div></td>
+                      <td><div align="left"><span id="modemUpTime"><%ejGetOther(sysInfo, modemUpTime)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">MTU Size:</div></td>
+                      <td><div align="left"><span id="mtuSize"><%ejGetOther(sysInfo, defaultMtuSize)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">MSS Size:</div></td>
+                      <td><div align="left"><span id="mssSize"><%ejGetOther(sysInfo, defaultMssSize)%></span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">TCP Connection:</div></td>
+                      <td><div align="left">0</div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">RWIN Size:</div></td>
+                      <td><div align="left"><span id="rwinSize"><%ejGetOther(sysInfo, defaultRwinSize)%></span></div></td>
+                    </tr>                    
+                </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+			      <p><strong>IPv4 Addressing </strong></p>
+		        <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                      <th width="260"><div align="left"><strong>PPP Parameter</strong></div>
+                      </th>
+                      <th width="160">
+                        <div align="left"><strong>Status</strong></div>
+                      </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Modem IPv4 Address:</div></td>
+                      <td><div align="left"><span id="ModemIP">
+<script language="javascript">
+	var wanip = '<%ejGetOther(dslinfo, WANIP)%>';
+	if ( wanip == '' || wanip == '&nbsp;' || wanip == '0.0.0.0' || wanip == 'N/A' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( wanip );
+	}
+</script>
+					  </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Modem IPv4 Subnet Mask:</div></td>
+                      <td><div align="left"><span id="subnetMask">
+<script language="javascript">
+	var mask = '<%ejGetOther(dslinfo, SUBNETMASK)%>';
+	if ( mask == '' || mask == '&nbsp;' || mask == '0.0.0.0' || mask == 'N/A' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( mask );
+	}
+</script>
+					  </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">DNS Address #1:</div></td>
+                      <td><div align="left"><span id="priDns">
+<script language="javascript">
+	var dns1 = '<%ejGetOther(sysInfo, dns1)%>';
+	if ( dns1 == '&nbsp' || dns1 == '0.0.0.0' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		dns1 = 'N/A';
+	}
+	document.writeln( dns1 );
+</script>
+					  </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">DNS Address #2:</div></td>
+                      <td><div align="left"><span id="secDns">
+<script language="javascript">
+	var dns2 = '<%ejGetOther(sysInfo, dns2)%>';
+	if ( dns2 == '&nbsp' || dns2 == '0.0.0.0' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		dns2 = 'N/A';
+	}
+	document.writeln( dns2 );
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Remote Gateway Address:</div></td>
+                      <td><div align="left"><span id="DefaultGateway">
+<script language="javascript">
+	var gateway = '<%ejGetOther(dslinfo, GATEWAY)%>';
+	if ( gateway == '' || gateway == '&nbsp;' || gateway == '0.0.0.0' || gateway == 'N/A' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( gateway );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">NTP Server:</div></td>
+                      <td><div align="left"><span id="NtpSrv">
+<script language="javascript">
+
+   var ntpStatusTable = "<%ejGetOther(ntpTable)%>";
+   var ntpStatusTables = ntpStatusTable.split(';');
+   var ntpSrv = 'N/A';
+
+   for(var i = 1 ; i < ntpStatusTables.length ; i++ )
+   {
+      var tblEntry = ntpStatusTables[i].split('|');
+
+      if((tblEntry[1] == '') || (tblEntry[2] == ''))
+      {
+         continue;
+      }
+
+	  if((tblEntry[2] != 'NA') && (tblEntry[2] != 'FAILED') && (tblEntry[2] != 'NEGOCIATING')) {
+	  	 ntpSrv = tblEntry[2];
+	  }
+   }
+   document.writeln(ntpSrv);
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv4 Packets Sent:</div></td>
+                      <td><div align="left"><span id="pkttx2">
+<script language="javascript">
+
+	if ( ipv4Sent == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( ipv4Sent );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv4 Packets Received:</div></td>
+                      <td><div align="left"><span id="pktrx2">
+<script language="javascript">
+
+	if ( ipv4Received == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( ipv4Received );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv4 Link Uptime:</div></td>
+                      <td><div align="left"><span id="connUpTime">
+<script language="javascript">
+	if ( ipv4Uptime == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') || g_ispType == 'Transparent Bridging' ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( ipv4Uptime );
+	}
+</script>
+                      </span></div></td>
+                    </tr>
+                </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+				  <p><strong>IPv6 Addressing </strong></p>
+		        <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                      <th width="260"><div align="left"><strong>PPP Parameter</strong></div>
+                      </th>
+                      <th width="160">
+                        <div align="left"><strong>Status</strong></div>
+                      </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv6 6rd Tunnel Status:</div></td>
+                      <td><div align="left"><span id="wan6TunnelStatus">
+<script language="javascript">
+      if(defPrctlv6 == '6rd')
+         document.writeln( tunnelStatus );
+      else
+         document.writeln('N/A');
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Modem IPv6 Address:</div></td>
+                      <td><div align="left"><span id="wan6IPv6Addr">
+<script language="javascript">
+	var wanipv6addrInfo = '<%ejGetOther(dslinfo, WANIPv6)%>';
+	if ( wanipv6addrInfo == '' || wanipv6addrInfo == '&nbsp;' || wanipv6addrInfo == 'N/A' )
+	{
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( wanipv6addrInfo );
+	}
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv6 Delegated Prefix:</div></td>
+                      <td><div align="left"><span id="wan6DelegatedPrefix">
+<script language="javascript">
+	var delegatedPrefix = '<%ejGetOther(dslinfo, IPv6DELEGATED)%>';
+	if ( delegatedPrefix == '&nbsp' || delegatedPrefix == '' ||tunnelStatus != 'Disabled') 
+   {
+		document.writeln( 'N/A' );
+	}
+   else
+   {
+      document.writeln( delegatedPrefix );
+   }
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv6 Calculated Prefix:</div></td>
+                      <td><div align="left"><span id="wan6CalculatedPrefix">
+<script language="javascript">
+	var calculatedPrefix = '<%ejGetOther(dslinfo, IPv6CALCULATED)%>';
+	if ( calculatedPrefix == '&nbsp' || calculatedPrefix == '' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') ) 
+   {
+		document.writeln( 'N/A' );
+	}
+   else
+   {
+      document.writeln( calculatedPrefix );
+   }
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv6 Subnet:</div></td>
+                      <td><div align="left"><span id="wan6Subnet">
+<script language="javascript">
+   var dhcpv6Enbl = '<%ejGetOther(enblDhcp6s)%>';
+	if ( g_ispType == 'Transparent Bridging' || dhcpv6Enbl == '0' ) 
+	{
+		document.writeln( 'N/A' );
+	}
+	else 
+	{
+		document.writeln( '64' );
+	}
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv6 Link Local Address:</div></td>
+                      <td><div align="left"><span id="wan6LinkLocalAddr">
+<script language="javascript">
+	var wanipv6LinkInfo = '<%ejGetOther(dslinfo, WANIPv6LINK)%>';
+	if ( wanipv6LinkInfo == '' || wanipv6LinkInfo == '&nbsp;' || wanipv6LinkInfo == 'N/A' || tunnelStatus != 'Disabled' ) 
+	{
+		document.writeln( 'N/A' );
+	}
+	else 
+	{
+		document.writeln( wanipv6LinkInfo );
+	}
+</script>                      
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">DNSv6 Address #1:</div></td>
+                      <td><div align="left"><span id="wan6Dns1">
+<script language="javascript">
+	var dns6Pri = '<%ejGetOther(sysInfo, dns6Pri)%>';
+	if ( dns6Pri == '&nbsp'  || dns6Pri == '' || g_ispType == 'Transparent Bridging' || wanipv6addrInfo == 'N/A' ) 
+	{
+		document.writeln( 'N/A' );
+	}
+   else
+   {
+      document.writeln( dns6Pri );
+   }
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">DNSv6 Address #2:</div></td>
+                      <td><div align="left"><span id="wan6Dns2">
+<script language="javascript">
+	var dns6Sec = '<%ejGetOther(sysInfo, dns6Sec)%>';
+	if ( dns6Sec == '&nbsp' || dns6Sec == '' || g_ispType == 'Transparent Bridging' || wanipv6addrInfo == 'N/A' ) 
+	{
+		document.writeln( 'N/A' );
+	}
+   else
+   {
+      document.writeln( dns6Sec );
+   }
+</script></span>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">IPv6 Link Uptime:</div></td>
+                      <td><div align="left"><span id="wan6Uptime">
+ <script language="javascript">
+	var ipv6Uptime = '<%ejGetOther(dslinfo, IPv6UPTIME)%>';
+	if ( ipv6Uptime == '&nbsp' || ipv6Uptime == '' ||tunnelStatus != 'Disabled' || wanipv6addrInfo == 'N/A') 
+   {
+		document.writeln( 'N/A' );
+	}
+   else
+   {
+      document.writeln( ipv6Uptime );
+   }
+</script></span>
+                      </span></div></td>
+                    </tr>
+                </table>
+				</div><!--end of stepWrapper-->
+
+				<div class="stepWrapper"> 
+					<a href="#" onClick="Clear();" id="clear_btn" class="btn clear_btn">Clear</a>
+				</div><!--end of stepWrapper-->
+			  </form>
+			</div>
+  </div>
+
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

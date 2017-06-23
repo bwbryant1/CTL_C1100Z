@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.showpassword-1.0.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var enbltelnet = "<%ejGetOther(telnetEnable)%>";
+var telnetusername = "<%ejGet(telnetUserName)%>";
+var sshusername = "<%ejGet(sshUserName)%>";
+var sshidleTime ="<%ejGet(sshIdleTime)%>";
+var idleTime ="<%ejGet(telnetIdleTime)%>";
+var userpasswd ='*********';
+
+function hideOther(element, hide) {
+  var status = ''; //don,t use block to fix the bug for some browser such as Firefox, Chorme.., Steven
+   if (window.ActiveXObject) { // IE,...
+      status =  "block";   
+   } else if (window.XMLHttpRequest) { // Mozilla, Safari,...
+      status = "table-row";
+   } 
+
+   if ( hide == 1 ){
+	status = "none";
+   }
+
+   if (document.getElementById){  // DOM3 = IE5, NS6
+	document.getElementById(element).style.display = status;
+   }
+   else {
+      if (document.layers == false){ // IE4
+		document.getElementById(element).style.display = status;
+      }
+   }
+}
+
+function show_password_change(){
+   with ( document.forms[0] ) {
+      if(show_password.checked == true)
+      {
+      	 hideOther("PasswordConfirmID", 1);
+      }   
+      else{
+      	 hideOther("PasswordConfirmID", 0);
+      }
+   }	
+}
+
+function btnApply()
+{
+	var loc = 'advancedsetup_telnettimeoutsetting.cgi?'; 
+	with(document.forms[0])
+	{
+		if ( telnetEnable.selectedIndex != 0)
+		{
+			if(telnetUserName.value==''){
+				AlertOpen("\"User name\" can not be empty!");
+				return false;
+			}
+			if(telnetUserName.value.length>15)
+			{
+				AlertOpen("The length of \"User name\" can not be more than 15!");
+				return false;
+			}
+			if(!isValidName(telnetUserName.value)){
+				AlertOpen("\"User name\" is invalid.\nEnter other \"User name\"");
+				return false;
+			}
+			
+			if(isValidPassword(telnetPassword.value) == false)
+			{
+				AlertOpen(" An unsupported character is included in the password.");
+				return false;
+			}
+
+			if(telnetPassword.value=='')
+			{
+				AlertOpen("\"Password\" can not be empty");
+				return false;
+			}
+			if(show_password.checked==false)
+			{
+				if(PasswordConfirm.value!=telnetPassword.value)
+				{
+					AlertOpen("The passwords entered do not match. Please enter matching passwords.");
+					return false;
+				}
+			}	
+		}
+
+		document.forms[0].sessionKey.value = gblsessionKey;
+	}
+	return true;
+
+}
+
+function doSubmit () {
+	if ( btnApply() ) {
+		document.forms[0].submit();
+	}
+}
+
+/*function dofocus () {
+	with ( document.forms[0] ) {
+		telnetPassword.focus();
+	}
+}*/
+
+function dofocus () {
+	with ( document.forms[0] ) {
+		telnetPassword.value = "";
+		telnetPassword.focus();
+		telnetPassword.onfocus = null;
+	}
+}
+function dofocus2 () {
+	with ( document.forms[0] ) {
+		PasswordConfirm.value = "";
+		PasswordConfirm.focus();
+		PasswordConfirm.onfocus = null;
+	}
+}
+
+
+function change () {
+	//document.getElementById("passwd").innerHTML = "<input name=\"telnetPassword\" type=\"text\" size=\"35\" maxlength=15 />";
+	setTimeout("dofocus();",10);
+}
+function change2 () {
+	setTimeout("dofocus2();",10);
+}
+
+function setChange() {
+	with ( document.forms[0] ) {
+      var protocolName = document.getElementById("protocolName");
+      var protocolPassword = document.getElementById("protocolPassword");
+		if ( telnetEnable.selectedIndex == 2 ) {
+			document.getElementById("set_idle_time").style.display = 'block';
+			document.getElementById("set_admin_table").style.display = 'block';
+			telnetUserName.value= sshusername;
+			for(i=0;i<telnetIdleTime.length;i++){
+				if(telnetIdleTime[i].value==sshidleTime)
+					telnetIdleTime.selectedIndex= i;
+			}
+         protocolName.innerHTML = "SSH Username:";
+         protocolPassword.innerHTML = "SSH Password:";
+		}
+		else if ( telnetEnable.selectedIndex == 1 ) {
+			document.getElementById("set_idle_time").style.display = 'block';
+			document.getElementById("set_admin_table").style.display = 'block';
+			telnetUserName.value= telnetusername;
+			for(i=0;i<telnetIdleTime.length;i++){
+				if(telnetIdleTime[i].value==idleTime)
+					telnetIdleTime.selectedIndex= i;
+			}
+         protocolName.innerHTML = "Telnet Username:";
+         protocolPassword.innerHTML = "Telnet Password:";
+		}
+		else if ( telnetEnable.selectedIndex == 0 ) {
+			document.getElementById("set_idle_time").style.display = 'none';
+			document.getElementById("set_admin_table").style.display = 'none';
+		}
+	}
+}
+
+function frmLoad()
+{
+	with (document.forms[0])
+	{
+		if(enbltelnet=="2"){
+			telnetEnable.selectedIndex = 2;
+			telnetUserName.value= sshusername;
+			for(i=0;i<telnetIdleTime.length;i++){
+				if(telnetIdleTime[i].value==sshidleTime)
+					telnetIdleTime.selectedIndex= i;
+			}
+		}	
+		else if(enbltelnet=="1"){
+			telnetEnable.selectedIndex = 1;
+			telnetUserName.value= telnetusername;
+			for(i=0;i<telnetIdleTime.length;i++){
+				if(telnetIdleTime[i].value==idleTime)
+					telnetIdleTime.selectedIndex= i;
+			}
+		}
+		else if(enbltelnet=="0"){
+			telnetEnable.selectedIndex = 0;
+		}   
+
+		//document.getElementById("passwd").innerHTML = "<input name=\"telnetPassword\" type=\"password\" onfocus=\"change();\" size=\"35\" maxlength=15 />";
+		//telnetPassword.value = userpasswd;
+		
+		telnetPassword.onfocus = function () {change();};
+		telnetPassword.value = userpasswd;
+		PasswordConfirm.onfocus = function () {change2();};
+		PasswordConfirm.value = userpasswd;		
+	}
+	setChange();
+}
+$(function(){
+	$('#telnetPassword').showPassword('#show_password');
+});
+
+//-->
+
+
+</SCRIPT>
+</head>
+<body id="advancedsetup_dhcpsettings" onLoad='frmLoad()'>
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>') ;
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="content_left">
+      <div id="subnav_header">
+      </div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('remotetelnet');
+</script>
+        </ul>
+        <div id="subnav_footer">
+        </div>
+        			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_remotetelnet">Remote Console <span>Remote Console enables  telnet or SSH access into the router from a WAN connection
+                    using the modems WAN IP address.</span></h1>
+            <form action="advancedsetup_remotetelnet.cgi" method="post" onSubmit="return btnApply();">
+                 <input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>            
+                 <div class="stepWrapper">
+                <p><strong>1. Set the remote Console state below.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"> <label for="telneRemotetType">Remote Console: </label>
+                        </td>
+                        <td><select name="telnetEnable" id="telnetEnable" onChange='setChange()'>
+                                <option value="0" selected="selected">Disabled </option>
+                                <option value="1">Telnet Enabled </option>
+                                <option value="2">SSH Enabled </option>
+                            </select>
+                        </td>
+                            <input name="telneRemotetType" type="HIDDEN" id="telneRemotetType" value="0" size="35" />
+                    </tr>
+                </table>
+                </div>
+                 <div class="stepWrapper" id ='set_admin_table'>
+ 				 <div id="set_admin_pw">
+                <p><strong>2. Enter the Console username and password below.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="telnetUserName">
+                        <span id=protocolName></span>
+                        </label>
+                        </td>
+                        <td width="255"><input name="telnetUserName" type="text" id="telnetUserName" value="admin" class="textInput2" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150"><label for="telnetPassword">
+                        <span id=protocolPassword></span>
+                        </label>
+                        </td>
+                        <td><span id=passwd><input name="telnetPassword" type="password" id="telnetPassword" class="textInput2" maxlength=64/></span>
+                        </td>
+                    </tr>
+                    <tr id="PasswordConfirmID">
+                        <td width="150"><label for="PasswordConfirm">Confirm Password:</label></td>
+                        <td>
+                                <span id=passwd><input name="PasswordConfirm" type="Password" id="PasswordConfirm" class="textInput2" maxlength=64/></span>
+                            </td>
+                    </tr>					
+                    <tr>
+                      <td>
+                          <input name="show_password" type="checkbox" id="show_password" onClick="show_password_change()" size="25" /> Show Password
+                      </td>
+                      <td>&nbsp;</td>
+                    </tr>					
+                </table>
+				</div>
+                </div>
+                <div id="stepWrapper_footer"></div>
+                 <div class="stepWrapper" id ='set_idle_time'>
+                <p><strong>3. Select the idle disconnect time below.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="telnetIdleTime">Idle Disconnect:</label>
+                        </td>
+                        <td><select name="telnetIdleTime" id="telnetIdleTime">
+                                <option value="Disabled" selected="selected">Disabled </option>
+                                <option value="15">15 Minutes </option>
+                                <option value="30">30 Minutes </option>
+                                <option value="60">1 Hour </option>
+                                <option value="360">6 Hours </option>
+                                <option value="720">12 Hours </option>
+                                <option value="1440">1 Day </option>
+                                <option value="4320">3 Days </option>
+                                <option value="10080">7 Days </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                 <div class="stepWrapper">
+                <p><strong>4. Click &quot;Apply&quot; to save your changes. </strong></p>
+                <a href="#" id="apply_btn" class="btn apply_btn" onclick="doSubmit()">Apply</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

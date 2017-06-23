@@ -1,0 +1,1096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+<!--hide
+
+var oa0 = '';
+var op0 = '';
+var ra0 = '';
+var rp0 = '';
+var dm0 = '';
+
+var ex0_0 = '';
+var dn0_0 = '';
+var an0_0 = '';
+var pw0_0 = '';
+var ex1_0 = '';
+var dn1_0 = '';
+var an1_0 = '';
+var pw1_0 = '';
+
+var tmpuad  = '<%ejGetVoice(domainName)%>';		// SIP Service Domain
+var tmpdme  = '<%ejGetVoice(digiMapEnable)%>';	// Dial Plan Enable
+var tmpdm  = '<%ejGetVoice(digiMap)%>';         // Dial Plan
+var tmppa = '<%ejGetVoice(proxyAddr)%>';  		// SIP Proxy URL
+var tmppp = '<%ejGetVoice(proxyPort)%>';  		// SIP Proxy Port
+var tmpoa = '<%ejGetVoice(obProxyAddr)%>';   	// SIP Outbound Proxy URL
+var tmpop = '<%ejGetVoice(obProxyPort)%>';   	// SIP Outbound Proxy Port
+var tmpra = '<%ejGetVoice(regAddr)%>';				// SIP REGISTER Server Address
+var tmprp = '<%ejGetVoice(regPort)%>';				// SIP REGISTER Server Port
+
+var tmple = '<%ejGetVoice(lineEnabled)%>';		// SIP Account Enable
+var tmpvadenable = '<%ejGetVoice(vadEnable)%>';	// SIP VAD Enabled
+var tmpphonenum = '<%ejGetVoice(extension)%>';	// SIP Account Extension
+var tmppdn = '<%ejGetVoice(dispName)%>';			// SIP Account Display Name
+var tmpan = '<%ejGetVoice(authName)%>';			// SIP Account Authentication Name
+var tmppw = '<%ejGetVoice(password)%>';			// SIP Account Password
+
+var tmppt = '<%ejGetVoice(voicePtime)%>';			// SIP Account Preferred Time
+
+var tmpcl = '<%ejGetVoice(codecList)%>';			// SIP Account Codec
+
+var tmpre  = '<%ejGetVoice(regExpTmr)%>';       // Registration Expire Time-out
+var tmpri  = '<%ejGetVoice(regRetryInt)%>';     // Registration Retry Interval
+var tmpts  = '<%ejGetVoice(tosByteSip)%>';      // QoS Tag, SIP DSCP Mark Setting 
+var tmptr  = '<%ejGetVoice(tosByteRtp)%>';      // QoS Tag, RTP DSCP Mark Setting 
+var tmpdt = '<%ejGetVoice(dtmfRelay)%>';        // DTMF Relay Settings
+var tmpst = '<%ejGetVoice(transport)%>';        // Transport Type
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+var g_maxPrefCodecs = 4;
+
+if ( tmpuad.search("ejGetVoice") < 0 ){
+	eval(tmpuad);
+}
+if ( tmpdme.search("ejGetVoice") < 0 ){
+	eval(tmpdme);
+}
+if ( tmpdm.search("ejGetVoice") < 0 ){
+	eval(tmpdm);
+}
+if ( tmppa.search("ejGetVoice") < 0 ){
+	eval(tmppa);
+}
+if ( tmppp.search("ejGetVoice") < 0 ){
+	eval(tmppp);
+}
+if ( tmpoa.search("ejGetVoice") < 0 ){
+	eval(tmpoa);
+}
+if ( tmpop.search("ejGetVoice") < 0 ){
+	eval(tmpop);
+}
+if ( tmpra.search("ejGetVoice") < 0 ){
+	eval(tmpra);
+}
+if ( tmprp.search("ejGetVoice") < 0 ){
+	eval(tmprp);
+}
+
+if ( tmple.search("ejGetVoice") < 0 ) {
+   eval( tmple );
+}
+if ( tmpvadenable.search("ejGetVoice") < 0 ) {
+   eval( tmpvadenable );
+}
+if ( tmpphonenum.search("ejGetVoice") < 0 ) {
+   eval( tmpphonenum );
+}
+if ( tmppdn.search("ejGetVoice") < 0 ) {
+   eval( tmppdn );
+}
+if ( tmpan.search("ejGetVoice") < 0 ) {
+   eval( tmpan );
+}
+if ( tmppw.search("ejGetVoice") < 0 ) {
+   eval( tmppw );
+}
+
+if ( tmppt.search("ejGetVoice") < 0 ) {
+   eval( tmppt );
+}
+
+if ( tmpcl.search("ejGetVoice") < 0 ) {
+   eval( tmpcl );
+}
+
+if ( tmpre.search("ejGetVoice") < 0 ){
+	eval(tmpre);
+}
+if ( tmpri.search("ejGetVoice") < 0 ){
+	eval(tmpri);
+}
+if ( tmpdt.search("ejGetVoice") < 0 ){
+	eval(tmpdt);
+}
+if ( tmpst.search("ejGetVoice") < 0 ){
+	eval(tmpst);
+}
+if ( tmpts.search("ejGetVoice") < 0 ){
+	eval(tmpts);
+}
+if ( tmptr.search("ejGetVoice") < 0 ){
+	eval(tmptr);
+}
+
+function ToHTMLDeCode(str)  
+{
+	var s = "";
+	if (str.length == 0)
+		return "";
+	s = str.replace(/&#39;/g, "\'");
+	s = s.replace(/&#34;/g, "\"");
+	s = s.replace(/&lt;/g, "<");
+	s = s.replace(/&gt;/g, ">");
+	s = s.replace(/&amp;/g, "&");
+	s = s.replace(/&nbsp;/g, " ");
+	s = s.replace(/'/g, "\'");
+	s = s.replace(/&quot;/g, "\"");
+	s = s.replace(/<br>/g, "\n");
+	return s;
+}
+
+function addOption(id, text, val)
+{
+	var x = document.getElementById(id);
+	var option = document.createElement("option");
+	option.text = text;
+	option.value = val;
+	try
+	{
+		/* for IE earlier than version 8 */
+		x.add(option, x.options[null]);
+	}
+	catch (e)
+	{
+		x.add(option,null);
+	}
+}
+
+function changeOutboundProxy()
+{
+	with (document.forms[0]) {
+		if (sipOutboundProxyEnable.checked == true)
+		{
+			$('.sipOutboundProxyEnabled').show();
+		}
+		else
+		{
+			$('.sipOutboundProxyEnabled').hide();
+		}
+	}
+}
+
+function isCodecDuplicate()
+{
+	var i, j;
+	
+	for (i = 1; i <= g_maxPrefCodecs; i++)
+	{
+		if (eval( "preferredCodec" + i + "_0.value" ) == 'None')
+		{
+			continue;
+		}
+		
+		for (j = i+1; j <= g_maxPrefCodecs; j++)
+		{
+			if (eval( "preferredCodec" + i + "_0.value" ) == 
+					eval( "preferredCodec" + j + "_0.value" ))
+			{
+				return true;				
+			}
+		}
+	}
+
+}
+
+function btnApply() {
+	with ( document.forms[0] ) {
+	
+		var i, j;
+	
+		if (domainName0.value == '')
+		{
+			AlertOpen('SIP Domain Name is invalid.');
+			return false;
+		}
+		domainName1.value = domainName0.value;
+		
+		if (proxyAddr0.value == '')
+		{
+			AlertOpen('SIP Proxy URL is invalid.');
+			return false;
+		}	
+		if (proxyPort0.value == '')
+		{
+			AlertOpen('SIP Proxy Port is invalid.');
+			return false;
+		}
+		proxyAddr1.value = proxyAddr0.value;
+		proxyPort1.value = proxyPort0.value;
+		
+		if (sipOutboundProxyEnable.checked == true)
+		{
+			if (obProxyAddr0.value == '')
+			{
+				AlertOpen('SIP Outbound Proxy URL is invalid.');
+				return false;
+			}
+			
+			if (obProxyPort0.value == '')
+			{
+				AlertOpen('SIP Outbound Proxy Port is invalid.');
+				return false;
+			}
+		}
+		else
+		{
+			obProxyAddr0.value = '';
+			obProxyPort0.value = '';
+		}
+		obProxyAddr1.value = obProxyAddr0.value;
+		obProxyPort1.value = obProxyPort0.value;
+		
+		if (regAddr0.value == '')
+		{
+			AlertOpen('SIP Registrar URL is invalid.');
+			return false;
+		}
+		if (regPort0.value == '')
+		{
+			AlertOpen('SIP Registrar Port is invalid.');
+			return false;
+		}
+		regAddr1.value = regAddr0.value
+		regPort1.value = regPort0.value;
+		
+		//	exmaine codec duplicate
+		for (i = 1; i <= g_maxPrefCodecs; i++)
+		{
+			if (eval( "preferredCodec" + i + "_0.value" ) == 'None')
+			{
+				continue;
+			}
+			
+			for (j = i+1; j <= g_maxPrefCodecs; j++)
+			{
+				if (eval( "preferredCodec" + i + "_0.value" ) == 
+						eval( "preferredCodec" + j + "_0.value" ))
+				{
+					AlertOpen('The CODEC of SIP account 1 is duplicate.');
+					return false;		
+				}
+			}
+		}
+		
+		for (i = 1; i <= g_maxPrefCodecs; i++)
+		{
+			if (eval( "preferredCodec" + i + "_1.value" ) == 'None')
+			{
+				continue;
+			}
+			
+			for (j = i+1; j <= g_maxPrefCodecs; j++)
+			{
+				if (eval( "preferredCodec" + i + "_1.value" ) == 
+						eval( "preferredCodec" + j + "_1.value" ))
+				{
+					AlertOpen('The CODEC of SIP account 2 is duplicate.');
+					return false;		
+				}
+			}
+		}
+		
+		// dial plan enabled
+		if (dialPlan0.value != '')
+		{
+			digiMapEnable0.value = "on";
+		}
+		else
+		{
+			digiMapEnable0.value = "off";
+		}
+		digiMapEnable1.value = digiMapEnable0.value;
+		dialPlan1.value = dialPlan0.value;
+		
+
+		if (lineEnabled0_0.checked == true)
+		{
+			lineEnabled0_0.value = 'on';
+		}
+		else
+		{
+			lineEnabled0_0.checked = true;		//should enable checked to send value
+			lineEnabled0_0.value = 'off';
+		}
+		
+		if (lineEnabled1_0.checked == true)
+		{
+			lineEnabled1_0.value = 'on';
+		}
+		else
+		{
+			lineEnabled1_0.checked = true;		//should enable checked to send value
+			lineEnabled1_0.value = 'off';
+		}
+		
+		if (vadEnable0_0.checked == true)
+		{
+			vadEnable0_0.value = 'on';
+		}
+		else
+		{
+			vadEnable0_0.checked = true;		//should enable checked to send value
+			vadEnable0_0.value = 'off';
+		}
+		
+		if (vadEnable1_0.checked == true)
+		{
+			vadEnable1_0.value = 'on';
+		}
+		else
+		{
+			vadEnable1_0.checked = true;		//should enable checked to send value
+			vadEnable1_0.value = 'off';
+		}
+		
+		// Codec List
+		var prefCodecList0 ="";
+		var prefCodecList1 ="";
+		var l;
+		
+		// for SIP accout 1
+		for (var k = 0; k < g_maxPrefCodecs; k++)
+		{
+			l = k + 1;
+			if (l == 1)
+			{
+				prefCodecList0 += eval( "preferredCodec" + l + "_0.value" );
+			}
+			else
+			{
+				if (eval( "preferredCodec" + l + "_0.value" ) == 'None')
+				{
+					continue;
+					//break;
+				}
+				prefCodecList0 += "," + eval( "preferredCodec" + l + "_0.value" );
+			}
+		}
+		prefCodecList0 += ",X_5067F0_T38,X_5067F0_NTE" 
+		codecList0_0.value = prefCodecList0;
+		
+		// for SIP accout 2
+		for (var k = 0; k < g_maxPrefCodecs; k++)
+		{
+			l = k + 1;
+			if (l == 1)
+			{
+				prefCodecList1 += eval( "preferredCodec" + l + "_1.value" );
+			}
+			else
+			{
+				if (eval( "preferredCodec" + l + "_1.value" ) == 'None')
+				{
+					continue;
+					//break;
+				}
+				prefCodecList1 += "," + eval( "preferredCodec" + l + "_1.value" );
+			}
+		}
+		prefCodecList1 += ",X_5067F0_T38,X_5067F0_NTE" 
+		codecList1_0.value = prefCodecList1;
+		
+		//
+		regExpTmr1.value = regExpTmr0.value;
+		regRetryInt1.value = regRetryInt0.value;
+		tosByteSip1.value = tosByteSip0.value;
+		tosByteRtp1.value = tosByteRtp0.value;
+		dtmfRelay1.value = dtmfRelay0.value;	
+		
+		//SIP Registrar
+		if (sipTransProtocolUDP.checked == true)
+		{
+			transport0.value = 'UDP';
+		}
+		else
+		{
+			transport0.value = 'TCP';
+		}
+		transport1.value = transport0.value;
+
+		sessionKey.value = gblsessionKey;
+
+	}	
+	document.forms[0].submit();
+}
+
+function frmLoad() {	
+	with (document.forms[0]) {
+		var i = 0;
+		var k = 0;
+		var maxCodeList = 5;
+		var codecTextArray = new Array(maxCodeList);
+		var codecValueArray = new Array(maxCodeList);
+		codecTextArray[i++] = 'G.711 MuLaw';
+		codecTextArray[i++] = 'G.711 ALaw';
+		//codecTextArray[i++] = 'G.729a';
+		//codecTextArray[i++] = 'G.731.1';
+		codecTextArray[i++] = 'G.726_24';
+		codecTextArray[i++] = 'G.726_32';
+		/*codecTextArray[i++] = 'AMR_WB_66';
+		codecTextArray[i++] = 'AMR_WB_885';
+		codecTextArray[i++] = 'AMR_WB_1265';
+		codecTextArray[i++] = 'AMR_WB_1425';
+		codecTextArray[i++] = 'AMR_WB_1585';
+		codecTextArray[i++] = 'AMR_WB_1825';
+		codecTextArray[i++] = 'AMR_WB_1985';
+		codecTextArray[i++] = 'AMR_WB_2305';
+		codecTextArray[i++] = 'AMR_WB_2385';*/
+		codecTextArray[i++] = 'None';
+		
+		i = 0;
+		codecValueArray[i++] = 'G.711MuLaw';
+		codecValueArray[i++] = 'G.711ALaw';
+		//codecValueArray[i++] = 'G.729a';
+		//codecValueArray[i++] = 'G.731.1';
+		codecValueArray[i++] = 'G.726_24';
+		codecValueArray[i++] = 'G.726_32';
+		/*codecValueArray[i++] = 'X_5067F0_AMR_WB_66';	//X_5067F0_AMR_WB_66 or AMR_WB_885 both is useful
+		codecValueArray[i++] = 'AMR_WB_885';
+		codecValueArray[i++] = 'AMR_WB_1265';
+		codecValueArray[i++] = 'AMR_WB_1425';
+		codecValueArray[i++] = 'AMR_WB_1585';
+		codecValueArray[i++] = 'AMR_WB_1825';
+		codecValueArray[i++] = 'AMR_WB_1985';
+		codecValueArray[i++] = 'AMR_WB_2305';
+		codecValueArray[i++] = 'AMR_WB_2385';*/
+		codecValueArray[i++] = 'None';
+		
+		for (i = 0; i < maxCodeList; i++)
+		{
+			addOption('preferredCodec1_0', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec1_1', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec2_0', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec2_1', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec3_0', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec3_1', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec4_0', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec4_1', codecTextArray[i], codecValueArray[i]);
+			/*addOption('preferredCodec5_0', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec5_1', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec6_0', codecTextArray[i], codecValueArray[i]);
+			addOption('preferredCodec6_1', codecTextArray[i], codecValueArray[i]);*/
+		}
+		
+		domainName0.value = eval('uad'+'0');			// SIP Domain Name
+		proxyAddr0.value = eval('pa'+'0');				// SIP Proxy URL
+		proxyPort0.value = eval('pp'+'0');				// SIP Proxy Port
+		
+		// dial plan
+		if (eval('dme'+'0') == 1)
+		{
+			dialPlan0.value = ToHTMLDeCode(eval('dm'+'0'));
+		}
+				
+		if ((eval('oa'+'0') == '') || (eval('op'+'0') == ''))
+		{
+			sipOutboundProxyEnable.checked = false;
+			sipOutboundProxyDisable.checked = true;
+			$('.sipOutboundProxyEnabled').hide();
+		}
+		else
+		{
+			obProxyAddr0.value = eval('oa'+'0');			// SIP Outbound Proxy URL
+			obProxyPort0.value = eval('op'+'0');			// SIP Outbound Proxy Port
+		}
+		
+		regAddr0.value = eval('ra'+'0');             // SIP REGISTER Server URL
+		regPort0.value = eval('rp'+'0');             // SIP REGISTER Server Port
+		
+		// Enable SIP Account
+		if ( eval("le" + '0' + "_" + '0' + "== 1")  )
+		{
+			lineEnabled0_0.checked = true;
+			//document.getElementById("table_sip_state").rows.item(2).cells.item(1).innerHTML='<font color=#0090><b>ENABLED</b></font>';
+		}
+		else
+		{
+			lineEnabled0_0.checked = false;
+			//document.getElementById("table_sip_state").rows.item(2).cells.item(1).innerHTML='<b>N/A</b>';
+		}
+		
+		if ( eval("le" + '1' + "_" + '0' + "== 1")  )
+		{
+			lineEnabled1_0.checked = true;
+		}
+		else
+		{
+			lineEnabled1_0.checked = false;
+		}
+		
+		// Enable VAD
+		if ( eval("ve" + '0' + "_" + '0' + "== 1")  )
+		{
+			vadEnable0_0.checked = true;
+		}
+		else
+		{
+			vadEnable0_0.checked = false;
+		}
+		
+		if ( eval("ve" + '1' + "_" + '0' + "== 1")  )
+		{
+			vadEnable1_0.checked = true;
+		}
+		else
+		{
+			vadEnable1_0.checked = false;
+		}		
+		
+		extension0_0.value = eval("ex"+ '0' + "_" + '0');	// SIP Account Extension
+		dispName0_0.value = eval("dn"+ '0' + "_" + '0');	// SIP Account Extension
+		authName0_0.value = eval("an"+ '0' + "_" + '0');	// SIP Account Authentication Name
+		password0_0.value = eval("pw"+ '0' + "_" + '0');	// SIP Account Password
+
+		extension1_0.value = eval("ex"+ '1' + "_" + '0');	// SIP Account Extension
+		dispName1_0.value = eval("dn"+ '1' + "_" + '0');	// SIP Account Extension
+		authName1_0.value = eval("an"+ '1' + "_" + '0');	// SIP Account Authentication Name
+		password1_0.value = eval("pw"+ '1' + "_" + '0');	// SIP Account Password
+
+
+		// Preferred Time		
+		// SIP Account 1
+		for (var t = 0; t < voicePtime0_0.length; t++)
+		{
+			if (eval("voicePtime0_0.options["+t+"].value") == eval("vp"+ '0' + "_" + '0'))
+			{
+				eval("voicePtime0_0.options["+t+"].selected = true");
+			}
+		}
+		
+		// SIP Account 2
+		for (var t = 0; t < voicePtime1_0.length; t++)
+		{
+			if (eval("voicePtime1_0.options["+t+"].value") == eval("vp"+ '1' + "_" + '0'))
+			{
+				eval("voicePtime1_0.options["+t+"].selected = true");
+			}
+		}
+			
+		// codec	
+		// SIP Account 1
+		var temp = eval( "cl" + '0' + "_" + '0' + ".split(',')" );
+		
+		for (var j = 0; j < g_maxPrefCodecs; j++)
+		{
+			k = j + 1;
+			if ( j < temp.length )
+			{
+				eval("preferredCodec" + k + "_0.value = \"None\"" );       	
+				for (var t = 0; t < eval("preferredCodec" + k + "_0.length"); t++)
+				{
+					if (eval("preferredCodec" + k + "_0.options["+t+"].value") == temp[j])
+					{
+						eval("preferredCodec" + k + "_0.options["+t+"].selected = true");
+					}
+				}
+			}
+			else
+			{
+				eval("preferredCodec" + k + "_0.value = \"None\" " );
+				//break;
+			}
+		}
+		
+		// SIP Account 2
+		k = 0;
+		temp = eval( "cl" + '1' + "_" + '0' + ".split(',')" );
+		for (var j = 0; j < g_maxPrefCodecs; j++)
+		{
+			k = j + 1;
+			if ( j < temp.length )
+			{
+				eval("preferredCodec" + k + "_1.value = \"None\"" );       	
+				for (var t = 0; t < eval("preferredCodec" + k + "_1.length"); t++)
+				{
+					if (eval("preferredCodec" + k + "_1.options["+t+"].value") == temp[j])
+					{
+						eval("preferredCodec" + k + "_1.options["+t+"].selected = true");
+					}
+				}
+			}
+			else
+			{
+				eval("preferredCodec" + k + "_1.value = \"None\" " );
+				//break;
+			}
+		}
+		
+		// Registration time
+		regExpTmr0.value = eval("re"+ '0' );
+		regRetryInt0.value = eval("ri"+ '0' );
+		
+		// DTMF Relay Settings
+		for (var t = 0; t < dtmfRelay0.length; t++)
+		{
+			if (eval("dtmfRelay0.options["+t+"].value") == eval("dt"+ '0'))
+			{
+				eval("dtmfRelay0.options["+t+"].selected = true");
+			}
+		}
+		
+		// DSCP for SIP
+		for (var t = 0; t < tosByteSip0.length; t++)
+		{
+			if (eval("tosByteSip0.options["+t+"].value") == eval("ts"+ '0'))
+			{
+				eval("tosByteSip0.options["+t+"].selected = true");
+			}
+		}
+		
+		// DSCP for RTP
+		for (var t = 0; t < tosByteRtp0.length; t++)
+		{
+			if (eval("tosByteRtp0.options["+t+"].value") == eval("tr"+ '0'))
+			{
+				eval("tosByteRtp0.options["+t+"].selected = true");
+			}
+		}
+		
+		// SIP Registrar
+		if (eval("st"+ '0') == 'UDP')
+		{
+			sipTransProtocolUDP.checked = true;
+			sipTransProtocolTCP.checked = false;
+		}
+		else
+		{
+			sipTransProtocolUDP.checked = false;
+			sipTransProtocolTCP.checked = true;
+		}
+				
+		sipMode.disabled = true;
+		
+		sipProxyEnable.disabled = true;
+		sipProxyDisable.disabled = true;
+		sipRegistrarEnable.disabled = true;
+		sipRegistrarDisable.disabled = true;
+		
+		phyEndpointId1.disabled = true;
+		phyEndpointId2.disabled = true;
+		
+		hookFlashRelay.disabled = true;		
+	}
+}
+
+// done hiding -->
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('voipbasic', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+         </div>
+   </div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+            <h1 class="supportconsole_voip_basicsettings">Basic VoIP Settings<span>The VoIP settings below configure the call the handling settgins. The settings below are based on the United States location designator.</span></h1>
+			<form id="form1" name="form1" method="post" action="voicebasicsettings.cmd" onSubmit="return btnApply();">
+			<input type="hidden" name="domainName1" id="domainName1" value="">
+			<input type="hidden" name="dialPlan1" id="dialPlan1" value="">
+			<input type="hidden" name="proxyAddr1" id="proxyAddr1" value="">
+			<input type="hidden" name="proxyPort1" id="proxyPort1" value="">
+			<input type="hidden" name="obProxyAddr1" id="obProxyAddr1" value="">
+			<input type="hidden" name="obProxyPort1" id="obProxyPort1" value="">
+			<input type="hidden" name="regAddr1" id="regAddr1" value="">
+			<input type="hidden" name="regPort1" id="regPort1" value="">
+			<input type="hidden" name="digiMapEnable0" id="digiMapEnable0" value="">
+			<input type="hidden" name="digiMapEnable1" id="digiMapEnable1" value="">
+			
+			<input type="hidden" name="regExpTmr1" id="regExpTmr1" value="">
+			<input type="hidden" name="regRetryInt1" id="regRetryInt1" value="">
+			<input type="hidden" name="tosByteSip1" id="tosByteSip1" value="">
+			<input type="hidden" name="tosByteRtp1" id="tosByteRtp1" value="">
+			<input type="hidden" name="dtmfRelay1" id="dtmfRelay1" value="">
+			
+			<input type="hidden" name="codecList0_0" id="codecList0_0" value="">
+			<input type="hidden" name="codecList1_0" id="codecList1_0" value="">
+			<input type="hidden" name="transport0" id="transport0" value="">
+			<input type="hidden" name="transport1" id="transport1" value="">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="">
+					<div class="stepWrapper">
+					<p><strong>1. Set the SIP mode.</strong></p>
+						<table>
+						<tr>
+						  <td width="175">SIP Mode:</td>
+						  <td><select name="sipMode" id="sipMode" onChange="">
+								  <option value="unmanaged" selected="selected">Unmanaged</option>
+								</select>
+						  </td>
+						</tr>
+						</table>
+               </div>
+				  
+               <div class="stepWrapper">
+						<p><strong>2. Set the SIP domain name.</strong></p>
+						<table>
+							<tr>
+								<td width="175">SIP Domain Name:</td>
+								<td><input name="domainName0" type="text" id="domainName0" /></td>
+							</tr>
+						</table>
+               </div>
+					
+               <div class="stepWrapper">
+						<p><strong>3. Set the VoIP dial plan (Optional).</strong></p>
+						<table>
+							<tr>
+								<td width="175">VoIP Dial Plan Setting:</td>
+								<td><input name="dialPlan0" type="text" id="dialPlan0" /></td>
+							</tr>
+						</table>
+               </div>
+					
+					<div class="stepWrapper">
+						<p><strong>4. Set the SIP proxy details.</strong></p>
+						<table>
+							<tr>
+								<td width="175"><label for="sipProxy">SIP Proxy:</label></td>
+								<td><label><input name="sipProxy" type="radio" id="sipProxyEnable" value="sipProxyEnable" checked="checked" /> Enable </label></td>
+								<td><label><input name="sipProxy" type="radio" id="sipProxyDisable" value="sipProxyDisable" /> Disable </label></td>
+							</tr>
+							<tr class="sipProxyEnabled">
+								<td width="135">SIP Proxy URL:</td>
+								<td colspan="2"><input name="proxyAddr0" id="proxyAddr0" type="text" size="35" value="" /></td>
+							</tr>
+							<tr class="sipProxyEnabled">
+								<td width="135">SIP Proxy Port:</td>
+								<td colspan="2"><input name="proxyPort0" id="proxyPort0" type="text" size="35" value="5060" /></td>
+							</tr>
+						</table>
+					</div>
+					
+					<div class="stepWrapper">
+						<p><strong>5. Set the SIP outbound proxy details.</strong></p>
+						<table>
+							<tr>
+								<td width="175"><label for="sipOutboundProxy">SIP Outbound Proxy:</label></td>
+								<td><label><input name="sipOutboundProxy" type="radio" id="sipOutboundProxyEnable" value="sipOutboundProxyEnable" checked="checked" onClick="changeOutboundProxy()"/> Enable </label></td>
+								<td><label><input name="sipOutboundProxy" type="radio" id="sipOutboundProxyDisable" value="sipOutboundProxyDisable" onClick="changeOutboundProxy()"/> Disable </label></td>
+							</tr>
+							<tr class="sipOutboundProxyEnabled">
+								<td width="135">SIP Outbound Proxy URL:</td>
+								<td colspan="2"><input name="obProxyAddr0" id="obProxyAddr0" type="text" size="35" value="" /></td>
+							</tr>
+							<tr class="sipOutboundProxyEnabled">
+								<td width="135">SIP Outbound Proxy Port:</td>
+								<td colspan="2"><input name="obProxyPort0" id="obProxyPort0" type="text" size="35" value="5060" /></td>
+							</tr>
+						</table>
+					</div>
+					
+					<div class="stepWrapper">
+						<p><strong>6. Set the SIP registrar details.</strong></p>
+						<table>
+							<tr>
+								<td width="175"><label for="sipRegistrar">SIP Registrar:</label></td>
+								<td><label><input name="sipRegistrar" type="radio" id="sipRegistrarEnable" value="sipRegistrarEnable" checked="checked" /> Enable </label></td>
+								<td><label><input name="sipRegistrar" type="radio" id="sipRegistrarDisable" value="sipRegistrarDisable" /> Disable </label></td>
+							</tr>
+							<tr class="sipRegistrarEnabled">
+								<td width="135">SIP Registrar URL:</td>
+								<td colspan="2"><input name="regAddr0" id="regAddr0" type="text" size="35" value="" /></td>
+							</tr>
+							<tr class="sipRegistrarEnabled">
+								<td width="135">SIP Registrar Port:</td>
+								<td colspan="2"><input name="regPort0" id="regPort0" type="text" size="35" value="5060" /></td>
+							</tr>
+						</table>
+					</div>
+					
+					<div class="stepWrapper">
+						<p><strong>7. Set the SIP account details.</strong></p>
+						<table>
+							<tr>
+								<td width="175">SIP Account:</td>
+								<td>&nbsp;&nbsp;1</td>
+								<td>&nbsp;&nbsp;2</td>
+							</tr>
+							<tr class="checkSipAccount">
+								<td width="175">Check to Enable SIP Account:</td>
+								<td><input type="checkbox" name="lineEnabled0_0" id="lineEnabled0_0" value="" /></td>
+								<td><input type="checkbox" name="lineEnabled1_0" id="lineEnabled1_0" value="" /></td>
+							</tr>
+							<tr class="checkVadSupport">
+								<td width="175">Check to Enable VAD Support:</td>
+								<td><input type="checkbox" name="vadEnable0_0" id="vadEnable0_0" value="" /></td>
+								<td><input type="checkbox" name="vadEnable1_0" id="vadEnable1_0" value="" /></td>
+							</tr>
+							<tr class="phyEndpointId">
+								<td width="175">Physical Endpoint ID:</td>
+								<td><input type="text" size="15" name="phyEndpointId1" id="phyEndpointId1" value="" /></td>
+								<td><input type="text" size="15" name="phyEndpointId2" id="phyEndpointId2" value="" /></td>
+							</tr>
+							<tr class="extension">
+								<td width="175">Extension:</td>
+								<td><input type="text" size="15" name="extension0_0" id="extension0_0" value="" /></td>
+								<td><input type="text" size="15" name="extension1_0" id="extension1_0" value="" /></td>
+							</tr>
+							<tr class="displayName">
+								<td width="175">Display Name:</td>
+								<td><input type="text" size="15" name="dispName0_0" id="dispName0_0" value="" /></td>
+								<td><input type="text" size="15" name="dispName1_0" id="dispName1_0" value="" /></td>
+							</tr>
+							<tr class="authName">
+								<td width="175">Authentication Name:</td>
+								<td><input type="text" size="15" name="authName0_0" id="authName0_0" value="" /></td>
+								<td><input type="text" size="15" name="authName1_0" id="authName1_0" value="" /></td>
+							</tr>
+							<tr class="password">
+								<td width="175">Password:</td>
+								<td><input type="text" size="15" name="password0_0" id="password0_0" value="" /></td>
+								<td><input type="text" size="15" name="password1_0" id="password1_0" value="" /></td>
+							</tr>
+							<tr class="preferredTime">
+								<td width="175">Preferred Time:</td>
+								<td><select name="voicePtime0_0" id="voicePtime0_0" onChange="">
+								  <option value="10">10</option>
+								  <option value="20">20</option>
+								  <option value="30">30</option>
+								</select></td>
+								<td><select name="voicePtime1_0" id="voicePtime1_0" onChange="">
+								  <option value="10">10</option>
+								  <option value="20">20</option>
+								  <option value="30">30</option>
+								</select></td>
+							</tr>
+							<tr class="preferredCodec1">
+								<td width="175">Preferred CODEC 1:</td>
+								<td><select name="preferredCodec1_0" id="preferredCodec1_0" onChange="">
+<!--hide
+								  <option value="G711 MuLaw">G.711 MuLaw</option>
+								  <option value="G711 ALaw">G.711 ALaw</option>
+								  <option value="G729a">G.729a</option>
+								  <option value="G731.1">G.731.1</option>
+								  <option value="G726_24">G.726_24</option>
+								  <option value="G726_32">G.726_32</option>
+								  <option value="AMR_WB_65">AMR_WB_65</option>
+								  <option value="AMR_WB_885">AMR_WB_885</option>
+								  <option value="AMR_WB_1265">AMR_WB_1265</option>
+								  <option value="AMR_WB_1425">AMR_WB_1425</option>
+								  <option value="AMR_WB_1585">AMR_WB_1585</option>
+								  <option value="AMR_WB_1825">AMR_WB_1825</option>
+								  <option value="AMR_WB_1985">AMR_WB_1985</option>
+								  <option value="AMR_WB_2305">AMR_WB_2305</option>
+								  <option value="AMR_WB_2385">AMR_WB_2385</option>
+								  <option value="None">None</option>
+// done hiding -->
+								</select></td>
+								<td><select name="preferredCodec1_1" id="preferredCodec1_1" onChange="">
+								</select></td>
+							</tr>
+							<tr class="preferredCodec2">
+								<td width="175">Preferred CODEC 2:</td>
+								<td><select name="preferredCodec2_0" id="preferredCodec2_0" onChange="">
+								</select></td>
+								<td><select name="preferredCodec2_1" id="preferredCodec2_1" onChange="">						  
+								</select></td>
+							</tr>
+							<tr class="preferredCodec3">
+								<td width="175">Preferred CODEC 3:</td>
+								<td><select name="preferredCodec3_0" id="preferredCodec3_0" onChange="">
+								</select></td>
+								<td><select name="preferredCodec3_1" id="preferredCodec3_1" onChange="">						  
+								</select></td>
+							</tr>
+							<tr class="preferredCodec4">
+								<td width="175">Preferred CODEC 4:</td>
+								<td><select name="preferredCodec4_0" id="preferredCodec4_0" onChange="">
+								</select></td>
+								<td><select name="preferredCodec4_1" id="preferredCodec4_1" onChange="">						  
+								</select></td>
+							</tr>
+<!--hide
+							<tr class="preferredCodec5">
+								<td width="175">Preferred CODEC 5:</td>
+								<td><select name="preferredCodec5_0" id="preferredCodec5_0" onChange="">
+								</select></td>
+								<td><select name="preferredCodec5_1" id="preferredCodec5_1" onChange="">						  
+								</select></td>
+							</tr>
+							<tr class="preferredCodec6">
+								<td width="175">Preferred CODEC 6:</td>
+								<td><select name="preferredCodec6_0" id="preferredCodec6_0" onChange="">
+								</select></td>
+								<td><select name="preferredCodec6_1" id="preferredCodec6_1" onChange="">						  
+								</select></td>
+							</tr>
+// done hiding -->
+						</table>
+					</div>
+					
+					<div class="stepWrapper">
+						<p><strong>8. Set the registration details (Optional).</strong></p>
+						<table>
+							<tr>
+								<td width="175">Registration Expire Time-out:</td>
+								<td colspan="2"><input type="text" size="15" name="regExpTmr0" id="regExpTmr0" value="" /></td>
+							</tr>
+							<tr>
+								<td width="175">Registration Retry Interval:</td>
+								<td colspan="2"><input type="text" size="15" name="regRetryInt0" id="regRetryInt0" value="" /></td>
+							</tr>
+							<tr>
+								<td width="175">DSCP for SIP:</td>
+								<td colspan="2"><select name="tosByteSip0" id="tosByteSip0" onChange="">
+									<option value="46">EF   (101110)</option>
+									<option value="14">AF13 (001110)</option>
+									<option value="12">AF12 (001100)</option>
+									<option value="10">AF11 (001010)</option>
+									<option value="8">CS1  (001000)</option>
+									<option value="22">AF23 (010110)</option>
+									<option value="20">AF22 (010100)</option>
+									<option value="18">AF21 (010010)</option>
+									<option value="16">CS2  (010000)</option>
+									<option value="30">AF33 (011110)</option>
+									<option value="28">AF32 (011100)</option>
+									<option value="26">AF31 (011010)</option>
+									<option value="24">CS3  (011000)</option>
+									<option value="38">AF43 (100110)</option>
+									<option value="36">AF42 (100100)</option>
+									<option value="34">AF41 (100010)</option>
+									<option value="32">CS4  (100000)</option>
+									<option value="40">CS5  (101000)</option>
+									<option value="48">CS6  (110000)</option>
+									<option value="56">CS7  (111000)</option>
+								</select></td>
+							</tr>
+							<tr>
+								<td width="175">DSCP for RTP:</td>
+								<td colspan="2"><select name="tosByteRtp0" id="tosByteRtp0" onChange="">
+									<option value="46">EF   (101110)</option>
+									<option value="14">AF13 (001110)</option>
+									<option value="12">AF12 (001100)</option>
+									<option value="10">AF11 (001010)</option>
+									<option value="8">CS1  (001000)</option>
+									<option value="22">AF23 (010110)</option>
+									<option value="20">AF22 (010100)</option>
+									<option value="18">AF21 (010010)</option>
+									<option value="16">CS2  (010000)</option>
+									<option value="30">AF33 (011110)</option>
+									<option value="28">AF32 (011100)</option>
+									<option value="26">AF31 (011010)</option>
+									<option value="24">CS3  (011000)</option>
+									<option value="38">AF43 (100110)</option>
+									<option value="36">AF42 (100100)</option>
+									<option value="34">AF41 (100010)</option>
+									<option value="32">CS4  (100000)</option>
+									<option value="40">CS5  (101000)</option>
+									<option value="48">CS6  (110000)</option>
+									<option value="56">CS7  (111000)</option>
+								</select></td>
+							</tr>
+							<tr>
+								<td width="175">DTMF Relay Settings:</td>
+								<td colspan="2"><select name="dtmfRelay0" id="dtmfRelay0" onChange="">
+								  <option value="RFC2833">Out of Band-RFC2833</option>
+								  <option value="InBand">In Band</option>
+								  <option value="SIPInfo">SIP Info</option>
+								</select></td>
+							</tr>
+							<tr>
+								<td width="175">Hook Flash Relay Settings:</td>
+								<td colspan="2"><select name="hookFlashRelay" id="hookFlashRelay" onChange="">
+								  <option value="SIP Information">SIP Information</option>
+								</select></td>
+							</tr>
+							<tr>
+								<td width="175"><label for="sipTransProtocol">SIP Registrar:</label></td>
+								<td><label><input name="sipTransProtocol" type="radio" id="sipTransProtocolUDP" value="UDP" checked="checked" /> UDP </label></td>
+								<td><label><input name="sipTransProtocol" type="radio" id="sipTransProtocolTCP" value="TCP" /> TCP </label></td>
+							</tr>
+						</table>
+					</div>
+					
+               <div class="stepWrapper">
+					  <p><strong>9. Click &quot;Apply&quot; to save your changes. </strong></p>
+					  <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+					</div>
+			   </form>
+                      <p>&nbsp;</p>
+<!--hide
+				  <span>
+              <div class="stepWrapperdark">
+				  <div >
+              <table id="table_sip_state">
+                	<tr>
+							<th colspan="4" class="tableTitle">SIP STATE</th>
+						</tr>
+                  <tr>
+							<th width="20%">Name</th>
+							<th width="20%">State</th>
+							<th width="40%">Registration State</th>
+							<th width="15%">Calls</th>
+						</tr>
+                  <tr>
+							<td>SIP 1</td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+                  <tr>
+							<td>SIP 2</td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+              </table>
+				  </div>
+				  </div>
+				  </span>
+// done hiding -->
+					<div class="clear_left"></div>
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
+

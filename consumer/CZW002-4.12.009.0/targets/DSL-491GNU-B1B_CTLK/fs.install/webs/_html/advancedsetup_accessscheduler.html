@@ -1,0 +1,885 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+<!-- hide
+var lanInfo= "<%ejGetOtherBig(dhcpLeasesinfo)%>";
+var SchRulelist ="<%ejGetOtherBig(accschlist)%>";
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var dev_name;
+
+function frmLoad() 
+{
+  with ( document.forms[0] )
+  {
+     ipaddress.value = '';
+     mac.value='';
+     dev_name = '';
+  }
+  encapChange();
+}
+
+function checkScheduleDup(guiStartTime, guiEndTime, guiDay, macValue)
+{
+	var SIZE_X = 7;
+	var SIZE_Y = 96;
+	var a = 0, b = 0, x = 0, y = 0;
+	var rule_start_time = 0, rule_end_time = 0;
+	var markStart = 0, markEnd = 0;
+	var scheduleTbl = new Array(SIZE_X);
+	for(x = 0; x < SIZE_X; x++){
+		scheduleTbl[x] =  new Array(SIZE_Y);
+	}
+
+	/* init array */
+	for(x = 0; x < SIZE_X; x++){
+		for(y = 0; y < SIZE_Y; y++){
+			scheduleTbl[x][y] = 0;
+		}
+	}
+
+	var Rules= SchRulelist.split("|");
+	for(a = 0; a < (Rules.length - 1); a++){
+		var ip_time = Rules[a].split(";");
+		var st_str = ip_time[2].split(":");
+		var en_str = ip_time[3].split(":");
+		rule_start_time = (parseInt(st_str[0]) * 60) + parseInt(st_str[1]);
+		rule_end_time = (parseInt(en_str[0]) * 60) + parseInt(en_str[1]);
+		
+		if(rule_end_time < rule_start_time && rule_end_time - rule_start_time == -1){
+			markStart = 0;
+			markEnd = 96;
+		}
+		else{
+			markStart = rule_start_time / 15;
+			if(rule_end_time < rule_start_time && rule_end_time - rule_start_time != -1){
+				markEnd = ((rule_end_time + 1) / 15) + 96;
+			}
+			else{
+				markEnd = (rule_end_time + 1) / 15;
+			}
+		}
+
+		for(b = markStart; b < markEnd; b++){
+			if(macValue == ip_time[0]){
+				if(ip_time[1].indexOf('Mon') != -1){
+					x = parseInt(b / 96) + 0;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+				if(ip_time[1].indexOf('Tue') != -1){
+					x = parseInt(b / 96) + 1;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+				if(ip_time[1].indexOf('Wed') != -1){
+					x = parseInt(b / 96) + 2;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+				if(ip_time[1].indexOf('Thu') != -1){
+					x = parseInt(b / 96) + 3;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+				if(ip_time[1].indexOf('Fri') != -1){
+					x = parseInt(b / 96) + 4;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+				if(ip_time[1].indexOf('Sat') != -1){
+					x = parseInt(b / 96) + 5;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+				if(ip_time[1].indexOf('Sun') != -1){
+					x = parseInt(b / 96) + 6;
+					y = b % 96;
+
+					x = (x == 7)?0:x;
+					scheduleTbl[x][y] = 1;
+				}
+			}
+		}
+	}
+
+	if(guiEndTime < guiStartTime && guiEndTime - guiStartTime == -1){
+		markStart = 0;
+		markEnd = 96;
+	}
+	else{
+		markStart = guiStartTime / 15;
+		if(guiEndTime < guiStartTime && guiEndTime - guiStartTime != -1){
+			markEnd = ((guiEndTime + 1) / 15) + 96;
+		}
+		else{
+			markEnd = (guiEndTime + 1) / 15;
+		}
+	}
+
+	for(b = markStart; b < markEnd; b++){
+		if(guiDay&1){
+			x = parseInt(b / 96) + 0;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+		if(guiDay&2){
+			x = parseInt(b / 96) + 1;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+		if(guiDay&4){
+			x = parseInt(b / 96) + 2;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+		if(guiDay&8){
+			x = parseInt(b / 96) + 3;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+		if(guiDay&16){
+			x = parseInt(b / 96) + 4;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+		if(guiDay&32){
+			x = parseInt(b / 96) + 5;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+		if(guiDay&64){
+			x = parseInt(b / 96) + 6;
+			y = b % 96;
+
+			x = (x == 7)?0:x;
+			if(scheduleTbl[x][y] == 1){
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+function btnApply() {
+	var rule_start_time;
+	var rule_end_time;
+	var st_time;
+	var ed_time;
+	var its= lanInfo.split("|");
+	with ( document.forms[0] ) {		
+		action.value = "add";
+		mac.value=ipaddress.value;
+		
+		if (from.value == to.value)
+		{
+			AlertOpen('An invalid timeframe was selected for your rule.  Please enter a valid from and to time.');
+			return false;
+		}  
+		if ( mac.value == '' ) {
+			AlertOpen( 'Please enter a IP address.' );
+			return false;
+		}
+		if(isValidIpAddress(mac.value)!=true)
+		{
+			AlertOpen('The IP Address is invalid. Please enter a valid IP address.');
+			ipaddress.value='';
+			mac.value='';
+			return false;
+		}
+		else {
+			var daysvalue;
+			daysvalue = 0;
+			
+			if( monday.checked )
+				daysvalue = 1;
+			
+			if( tuesday.checked )
+				daysvalue |= 2;
+			
+			if( wednesday.checked )
+				daysvalue |= 4;
+			
+			if( thursday.checked )
+				daysvalue |= 8;
+			
+			if( friday.checked )
+				daysvalue |= 16;
+			
+			if( saturday.checked )
+				daysvalue |= 32;
+			
+			if( sunday.checked )
+				daysvalue |= 64;
+
+			if( AllDays.checked )
+				daysvalue |= 127;
+			
+			if( daysvalue == 0 ) {
+				AlertOpen("No days were specified.");
+				return false;
+			}			
+			if(dev_name==''){
+				username.value = 'unknown'+'@'+from.value+to.value+daysvalue;
+				for (i = 0 ; i < its.length ; i++){
+        				var names = its[i].split("/");		
+       			 	if (names.length > 2){	 
+           					if(ipaddress.value == names[2]){
+							dev_name=names[0];
+							username.value = dev_name+'@'+from.value+to.value+daysvalue;
+	       					break;
+	    					} 
+         				} 
+       			} 
+			}else{
+				username.value = dev_name+'@'+from.value+to.value+daysvalue;
+			}
+			
+			days.value = daysvalue;
+
+			if( from.value.length ) {
+				vals = from.value.split( ':' );	
+				if ( vals.length == 2 ) {
+					hour = eval( vals[0] )					
+					min = eval( vals[1] );					
+					if( hour < 0 || hour > 23 ) {
+						AlertOpen( from.value + " is an invalid time." );
+						return false;
+					}
+					if( min < 0 || min > 59 ) {
+						AlertOpen( from.value + " is an invalid time." );
+					}
+					st_time = hour * 60 + min;
+				} else {
+					AlertOpen( from.value + " is an invalid time." );
+					return false;
+				}
+			} else {
+				st_time = 0; // 00:00
+			}
+
+			if(to.value.length ) {
+				vals = to.value.split( ':' );
+				if ( vals.length == 2 ) {
+					hour = eval( vals[0] );
+					min = eval( vals[1] );
+					if( hour < 0 || hour > 23 ) {
+						AlertOpen( to.value + " is an invalid time." );
+						return false;
+					}
+					if( min < 0 || min > 59 ) {
+						AlertOpen( to.value + " is an invalid time." );
+						return false;
+					}
+					ed_time = hour* 60 + min;
+				} else {
+					AlertOpen( to.value + " is an invalid time." );
+					return false;
+				}
+			} else {
+				ed_time = 1439; // 23:59
+			}
+			/*
+			if( ed_time < st_time && ed_time - st_time != -1) {
+				AlertOpen( 'Stop time must be later than start time.');
+				return false;
+			}
+			*/
+			start_time.value=st_time;
+			end_time.value=ed_time;
+			/*
+			var Rules= SchRulelist.split("|");
+			var rule_day;
+			var j;
+			//alert('length is '+Rules.length);
+			for(j=0;j<(Rules.length-1);j++)
+			{
+				//alert('Rules['+j+'] is '+Rules[j]);
+				var ip_time=Rules[j].split(";");
+				rule_day=0;
+				if(ip_time[1].indexOf('Mon')!=-1)
+					rule_day=1;
+				if(ip_time[1].indexOf('Tue')!=-1)
+					rule_day |=2;
+				if(ip_time[1].indexOf('Wed')!=-1)
+					rule_day |=4;
+				if(ip_time[1].indexOf('Thu')!=-1)
+					rule_day |=8;
+				if(ip_time[1].indexOf('Fri')!=-1)
+					rule_day |=16;
+				if(ip_time[1].indexOf('Sat')!=-1)
+					rule_day |=32;
+				if(ip_time[1].indexOf('Sun')!=-1)
+					rule_day |=64;
+				var day_conf=rule_day&daysvalue;
+				//alert('rule_day is '+rule_day+' days is'+days+' and is'+day_conf);
+				//alert('mac is'+mac.value+' ip is '+ip_time[0]);
+				if((day_conf!=0)&&(mac.value==ip_time[0]))
+				{
+					var st_str=ip_time[2].split(":");
+					var en_str=ip_time[3].split(":");
+					rule_start_time=(parseInt(st_str[0])*60)+parseInt(st_str[1]);
+					//alert('start time is '+rule_start_time);
+					rule_end_time=(parseInt(en_str[0])*60)+parseInt(en_str[1]);
+					//alert('end time is '+rule_end_time);
+					if((st_time <= rule_end_time)&&(st_time >= rule_start_time))
+					{
+						AlertOpen('The rule defined overlaps a defined rule in the device access restriction list for the defined IP.  \nThe overlapping rule must be removed before the rule defined can be applied.');
+						return false;
+					}
+					if((ed_time <= rule_end_time)&&(ed_time >= rule_start_time))
+					{
+						AlertOpen('The rule defined overlaps a defined rule in the device access restriction list for the defined IP.  \nThe overlapping rule must be removed before the rule defined can be applied.');
+						return false;
+					}
+					if((st_time <= rule_start_time)&&(ed_time >= rule_end_time))
+					{
+						AlertOpen('The rule defined overlaps a defined rule in the device access restriction list for the defined IP.  \nThe overlapping rule must be removed before the rule defined can be applied.');
+						return false;
+					}
+				}
+			}*/
+			
+			if(checkScheduleDup(st_time, ed_time, daysvalue, mac.value) == 1){
+				AlertOpen('The rule defined overlaps a defined rule in the device access restriction list for the defined IP.  \nThe overlapping rule must be removed before the rule defined can be applied.');
+				return false;
+			}
+			document.forms[0].sessionKey.value = gblsessionKey;	
+			document.forms[0].submit();
+
+			//Return false to avoid do submit twice.
+			return false;
+		}
+	}		
+}
+
+function encapChange() {
+	with ( document.forms[0] ) 
+	{
+		var its= lanInfo.split("|");
+		
+		if(mode.value=="Manually Enter IP Address")
+		{
+			ipaddress.value = '';
+			mac.value='';
+			dev_name = '';
+			ipaddress.disabled = false;
+			$('.manual_ip_address').show();
+			ipaddress.style.background = "#FFF";
+		}
+		else 
+		{
+			ipaddress.disabled = true;
+			$('.manual_ip_address').hide();
+			ipaddress.style.background = "#999";
+			
+			for (i = 0 ; i < its.length ; i++) 
+			{
+				var names = its[i].split("/");
+				if (names.length > 2) 
+				{
+					if((mode.value==names[1])||(mode.value==names[2]))
+					{
+						ipaddress.value=names[2];
+						mac.value=names[2];
+						if(mode.value==names[1])
+							dev_name=names[0];
+						else
+							dev_name=names[2];
+						break;
+					}  //else
+				} // if name.length
+			} // for
+		}// else
+	} //with
+}
+
+function dayChange() {
+	with ( document.forms[0] ) 
+	{	
+		if(AllDays.checked == true){
+			monday.checked = true;
+			monday.disabled = true;
+			tuesday.checked = true;
+			tuesday.disabled = true;
+			wednesday.checked = true;
+			wednesday.disabled = true;
+			thursday.checked = true;
+			thursday.disabled = true;
+			friday.checked = true;
+			friday.disabled = true;
+			saturday.checked = true;
+			saturday.disabled = true;
+			sunday.checked = true;
+			sunday.disabled = true;	
+		}else{
+			monday.checked = false;
+			monday.disabled = false;
+			tuesday.checked = false;
+			tuesday.disabled = false;
+			wednesday.checked = false;
+			wednesday.disabled = false;
+			thursday.checked = false;
+			thursday.disabled = false;
+			friday.checked = false;
+			friday.disabled = false;
+			saturday.checked = false;
+			saturday.disabled = false;
+			sunday.checked = false;
+			sunday.disabled = false;
+              }
+
+	} //with
+}
+
+function removeClick(rml, ip) {
+	
+	with ( document.forms[0] ) {
+		action.value="remove";
+		rmLst.value=rml;
+		mac.value=ip;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	
+}    
+-->
+</script>
+</head>
+<body  id="advancedsetup_accessscheduler">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>        
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+        <a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="content_left">
+        <div id="subnav_header">
+        </div>
+        <ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('accessscheduler');
+</script>
+        </ul>       
+        <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+    </div>
+    <div id="content_right">
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_schedulingaccess">Access Scheduler<span> Access Scheduler sets Internet access rules for LAN devices.</span></h1>
+            <form action="todmngr.tod" method="post" onSubmit="return btnApply();">
+            <input type="hidden" name="action" id="action" value="">
+	     <input type="hidden" name="days" id="days" value="">
+	     <input type="hidden" name="start_time" id="start_time" value="">
+	     <input type="hidden" name="end_time" id="end_time" value="">
+	     <input type="hidden" name="username" id="username" value="">
+	     <input type="hidden" name="rmLst" id="rmLst" value="">
+	     <input type="hidden" name="mac" id="mac" value=""/>
+		 <input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+                <div class="stepWrapper">
+                    <p><strong>1. Select Device, or manually enter an IP address.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">Select Device: </td>
+                            <td><select name="mode" id="mode" onChange="encapChange()">
+                                    <option value="Manually Enter IP Address" selected="selected">Manually Enter IP Address </option>
+
+                                    <!--
+                                    <option>PaulLaptop </option>
+                                    <option>Xbox 360 </option>
+                                    <option>VistaPC </option>
+                                     -->
+<script language="javascript">
+<!-- hide
+	{
+		var i=0;
+		var hinfo = lanInfo.split('|');
+		var hostname = '';
+		if (hinfo != '') {
+			for ( i = 0; i < hinfo.length; i++ ) 
+			{
+				if (hinfo[i] == '')
+					break;
+				var names = hinfo[i].split('/');
+				if ( names[0] != 'unknown' ) {
+					hostname = names[0];
+				}
+				else if ( names[2] != '' ) {
+					hostname = names[2];
+				}
+				else {
+					hostname = names[1];
+				}
+				document.writeln("<option value=\""+names[1]+"\">"+names[0]+" - "+names[2]+" </option>");
+			}
+		}
+	}
+//-->
+</script>  
+                                </select>
+                            </td>
+                        </tr>
+                        <tr class="manual_ip_address">
+                            <td width="150">Enter IP Address:</td>
+                            <td><input name="ipaddress" id="ipaddress" type="text" size="25" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>2. Set the days of the week on which access is allowed.</strong></p>
+                <table>
+                    <tr>
+                        <td width="43"><label for="sunday">Sunday:</label>
+                        </td>
+                        <td width="64"><input type="checkbox" name="sunday" id="sunday" value="allowed" />
+                        </td>
+                        <td width="73"><label for="wednesday">Wednesday:</label></td>
+                        <td width="65"><input type="checkbox" name="wednesday" id="wednesday" value="allowed" />
+                        </td>
+                        <td width="64"><label for="saturday">Saturday:</label>
+                        </td>
+                        <td width="71"><input type="checkbox" name="saturday" id="saturday" value="allowed" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="monday">Monday:</label>
+                        </td>
+                        <td width="64"><input type="checkbox" name="monday" id="monday" value="allowed" />
+                        </td>
+                        <td width="73"><label for="thursday">Thursday:</label></td>
+                        <td width="65"><input type="checkbox" name="thursday" id="thursday" value="allowed" />
+                        </td>
+                        <td><label for="AllDays">All Days:</label></td>
+                        <td width="71"><input type="checkbox" name="AllDays" id="AllDays" value="allowed" onClick="dayChange()"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="tuesday">Tuesday:</label>
+                        </td>
+                        <td width="64"><input type="checkbox" name="tuesday" id="tuesday" value="allowed" />
+                        </td>
+                        <td width="73"><label for="friday">Friday:</label></td>
+                        <td width="65"><input type="checkbox" name="friday" id="friday" value="allowed" />
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>3. Select the time  range access is allowed.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="from">From:</label></td>
+                        <td><select name="from" id="from">
+                                <option value="00:00">12:00 AM</option>
+                                <option value="00:15">12:15 AM</option>
+                                <option value="00:30">12:30 AM</option>
+                                <option value="00:45">12:45 AM</option>
+                                <option value="01:00">1:00 AM</option>
+                                <option value="01:15">1:15 AM</option>
+                                <option value="01:30">1:30 AM</option>
+                                <option value="01:45">1:45 AM</option>
+                                <option value="02:00">2:00 AM</option>
+                                <option value="02:15">2:15 AM</option>
+                                <option value="02:30">2:30 AM</option>
+                                <option value="02:45">2:45 AM</option>
+                                <option value="03:00">3:00 AM</option>
+                                <option value="03:15">3:15 AM</option>
+                                <option value="03:30">3:30 AM</option>
+                                <option value="03:45">3:45 AM</option>
+                                <option value="04:00">4:00 AM</option>
+                                <option value="04:15">4:15 AM</option>
+                                <option value="04:30">4:30 AM</option>
+                                <option value="04:45">4:45 AM</option>
+                                <option value="05:00">5:00 AM</option>
+                                <option value="05:15">5:15 AM</option>
+                                <option value="05:30">5:30 AM</option>
+                                <option value="05:45">5:45 AM</option>
+                                <option value="06:00">6:00 AM</option>
+                                <option value="06:15">6:15 AM</option>
+                                <option value="06:30">6:30 AM</option>
+                                <option value="06:45">6:45 AM</option>
+                                <option value="07:00">7:00 AM</option>
+                                <option value="07:15">7:15 AM</option>
+                                <option value="07:30">7:30 AM</option>
+                                <option value="07:45">7:45 AM</option>
+                                <option value="08:00">8:00 AM</option>
+                                <option value="08:15">8:15 AM</option>
+                                <option value="08:30">8:30 AM</option>
+                                <option value="08:45">8:45 AM</option>
+                                <option value="09:00" selected="selected">9:00 AM</option>
+                                <option value="09:15">9:15 AM</option>
+                                <option value="09:30">9:30 AM</option>
+                                <option value="09:45">9:45 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="10:15">10:15 AM</option>
+                                <option value="10:30">10:30 AM</option>
+                                <option value="10:45">10:45 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="11:15">11:15 AM</option>
+                                <option value="11:30">11:30 AM</option>
+                                <option value="11:45">11:45 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="12:15">12:15 PM</option>
+                                <option value="12:30">12:30 PM</option>
+                                <option value="12:45">12:45 PM</option>
+                                <option value="13:00">1:00 PM</option>
+                                <option value="13:15">1:15 PM</option>
+                                <option value="13:30">1:30 PM</option>
+                                <option value="13:45">1:45 PM</option>
+                                <option value="14:00">2:00 PM</option>
+                                <option value="14:15">2:15 PM</option>
+                                <option value="14:30">2:30 PM</option>
+                                <option value="14:45">2:45 PM</option>
+                                <option value="15:00">3:00 PM</option>
+                                <option value="15:15">3:15 PM</option>
+                                <option value="15:30">3:30 PM</option>
+                                <option value="15:45">3:45 PM</option>
+                                <option value="16:00">4:00 PM</option>
+                                <option value="16:15">4:15 PM</option>
+                                <option value="16:30">4:30 PM</option>
+                                <option value="16:45">4:45 PM</option>
+                                <option value="17:00">5:00 PM</option>
+                                <option value="17:15">5:15 PM</option>
+                                <option value="17:30">5:30 PM</option>
+                                <option value="17:45">5:45 PM</option>
+                                <option value="18:00">6:00 PM</option>
+                                <option value="18:15">6:15 PM</option>
+                                <option value="18:30">6:30 PM</option>
+                                <option value="18:45">6:45 PM</option>
+                                <option value="19:00">7:00 PM</option>
+                                <option value="19:15">7:15 PM</option>
+                                <option value="19:30">7:30 PM</option>
+                                <option value="19:45">7:45 PM</option>
+                                <option value="20:00">8:00 PM</option>
+                                <option value="20:15">8:15 PM</option>
+                                <option value="20:30">8:30 PM</option>
+                                <option value="20:45">8:45 PM</option>
+                                <option value="21:00">9:00 PM</option>
+                                <option value="21:15">9:15 PM</option>
+                                <option value="21:30">9:30 PM</option>
+                                <option value="21:45">9:45 PM</option>
+                                <option value="22:00">10:00 PM</option>
+                                <option value="22:15">10:15 PM</option>
+                                <option value="22:30">10:30 PM</option>
+                                <option value="22:45">10:45 PM</option>
+                                <option value="23:00">11:00 PM</option>
+                                <option value="23:15">11:15 PM</option>
+                                <option value="23:30">11:30 PM</option>
+                                <option value="23:45">11:45 PM</option>
+                                <option value="00:00">12:00 PM</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150"><label for="to">To:</label></td>
+                        <td><select name="to" id="to">
+                                <option value="23:59">12:00 AM</option>
+                                <option value="00:14">12:15 AM</option>
+                                <option value="00:29">12:30 AM</option>
+                                <option value="00:44">12:45 AM</option>
+                                <option value="00:59">1:00 AM</option>
+                                <option value="01:14">1:15 AM</option>
+                                <option value="01:29">1:30 AM</option>
+                                <option value="01:44">1:45 AM</option>
+                                <option value="01:59">2:00 AM</option>
+                                <option value="02:14">2:15 AM</option>
+                                <option value="02:29">2:30 AM</option>
+                                <option value="02:44">2:45 AM</option>
+                                <option value="02:59">3:00 AM</option>
+                                <option value="03:14">3:15 AM</option>
+                                <option value="03:29">3:30 AM</option>
+                                <option value="03:44">3:45 AM</option>
+                                <option value="03:59">4:00 AM</option>
+                                <option value="04:14">4:15 AM</option>
+                                <option value="04:29">4:30 AM</option>
+                                <option value="04:44">4:45 AM</option>
+                                <option value="04:59">5:00 AM</option>
+                                <option value="05:14">5:15 AM</option>
+                                <option value="05:29">5:30 AM</option>
+                                <option value="05:44">5:45 AM</option>
+                                <option value="05:59">6:00 AM</option>
+                                <option value="06:14">6:15 AM</option>
+                                <option value="06:29">6:30 AM</option>
+                                <option value="06:44">6:45 AM</option>
+                                <option value="06:59">7:00 AM</option>
+                                <option value="07:14">7:15 AM</option>
+                                <option value="07:29">7:30 AM</option>
+                                <option value="07:44">7:45 AM</option>
+                                <option value="07:59">8:00 AM</option>
+                                <option value="08:14">8:15 AM</option>
+                                <option value="08:29">8:30 AM</option>
+                                <option value="08:44">8:45 AM</option>
+                                <option value="08:59" selected="selected">9:00 AM</option>
+                                <option value="09:14">9:15 AM</option>
+                                <option value="09:29">9:30 AM</option>
+                                <option value="09:44">9:45 AM</option>
+                                <option value="09:59">10:00 AM</option>
+                                <option value="10:14">10:15 AM</option>
+                                <option value="10:29">10:30 AM</option>
+                                <option value="10:44">10:45 AM</option>
+                                <option value="10:59">11:00 AM</option>
+                                <option value="11:14">11:15 AM</option>
+                                <option value="11:29">11:30 AM</option>
+                                <option value="11:44">11:45 AM</option>
+                                <option value="11:59">12:00 PM</option>
+                                <option value="12:14">12:15 PM</option>
+                                <option value="12:29">12:30 PM</option>
+                                <option value="12:44">12:45 PM</option>
+                                <option value="12:59">1:00 PM</option>
+                                <option value="13:14">1:15 PM</option>
+                                <option value="13:29">1:30 PM</option>
+                                <option value="13:44">1:45 PM</option>
+                                <option value="13:59">2:00 PM</option>
+                                <option value="14:14">2:15 PM</option>
+                                <option value="14:29">2:30 PM</option>
+                                <option value="14:44">2:45 PM</option>
+                                <option value="14:59">3:00 PM</option>
+                                <option value="15:14">3:15 PM</option>
+                                <option value="15:29">3:30 PM</option>
+                                <option value="15:44">3:45 PM</option>
+                                <option value="15:59">4:00 PM</option>
+                                <option value="16:14">4:15 PM</option>
+                                <option value="16:29">4:30 PM</option>
+                                <option value="16:44">4:45 PM</option>
+                                <option value="16:59">5:00 PM</option>
+                                <option value="17:14">5:15 PM</option>
+                                <option value="17:29">5:30 PM</option>
+                                <option value="17:44">5:45 PM</option>
+                                <option value="17:59">6:00 PM</option>
+                                <option value="18:14">6:15 PM</option>
+                                <option value="18:29">6:30 PM</option>
+                                <option value="18:44">6:45 PM</option>
+                                <option value="18:59">7:00 PM</option>
+                                <option value="19:14">7:15 PM</option>
+                                <option value="19:29">7:30 PM</option>
+                                <option value="19:44">7:45 PM</option>
+                                <option value="19:59">8:00 PM</option>
+                                <option value="20:14">8:15 PM</option>
+                                <option value="20:29">8:30 PM</option>
+                                <option value="20:44">8:45 PM</option>
+                                <option value="20:59">9:00 PM</option>
+                                <option value="21:14">9:15 PM</option>
+                                <option value="21:29">9:30 PM</option>
+                                <option value="21:44">9:45 PM</option>
+                                <option value="21:59">10:00 PM</option>
+                                <option value="22:14">10:15 PM</option>
+                                <option value="22:29">10:30 PM</option>
+                                <option value="22:44">10:45 PM</option>
+                                <option value="22:59">11:00 PM</option>
+                                <option value="23:14">11:15 PM</option>
+                                <option value="23:29">11:30 PM</option>
+                                <option value="23:44">11:45 PM</option>
+                                <option value="23:59">12:00 PM</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>4. Click &quot;Apply&quot; to create device schedule.</strong></p>
+                <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+                <p>&nbsp;</p>
+                <div class="stepWrapperdark">
+                <table>
+                    <tr>
+                		<th colspan="5" class="tableTitle">Device Access Restriction List</th>
+                	</tr>
+                    <tr>
+                        <th>Device Name </th>
+                        <th>IP Address </th>
+                        <th>Allowed Days </th>
+                        <th width="80">Allowed Time </th>
+                        <th>Edit</th>
+                    </tr>
+                   <%ejGetOtherBig(accschdtable)%>
+                </table>
+                </div>
+            </form>
+<script language='JavaScript'>
+<!--
+$(document).ready(function() {
+
+	frmLoad();
+});
+//-->
+</script>               
+            <div class="clear_left">
+            </div>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

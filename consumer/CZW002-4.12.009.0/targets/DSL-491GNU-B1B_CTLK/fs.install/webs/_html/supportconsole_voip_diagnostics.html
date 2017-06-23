@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="JavaScript">
+<!--hide
+
+var tmla = '<%ejGetVoice(sipLogAddr)%>';
+var tmlp = '<%ejGetVoice(sipLogPort)%>';
+var tmpegain = '<%ejGetVoice(egressGain)%>';
+var tmpingain = '<%ejGetVoice(ingressGain)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+if ( tmla.search("ejGetVoice") < 0 ) {
+   eval( tmla );
+}
+if ( tmlp.search("ejGetVoice") < 0 ) {
+   eval( tmlp );
+}
+if ( tmpegain.search("ejGetVoice") < 0 ) {
+   eval( tmpegain );
+}
+if ( tmpingain.search("ejGetVoice") < 0 ) {
+   eval( tmpingain );
+}
+
+function addOption(id, text, val)
+{
+	var x = document.getElementById(id);
+	var option = document.createElement("option");
+	option.text = text;
+	option.value = val;
+	try
+	{
+		/* for IE earlier than version 8 */
+		x.add(option, x.options[null]);
+	}
+	catch (e)
+	{
+		x.add(option,null);
+	}
+}
+
+function changeSipDebug()
+{
+	with (document.forms[0]) {
+		if (sipDebugEnable.checked == true)
+		{
+			$('.sipDebugEnabled').show();
+		}
+		else
+		{
+			$('.sipDebugEnabled').hide();
+		}
+	}
+}
+
+function btnApply(type) {
+	with ( document.forms[0] ) {
+
+		if (type == 'restart')
+		{
+			diagType.value = 2;
+		}
+		else if (type == 'restore')
+		{
+			diagType.value = 3;
+		}
+		else
+		{
+			if (sipDebugEnable.checked == true)
+			{
+				if ((sipLogAddr0.value == "") || (sipLogAddr0.value == "0.0.0.0") ||
+						(sipLogPort0.value == "") || (sipLogPort0.value == "0"))
+				{
+					AlertOpen('SIP Log IP Address or SIP Log Port is invalid.');
+					return false;
+				}
+			}
+			else
+			{
+				sipLogAddr0.value = "0.0.0.0";
+				sipLogPort0.value = "0";
+			}
+
+			diagType.value = 1;
+		}
+		
+		if ((type == 'restart') || (type == 'restore'))
+		{
+			sipLogAddr0.disabled = true;
+			sipLogPort0.disabled = true;
+			ingressGain0_0.disabled = true;
+			ingressGain1_0.disabled = true;
+			egressGain0_0.disabled = true;
+			egressGain1_0.disabled = true;
+		}
+
+		sessionKey.value = gblsessionKey;
+	}
+	document.forms[0].submit();
+}
+
+function frmLoad() {		
+	with (document.forms[0]) {
+		
+		//
+		if ((eval("la"+ '0') == "") || (eval("la"+ '0') == "0.0.0.0"))
+		{
+			sipDebugEnable.checked = false;
+			sipDebugDisable.checked = true;
+		}
+		else
+		{
+			sipDebugEnable.checked = true;
+			sipDebugDisable.checked = false;
+			sipLogAddr0.value = eval("la"+ '0');
+			sipLogPort0.value = eval("lp"+ '0');
+		}
+		changeSipDebug();
+	
+		//
+		var maxGainList = 41;
+		var gainTextArray = new Array(maxGainList);
+		var gainValueArray = new Array(maxGainList);
+		var i = 0;
+		gainTextArray[i++] = '0';
+		gainTextArray[i++] = '1';
+		gainTextArray[i++] = '2';
+		gainTextArray[i++] = '3';
+		gainTextArray[i++] = '4';
+		gainTextArray[i++] = '5';
+		gainTextArray[i++] = '6';
+		gainTextArray[i++] = '7';
+		gainTextArray[i++] = '8';
+		gainTextArray[i++] = '9';
+		gainTextArray[i++] = '10';
+		gainTextArray[i++] = '11';
+		gainTextArray[i++] = '12';
+		gainTextArray[i++] = '13';
+		gainTextArray[i++] = '14';
+		gainTextArray[i++] = '15';
+		gainTextArray[i++] = '16';
+		gainTextArray[i++] = '17';
+		gainTextArray[i++] = '18';
+		gainTextArray[i++] = '19';
+		gainTextArray[i++] = '20';
+		gainTextArray[i++] = '-1';
+		gainTextArray[i++] = '-2';
+		gainTextArray[i++] = '-3';
+		gainTextArray[i++] = '-4';
+		gainTextArray[i++] = '-5';
+		gainTextArray[i++] = '-6';
+		gainTextArray[i++] = '-7';
+		gainTextArray[i++] = '-8';
+		gainTextArray[i++] = '-9';
+		gainTextArray[i++] = '-10';
+		gainTextArray[i++] = '-11';
+		gainTextArray[i++] = '-12';
+		gainTextArray[i++] = '-13';
+		gainTextArray[i++] = '-14';
+		gainTextArray[i++] = '-15';
+		gainTextArray[i++] = '-16';
+		gainTextArray[i++] = '-17';
+		gainTextArray[i++] = '-18';
+		gainTextArray[i++] = '-19';
+		gainTextArray[i++] = '-20';
+		
+		i = 0;
+		gainValueArray[i++] = '0';
+		gainValueArray[i++] = '1';
+		gainValueArray[i++] = '2';
+		gainValueArray[i++] = '3';
+		gainValueArray[i++] = '4';
+		gainValueArray[i++] = '5';
+		gainValueArray[i++] = '6';
+		gainValueArray[i++] = '7';
+		gainValueArray[i++] = '8';
+		gainValueArray[i++] = '9';
+		gainValueArray[i++] = '10';
+		gainValueArray[i++] = '11';
+		gainValueArray[i++] = '12';
+		gainValueArray[i++] = '13';
+		gainValueArray[i++] = '14';
+		gainValueArray[i++] = '15';
+		gainValueArray[i++] = '16';
+		gainValueArray[i++] = '17';
+		gainValueArray[i++] = '18';
+		gainValueArray[i++] = '19';
+		gainValueArray[i++] = '20';
+		gainValueArray[i++] = '-1';
+		gainValueArray[i++] = '-2';
+		gainValueArray[i++] = '-3';
+		gainValueArray[i++] = '-4';
+		gainValueArray[i++] = '-5';
+		gainValueArray[i++] = '-6';
+		gainValueArray[i++] = '-7';
+		gainValueArray[i++] = '-8';
+		gainValueArray[i++] = '-9';
+		gainValueArray[i++] = '-10';
+		gainValueArray[i++] = '-11';
+		gainValueArray[i++] = '-12';
+		gainValueArray[i++] = '-13';
+		gainValueArray[i++] = '-14';
+		gainValueArray[i++] = '-15';
+		gainValueArray[i++] = '-16';
+		gainValueArray[i++] = '-17';
+		gainValueArray[i++] = '-18';
+		gainValueArray[i++] = '-19';
+		gainValueArray[i++] = '-20';
+		
+		for (i = 0; i < maxGainList; i++)
+		{
+			addOption('ingressGain0_0', gainTextArray[i], gainValueArray[i]);
+			addOption('ingressGain1_0', gainTextArray[i], gainValueArray[i]);
+			addOption('egressGain0_0', gainTextArray[i], gainValueArray[i]);
+			addOption('egressGain1_0', gainTextArray[i], gainValueArray[i]);
+		}
+		
+		for (i = 0; i < ingressGain0_0.length; i++)
+		{
+			if(ingressGain0_0.options[i].value == eval("ig"+ '0' + "_" + '0'))
+			{
+				ingressGain0_0.options[i].selected = true;
+			}
+		}
+		for (i = 0; i < ingressGain1_0.length; i++)
+		{
+			if(ingressGain1_0.options[i].value == eval("ig"+ '1' + "_" + '0'))
+			{
+				ingressGain1_0.options[i].selected = true;
+			}
+		}
+
+		for (i = 0; i < egressGain0_0.length; i++)
+		{
+			if(egressGain0_0.options[i].value == eval("eg"+ '0' + "_" + '0'))
+			{
+				egressGain0_0.options[i].selected = true;
+			}
+		}
+		for (i = 0; i < egressGain1_0.length; i++)
+		{
+			if(egressGain1_0.options[i].value == eval("eg"+ '1' + "_" + '0'))
+			{
+				egressGain1_0.options[i].selected = true;
+			}
+		}
+	}
+}
+
+// done hiding -->
+</script>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+                WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('voipdiag', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+         </div>
+   </div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+            <h1 class="supportconsole_voip_diagnostics">Diagnostics<span>The VoIP diagnostics below provides troubleshooting configurations.</span></h1>
+			<form id="form1" name="form1" method="post" action="voicediagnostics.cmd" onSubmit="return btnApply();">
+			<input type="hidden" name="diagType" id="diagType" value="">
+			<input type="hidden" name="sessionKey" id="sessionKey" value="">
+					<div class="stepWrapper">
+						<p><strong>1. Set the SIP debug configuration.</strong></p>
+						<table>
+							<tr>
+								<td width="175"><label for="sipDebug">SIP Debug:</label></td>
+								<td><label><input name="sipDebug" type="radio" id="sipDebugEnable" value="sipDebugEnable" checked="checked" onClick="changeSipDebug()"/> Enable </label></td>
+								<td><label><input name="sipDebug" type="radio" id="sipDebugDisable" value="sipDebugDisable" onClick="changeSipDebug()"/> Disable </label></td>
+							</tr>
+							<tr class="sipDebugEnabled">
+								<td width="135">SIP Log IP Address:</td>
+								<td colspan="2"><input name="sipLogAddr0" id="sipLogAddr0" type="text" size="35" value="" /></td>
+							</tr>
+							<tr class="sipDebugEnabled">
+								<td width="135">SIP Log Port:</td>
+								<td colspan="2"><input name="sipLogPort0" id="sipLogPort0" type="text" size="35" value="" /></td>
+							</tr>
+						</table>
+					</div>
+					
+					<div class="stepWrapper">
+						<p><strong>2. Set the diagnostic state for both lines.</strong></p>
+						<table>
+							<tr>
+								<td width="175">SIP Account:</td>
+								<td>&nbsp;&nbsp;1</td>
+								<td>&nbsp;&nbsp;2</td>
+							</tr>
+							<tr class="ingressGain">
+								<td width="175">Ingress Gain:</td>
+								<td><select name="ingressGain0_0" id="ingressGain0_0" onChange="">
+								</select></td>
+								<td><select name="ingressGain1_0" id="ingressGain1_0" onChange="">
+								</select></td>
+							</tr>
+							<tr class="egressGain">
+								<td width="175">Egress Gain:</td>
+								<td><select name="egressGain0_0" id="egressGain0_0" onChange="">
+								</select></td>
+								<td><select name="egressGain1_0" id="egressGain1_0" onChange="">
+								</select></td>
+							</tr>
+						</table>
+					</div>
+					
+               <div class="stepWrapper">
+					  <p><strong>3. Click &quot;Apply&quot; to save your changes. </strong></p>
+					  <a href="#" class="btn apply_btn" onClick="btnApply('diag')">Apply</a>
+					</div>
+					
+					<p>&nbsp;</p>
+				
+					<div class="stepWrapper">
+                  <p><strong>VoIP Diagnostics</strong></p>
+						<table>
+						   <tr>
+								<th width="55">&nbsp;</th>
+								<th>Restore Event</th>
+								<th>Restore</th>
+                     </tr>             
+                     <tr align="center">
+                        <td><img src="../_images/icon_telephone.png" width="45" height="40" /></td>
+                        <td>Restart the SIP Server:</td>
+                        <td><a href="#" class="btn restore_btn" onClick="btnApply('restart')">Restart SIP</a></td>
+                     </tr>
+                     <tr align="center">
+                        <td><img src="../_images/icon_telephone.png" width="45" height="40" /></td>
+                        <td>Restore Default VoIP Settings:</td>
+                        <td><a href="#" class="btn restore_btn" onClick="btnApply('restore')">Restore</a></td>
+                     </tr>
+                  </table>
+					</div>
+			   </form>
+               <p>&nbsp;</p>
+					<div class="clear_left"></div>
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>
+

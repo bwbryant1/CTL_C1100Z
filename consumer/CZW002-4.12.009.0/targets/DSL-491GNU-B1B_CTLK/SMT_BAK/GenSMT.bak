@@ -1,0 +1,7 @@
+echo ********************Generate SMT CFE END********************
+cp ../../defaultcfg/100AAVM_TE.rom ./100AAVM_TE.rom
+./CompressConfig_CFE ./100AAVM_TE.rom ./100AAVM_TE.rom_COMP
+cat ./cfe63268nand128.bm ./100AAVM_TE.rom_COMP > ./cfe63268nand128.tmp
+./createboot --boardid=963168MBV_17A --numbermac=4 --macaddr=40:4A:03:00:00:01 --countrycode=FF --manufactureConfig=1 --modelid=6008 --tp=0 --psisize=128 --backuppsi=y --inputfile=cfe63268nand128.tmp --outputfile=cfe63268nand128_Release_TE.bin --cfeSize=$(find . -name cfe63268nand128.bm -printf '%s')
+./createboot --boardid=963168MBV_17A --numbermac=4 --macaddr=40:4A:03:00:00:01 --countrycode=FF --manufactureConfig=1 --modelid=6008 --tp=0 --psisize=128 --empty --backuppsi=y --inputfile=cfe63268nand128.tmp --outputfile=cfe63268nand128_TE.bin --cfeSize=$(find . -name cfe63268nand128.bm -printf '%s')
+echo ********************Generate SMT CFE END********************

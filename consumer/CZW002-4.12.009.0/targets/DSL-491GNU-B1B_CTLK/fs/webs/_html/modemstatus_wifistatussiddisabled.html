@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+</head>
+
+<script language="JavaScript">
+<!--hide
+var ssidIdx = parseInt('<%ejGetWl(wlSsidIdx)%>');
+var ssidName ='<%ejGetWl(wlSsid)%>';
+var ssidName0 ='<%ejGetWl(wlSsid_wl0v0)%>';
+var ssidName1 ='<%ejGetWl(wlSsid_wl0v1)%>';
+var ssidName2 ='<%ejGetWl(wlSsid_wl0v2)%>';
+var ssidName3 ='<%ejGetWl(wlSsid_wl0v3)%>';
+var enblWireless = '<%ejGetWl(wlEnbl)%>';
+var enblWireless0 = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var enblWireless1 ='<%ejGetWl(wlEnbl_wl0v1)%>';
+var enblWireless2= '<%ejGetWl(wlEnbl_wl0v2)%>';
+var enblWireless3= '<%ejGetWl(wlEnbl_wl0v3)%>';
+
+function wlStatusUpdateValue(updateVal)
+{
+   with (document.forms[0]) {
+      var upDate = updateVal.replace(/\r\n/ig, "");
+      upDate = upDate.replace(/\n/ig, "");
+
+      var fieldValue = upDate.split('|');
+      // wireless enable
+      enblWireless0 = fieldValue[0];
+      enblWireless1 = fieldValue[1];
+      enblWireless2 = fieldValue[2];
+      enblWireless3 = fieldValue[3];
+
+      frmLoad('0');
+   }
+}
+
+function getRefresh()
+{
+   var objXMLHTTP = null;
+
+   if (window.XMLHttpRequest)
+   { 
+      objXMLHTTP=new XMLHttpRequest(); 
+   }// code for IE 
+   else if (window.ActiveXObject)
+   { 
+      objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+   }
+
+   if (objXMLHTTP != null) {
+      // var loc = "wlansetup.cgi?pageAct=modemWlRefresh&wlSsidIdx=" + ssidIdx;
+      // var parameter = "pageAct=modemWlRefresh&wlSsidIdx=" + ssidIdx;
+
+      objXMLHTTP.open("POST", "GetWirelessEnbl.html", false);
+      objXMLHTTP.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      objXMLHTTP.onreadystatechange = function()
+      {
+         if (objXMLHTTP.readyState == 4) {
+            var updateValueStr = objXMLHTTP.responseText;
+
+            if ( (updateValueStr != null) && updateValueStr != "" ) {
+               wlStatusUpdateValue(updateValueStr);
+            }
+         }
+      }
+      // objXMLHTTP.send(parameter);
+      objXMLHTTP.send(null);
+      setTimeout("getRefresh();", 5000);
+   }
+}
+
+function btnApply(place) {
+   var loc = '';
+
+   with (document.forms[0]) {
+      var tmp = 'enblWireless' + getSelect(ssid);
+      if (eval(tmp) == 0) {
+         var ssidtmp = 'ssidName' + getSelect(ssid);
+         document.getElementById("ssidName").innerHTML = eval(ssidtmp);
+         // location.href="modemstatus_wifistatussiddisabled.wl?wlSsidIdx="+getSelect(ssid);
+         return;
+      }
+
+      loc += place + '?wlSsidIdx=' + getSelect(ssid);
+      loc += '&sessionKey=<%ejGetOther(sessionKey)%>';
+      // for all SSID
+      submitFrm(loc);
+   }
+}
+
+function frmLoad(onLoad) {
+   with (document.forms[0]) {
+      var tmp = 'enblWireless' + ssidIdx;
+      ssid.options[ssidIdx].selected = true;
+
+      if (eval(tmp) == "1") {
+         btnApply("modemstatus_wifistatus.wl");
+         // location.href = "modemstatus_wifistatus.html";
+      } else {
+         document.getElementById("ssidName").innerHTML = ssidName;
+         if (enblWireless0 == "1")
+            document.getElementById("radioEnbl").innerHTML = 'Enabled';
+         else
+            document.getElementById("radioEnbl").innerHTML = 'Disabled';
+      }
+   }	
+   if (onLoad == '1') {
+      setTimeout('getRefresh()', 10000);
+   }
+}
+// done hiding -->
+</script>
+
+<body onload="frmLoad('1')">
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+   <div class="clear_left"></div>
+   <div id="content_left">
+      <ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('wifistatus','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+      </ul>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+         </div>
+      </div>
+   </div>
+   <div id="content_right">
+      <div id="content_right_header">
+      </div>
+      <div id="content_right_contentarea">
+         <img src="../_images/Wi-Fi_Certififed.png" width="197" height="77" style="float:right; margin-top:-30px;" />
+         <h1 class="modemstatus_wifistatus">Wireless Status</h1>
+         <form id="form1" name="form1" method="post" action="">
+            <div class="stepWrapper">
+               <p><strong>Wireless</strong></p>
+               <table>
+                  <tr>
+                     <th width="150" colspan="2">Select SSID </th>
+                  </tr>
+                  <tr>
+                     <td width="150">SSID: </td>
+                     <td><select name="ssid" id="ssid" onchange="btnApply('modemstatus_wifistatus.wl')">
+                        <%ejGetWl(wlSsidList)%>
+                     </select></td>
+                  </tr>
+               </table>
+               <p>&nbsp;</p>
+               <table>
+                  <tr>
+                     <th width="225">Wireless State </th>
+                     <th> Status </th>
+                  </tr>
+                  <tr>
+                     <td width="225"> Radio: </td>
+<script language=javascript>
+   if (enblWireless0 == "1")
+      document.write("<td align='center' >");
+   else
+      document.write("<td align='center' class='redtext'>");
+</script>
+                     <span id='radioEnbl'></span></td>
+                  </tr>
+                  <tr>
+                     <td width="225">SSID: </td>
+                     <td align="center" class='redtext'>Disabled</td>
+                  </tr>
+                  <tr>
+                     <td width="225"> Security: </td>
+                     <td align="center" >N/A</td>
+                  </tr>
+               </table>
+            </div>
+            <div class="stepWrapper">
+               <p><strong>Wireless Settings </strong></p>
+               <table>
+                  <tr>
+                     <th width="225">Wireless Parameter </th>
+                     <th> Setting </th>
+                  </tr>
+                  <tr>
+                     <td width="225">SSID: </td>
+                     <td align="center"><span id="ssidName"></span></td>
+                  </tr>
+                  <tr>
+                     <td width="225">Channel: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">Best Available Channel: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">Second Best Available Channel: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">Wireless Security Type: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">SSID Broadcast: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">MAC Authentication: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">Wireless Model </td>
+                     <td align="center">N/A</td>
+                  </tr>
+<script language='javascript'>
+   if (ssidIdx == 0) {
+      document.write('<tr>');
+      document.write('    <td width="225">WPS State: </td>');
+      document.write('    <td align="center">N/A</td>');
+      document.write('</tr>');
+      document.write('<tr>');
+      document.write('    <td width="225">WPS Type: </td>');
+      document.write('    <td align="center">N/A</td>');
+      document.write('</tr>');
+   }
+</script>
+                  <tr>
+                     <td width="225">WMM QoS: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">WMM Power Save:</td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">Wireless Packets Sent:</td>
+                     <td align="center">N/A</td>
+                  </tr>
+                  <tr>
+                     <td width="225">Wireless Packets Received: </td>
+                     <td align="center">N/A</td>
+                  </tr>
+               </table>
+            </div>
+         </form>
+      </div>
+   </div>
+   <div class="clear_left">
+   </div>
+   <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

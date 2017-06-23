@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/AppRule.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ruleinfo = '<%ejGetOtherBig(portMapRule)%>';
+var info = ruleinfo.split('|');
+var found = 0;
+if ( info != '' ) {
+	for ( i = 0; i < info.length ; i ++ ) {
+		found = 0;
+		if (info[i] == '')
+			break;
+		var names = info[i].split('/');
+
+		for ( j = 0 ; c[6][j] != null; j ++ ) {
+			if ( c[6][j].name == names[0] ) {
+				found = 1;
+				c[6][j].eNum++;
+				c[6][j].e[c[6][j].eNum-1] = new iVe(names[2], names[3], names[1], names[4]);
+				break;
+			}
+		}
+		if ( found == 0 ) {
+			c[6][j] = new cV(names[0], names[0], 1);
+			c[6][j].e[0] = new iVe(names[2], names[3], names[1], names[4]);
+		}
+	}
+}
+
+function backBtn() {
+	var app = '<%ejGet(applicationsIdx)%>';
+	var ca = '<%ejGet(applicationsCatIdx)%>';
+	var ip = '<%ejGet(applicationsIPaddress)%>';	
+	var loc = 'advancedsetup_applications.cgi?applicationsCatIdx='+ca+'&applicationsIdx='+app+'&applicationsIPaddress='+ip;
+	var code = 'location="' + loc + '"';
+	with ( document.forms[0] ) {
+	alert(code);
+	}
+	eval(code);
+}
+
+</SCRIPT>
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+<div id="content_left">
+					<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('applications');
+</script>		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>      
+            </div>
+        </div>
+</div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_applications">Applications </h1>
+				<form>
+					<div class="stepWrapper">
+                    <p align="center"><strong>View Rule Manager</strong></p>
+					<table>
+						<tr>
+							<th>							    Rule Name						    </th>
+							<th>							    Protocol						    </th>
+							<th>							    Port Start						    </th>
+							<th>							    Port End						    </th>
+							<th>							    Port MAP						    </th>
+						</tr>
+						<SCRIPT LANGUAGE="JavaScript">
+	var curRule = null;
+	var Prot = null;
+	var eStart = 0;
+	var iStart = 0;
+	var eEnd = 0;
+	var i = 0;
+	var app = '<%ejGet(applicationsIdx)%>';
+	var ca = '<%ejGet(applicationsCatIdx)%>';
+	if ( ca < TOTAL_CAT ) {
+		curRule = c[ca][app];
+	}
+
+	for ( i = 0; i < curRule.eNum ; i ++ ) {
+		eStart = curRule.e[i].eStart;
+		iStart = curRule.e[i].iStart;
+		eEnd = curRule.e[i].eEnd;
+		if ( curRule.e[i].proto == 0 ) {
+			Prot = "TCP";
+		}
+		else if ( curRule.e[i].proto == 1 ) {
+			Prot = "UDP";
+		}
+		else if ( curRule.e[i].proto == 2 ) {
+			Prot = "TCP/UDP";
+		}
+		else {
+			Prot = "GRE";
+			eStart = "N/A";
+			iStart = "N/A";
+			eEnd = "N/A";
+		}
+		
+		var appname = processLongName( curRule.show, 20 );
+
+		document.writeln('<tr class=\"smallprint\">');
+		document.writeln('<td bgcolor=\"#417BA2\"><div>'+appname+'</div></td>');
+		document.writeln('<td bgcolor=\"#417BA2\"><div>'+Prot+'</div></td>');
+		document.writeln('<td bgcolor=\"#417BA2\"><div>'+eStart+'</div></td>');
+		document.writeln('<td bgcolor=\"#417BA2\"><div>'+eEnd+'</div></td>');
+		document.writeln('<td bgcolor=\"#417BA2\"><div>'+iStart+'</div></td>');
+		document.writeln('</tr>');
+	}
+</SCRIPT>
+					</table>
+                    <p>&nbsp;</p>
+					<a href="advancedsetup_applications.html" class="btn back_btn">Back</a>
+                    </div>
+				</form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

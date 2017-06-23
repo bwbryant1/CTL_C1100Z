@@ -1,0 +1,98 @@
+/*
+-----------------------------------------------
+CenturyLink Modem Configurator Index Stylesheet
+author:		KC Dunstan 
+date: 05.21.2011  
+----------------------------------------------- */
+*{
+	font: 12px/14px Verdana, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+body{
+	background: url(../_images/index_bg.png);
+}
+a img{
+	border: none;
+}
+#wrapper{
+	background: url(../_images/index_wrapper_bg.png) no-repeat;
+	margin: 0 auto;
+	position: relative;
+	width: 800px;
+}
+#logo_link{
+	background: url(../_images/index_logo.png) no-repeat;
+	display: block;
+	height: 39px;
+	left:60px;
+	position: absolute;
+	text-indent: -9999em;
+	top:60px;
+	width: 197px;
+}
+h1#modem_type{
+	background: url(../_images/index_header.png) no-repeat;
+	height: 159px;
+	margin: 166px 0 0 0;
+	overflow: hidden;
+	text-indent: -9999px;
+}
+ul#navigation{
+	display: inline;
+	float: left;
+	margin: 325px 0 50px 76px;
+}
+ul#navigation li{
+	background-position: 0 0;
+	display: inline;
+	float: left;
+	overflow: hidden;
+}
+ul#navigation li a{
+	display: block;
+	height: 203px;
+	overflow: hidden;
+	text-indent: -9999px;
+}
+ul#navigation li.modemstatus a{
+	background: url(../_images/index_nav_modemstatus.png) no-repeat;
+	width: 124px;
+}
+ul#navigation li.quicksetup a{
+	background: url(../_images/index_nav_quicksetup.png) no-repeat;
+	width: 128px;
+}
+ul#navigation li.wirelesssetup a{
+	background: url(../_images/index_nav_wirelesssetup.png) no-repeat;
+	width: 130px;
+}
+ul#navigation li.utilities a{
+	background: url(../_images/index_nav_utilities.png) no-repeat;
+	width: 124px;
+}
+ul#navigation li.advancedsetup a{
+	background: url(../_images/index_nav_advancedsetup.png) no-repeat;
+	width: 128px;
+}
+ul#navigation li a:hover{
+	background-position: 0 -205px;
+}
+#footer{
+	color: #FFF;
+	font: 11px/11px Arial, Helvetica, sans-serif;
+	margin: 50px 0 50px 0;
+	text-align: center;
+}
+.clear_left{
+	clear: left;
+	height: 0;
+}
+.clear_right{
+	clear: right;
+	height: 0;
+}
+.clear_both{
+	clear: both;
+	height: 0;
+}

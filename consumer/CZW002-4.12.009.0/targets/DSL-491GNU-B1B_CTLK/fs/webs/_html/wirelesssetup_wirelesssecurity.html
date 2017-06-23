@@ -1,0 +1,896 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide>
+var syncNvram = '<%ejGetWl(wlSyncNvram)%>';
+var enblWireless = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var ssidIdx =/*0;//*/ '<%ejGetWl(wlSsidIdx)%>';
+
+var wlAuthMode = /*"psk";//*/'<%ejGetWl(wlAuthMode)%>';
+var wlWep = /*"enabled";//*/'<%ejGetWl(wlWep)%>';
+var wlKeyBit =/*1;//*/'<%ejGetWl(wlKeyBit)%>';
+
+//WEP
+var wlKeyIndex = /*1;//*/parseInt('<%ejGetWl(wlKeyIndex)%>');
+var wlKey1=/*"aaa";//*/'<%ejGetWl(wlKey1)%>';
+var wlKey2=/*"bbb";//*/'<%ejGetWl(wlKey2)%>';
+var wlKey3=/*"ccc";//*/'<%ejGetWl(wlKey3)%>';
+var wlKey4=/*"ddd";//*/'<%ejGetWl(wlKey4)%>';
+var wlAuth='<%ejGetWl(wlAuth)%>';
+
+//Pre-Shared Key
+var wlWpaPsk=/*"presharedkey";//*/'<%ejGetWl(wlWpaPsk)%>';
+var wlWpaGTKRekey='<%ejGetWl(wlWpaGTKRekey)%>';
+var wlWpa=/*'tkip';//*/'<%ejGetWl(wlWpa)%>'; //tkip+aes / tkip / aes
+//RadiusKey
+var wlRadiusKey='<%ejGetWl(wlRadiusKey)%>';
+var wlRadiusServerIP='<%ejGetWl(wlRadiusServerIP)%>';
+var wlRadiusPort='<%ejGetWl(wlRadiusPort)%>';
+var divMode =0;
+var var_is8021xEnabled=0;
+
+
+//Auto-WEP
+var WepAutoEnbled = '<%ejGetWl(WepAutoEnbled)%>'; 
+var WepAutoGenKey64 = '<%ejGetWl(WepAutoGenKey64)%>';
+var WepAutoGenKey128 = '<%ejGetWl(WepAutoGenKey128)%>';
+//Auto-PSK
+var wlAutoPSKEnbled = /*0//*/'<%ejGetWl(wlAutoEnbled)%>';  
+var wlAutoPSKKeys=/*"autokey"//*/'<%ejGetWl(wlAutoGenKey)%>';
+
+//default
+var varNetReauth = '<%ejGetWl(wlNetReauth)%>';
+var wpaGTKRekey = '<%ejGetWl(wlWpaGTKRekey)%>';
+var varPreauth = '<%ejGetWl(wlPreauth)%>';
+
+//11n
+var wlCorerev = '<%ejGetWl(wlCoreRev)%>';
+var phy = '<%ejGetWl(wlPhyType)%>'; 
+var nmode = '<%ejGetWl(wlNmode)%>'; 
+var nreqd = '<%ejGetWl(wlNReqd)%>'; 
+
+//WPS
+var wpsManullyDisable='<%ejGetWl(wpsManullyDisable)%>';
+var WscAPMode  = '<%ejGetWl(wlWscAPMode)%>';
+var WscMode       = '<%ejGetWl(wlWscMode)%>';
+
+var tempWepKey;
+
+function showKeyLengthByBit(type,number){
+	var temp = "wepKeyLeft"+number;
+	with(document.forms[0]){	
+		if(type==1) document.getElementById(temp).innerHTML = "10";		
+		else document.getElementById(temp).innerHTML = "26";	
+	}
+}
+
+function changeWepKeyBit(number){
+	var type=0;
+	with(document.forms[0]){
+		type=security_wep_key_bit[number-1].value;
+		/* //Qwest only use 128bit key as default key
+		if(type==0)
+			document.getElementById('security_wep_default_key_value').innerHTML = WepAutoGenKey128;		
+		else
+			document.getElementById('security_wep_default_key_value').innerHTML = WepAutoGenKey64;	*/
+					
+		var limitLength=0;
+		if(type==0)limitLength=26;
+		else limitLength=10;
+				
+		var temp = security_wep_key_value[number-1].value;
+		if(isHexaDigit(temp.charAt(temp.length-1))==false){
+			if(temp.length>limitLength) security_wep_key_value[number-1].value = temp.slice(0,limitLength);
+			else security_wep_key_value[number-1].value = temp.slice(0,temp.length-1);			
+			isContinueCheck = 0;
+		}
+	
+		showKeyLengthByBit(type,number);
+		security_wep_key_value[number-1].value="";		
+	}
+}
+
+function checkWepKey(number,OnFrmLoad, OnMouseOut){
+	var type=0;
+				
+	with(document.forms[0]){
+		type=security_wep_key_bit[number-1].value;		
+		var limitLength=0;
+		if(type==0)limitLength=26;
+		else limitLength=10;
+		var name = "wepKeyLeft"+number;
+				
+		var temp = security_wep_key_value[number-1].value;			
+		if (OnFrmLoad==false){
+			if(temp==""){ document.getElementById(name).innerHTML = limitLength;return;	}
+			/*
+			if(isHexaDigit(temp.charAt(temp.length-1))==false){
+				security_wep_key_value[number-1].value = temp.slice(0,temp.length-1);			
+				AlertOpen("The WEP Key can only contain letters between A-F and numbers between 0-9 with no spaces. "); 
+			}*/			
+			if(!OnMouseOut || (OnMouseOut && tempWepKey!=temp) ){
+				security_wep_key_value[number-1].value="";//remvoe invalid char
+				var errorFlag=0;
+				for(var i=0;i<temp.length;i++){
+					if(isHexaDigit(temp.charAt(i))==true){
+						security_wep_key_value[number-1].value = security_wep_key_value[number-1].value+temp.slice(i,i+1);			
+					}else{ errorFlag=1;
+					       //break;
+						security_wep_key_value[number-1].value = security_wep_key_value[number-1].value.slice(0,i-1);
+					}
+				}
+				if(errorFlag==1){
+					AlertOpen("The WEP Key can only contain letters between A-F and numbers between 0-9 with no spaces. ");
+				}
+			}
+		}
+		temp = security_wep_key_value[number-1].value;
+		var keylength = security_wep_key_value[number-1].value.length;		
+		var leftLength = limitLength-keylength;	
+		if(leftLength<0) {
+			if(temp.length>limitLength)
+				security_wep_key_value[number-1].value = temp.slice(0,limitLength);
+			else security_wep_key_value[number-1].value = temp.slice(0,temp.length-1);	
+			document.getElementById(name).innerHTML = 0;
+		}else document.getElementById(name).innerHTML = leftLength ;
+		
+		tempWepKey = security_wep_key_value[number-1].value;			
+	}
+}
+
+function changeWEPCustomKeyClick(FrmOnLoad){
+	with(document.forms[0]){
+		if(FrmOnLoad){
+			if(security_wep_security_key[1].checked){
+				if(security_wep_key[0].checked) $('#security_wep_key_1').trigger('click');	
+				else if(security_wep_key[1].checked)  $('#security_wep_key_2').trigger('click');
+				else if(security_wep_key[2].checked)  $('#security_wep_key_3').trigger('click');
+				else if(security_wep_key[3].checked)  $('#security_wep_key_4').trigger('click');
+			}
+		}else{
+				if(security_wep_key[0].checked){security_wep_security_key[1].checked=1; }
+				else if(security_wep_key[1].checked){security_wep_security_key[1].checked=1;}
+				else if(security_wep_key[2].checked){security_wep_security_key[1].checked=1;}
+				else if(security_wep_key[3].checked){security_wep_security_key[1].checked=1;}
+		}
+		changeWEPKeyType(FrmOnLoad);	
+	}
+}
+
+function changeWEPKeyType(FrmOnLoad){
+	with(document.forms[0]){
+		if(security_wep_security_key[0].checked){
+			security_wep_key[0].checked=0;		
+			security_wep_key[1].checked=0;		
+			security_wep_key[2].checked=0;		
+			security_wep_key[3].checked=0;			
+			security_wep_key_value[0].disabled=1;
+			security_wep_key_value[1].disabled=1;			
+			security_wep_key_value[2].disabled=1;						
+			security_wep_key_value[3].disabled=1;						
+			security_wep_key_bit[1].disabled=1;		
+			security_wep_key_bit[2].disabled=1;							
+			security_wep_key_bit[3].disabled=1;	
+			security_wep_key_bit[0].disabled=1;	
+			security_wep_key_value[0].value="";
+			security_wep_key_value[1].value=""			
+			security_wep_key_value[2].value=""						
+			security_wep_key_value[3].value=""	
+			security_wep_key_bit[0].options[1].selected = true;
+			security_wep_key_bit[1].options[1].selected = true;
+			security_wep_key_bit[2].options[1].selected = true;
+			security_wep_key_bit[3].options[1].selected = true;					
+		}else{
+			var show_wlKeyBit=0;		
+			if(parseInt(wlKeyBit)==0)show_wlKeyBit=1;
+			else if(parseInt(wlKeyBit)==1)show_wlKeyBit=0;				
+			//else show_wlKeyBit = parseInt(wlKeyBit);
+			security_wep_key_bit[0].options[show_wlKeyBit].selected = true;
+			security_wep_key_bit[1].options[show_wlKeyBit].selected = true;
+			security_wep_key_bit[2].options[show_wlKeyBit].selected = true;
+			security_wep_key_bit[3].options[show_wlKeyBit].selected = true;												
+			
+			//if(parseInt(WepAutoEnbled)==0)security_wep_key_value[0].value = wlKey1;
+			//else security_wep_key_value[0].value="";//don't show default key in wlKey1
+			security_wep_key_value[0].value = wlKey1;
+			security_wep_key_value[1].value = wlKey2;
+			security_wep_key_value[2].value = wlKey3;
+			security_wep_key_value[3].value = wlKey4;	
+			if(FrmOnLoad){	
+				tempWepKey = security_wep_key_value[wlKeyIndex-1].value;	
+				security_wep_key[wlKeyIndex-1].checked=true;
+			}
+				for (var i = 0 ; i < security_wep_key.length ; i++){
+					if(security_wep_key[i].checked == true) {	
+						if(!FrmOnLoad) tempWepKey = security_wep_key_value[i].value;	 				
+						$('#security_wep_key_'+(i+1)).trigger('selectMe',FrmOnLoad);
+						break;
+					}
+				}					
+		}
+		checkWepKey(1,false,false);
+		checkWepKey(2,false,false);
+		checkWepKey(3,false,false);
+		checkWepKey(4,false,false);						
+	}	
+}
+
+function authModeChange(){
+	var algos;
+	with(document.forms[0]){	
+	       if (wlCorerev >= 3)
+	       {
+	         if (phy=='n' && nmode != "off"){	         	
+	         	if(nreqd==1)
+		           algos = new Array("AES");	         	
+	         	else 
+		           algos = new Array("BOTH","AES","TKIP");//only for Qwest, should have TKIP
+	         }else
+	           algos = new Array("BOTH","AES","TKIP");
+	       }
+	       else
+	       {
+	         algos = new Array("TKIP");
+	       }
+	
+	      // Reconstruct algorithm array from new algorithms
+	      encryption_type0.length = algos.length;
+	
+	      for (var i in algos) {
+	          encryption_type0[i] = new Option(algos[i], algos[i].toLowerCase());
+	          if (algos[i]=='BOTH') {
+	            encryption_type0[i].value = 'tkip+aes';	          
+	          }else {
+				encryption_type0[i].value = algos[i].toLowerCase();	          
+	          }
+	      }    
+
+	/*
+	     if (algos[i].toLowerCase() == wpa)
+	         wlWpa[i].selected = true;
+	      }*/
+    }       
+}
+
+function showByMode(divMode){
+	var_is8021xEnabled = is8021xEnabled(wlAuthMode,wlWep,wlKeyBit);
+	with(document.forms[0]){
+		ssid.options[ssidIdx].selected = true;		
+				
+		switch(divMode){
+			case 1:	//open.enabled.64bit(1)	
+			case 2: //open.enabled.128bit(0)
+			case 6:
+			case 7:			
+				//alert("WEP");					
+				security_type.options[3].selected = true; //WEP
+				$('#security_type').trigger('change');
+				
+				break;
+			case 3: case 8:
+				//alert("WPA");
+				security_type.options[1].selected = true; //wpa		
+				$('#security_type').trigger('change');	
+				break;
+			case 4: case 9:
+				//alert("WPA2");			
+				security_type.options[2].selected = true; //wpa2
+				$('#security_type').trigger('change');					
+				break;				
+			case 5: case 10:
+				//alert("WPA.WPA2");			
+				security_type.options[0].selected = true; //wpa.wpa2
+				$('#security_type').trigger('change');		
+				break;
+			default:
+				security_type.options[4].selected = true; //off		
+				$('#security_type').trigger('change');			
+				break;
+		}
+		
+		//WEP || WEP+802.1x
+		if (wlAuthMode == "open"){
+			encryption_type1.options[0].selected = true;				
+		}else if (wlAuthMode == "shared"){
+			encryption_type1.options[1].selected = true;				
+		}
+		//<waiting>if use default key, security_wep_security_key[0].checked = 1
+		if(parseInt(WepAutoEnbled)==1){
+			security_wep_security_key[0].checked = true;			
+		}else{ 
+			security_wep_security_key[1].checked = true;	
+			security_wep_key[wlKeyIndex-1].checked=true;
+		}
+			
+		
+		changeWEPKeyType(true);
+
+		checkWepKey(1,true,false);
+		checkWepKey(2,true,false);				
+		checkWepKey(3,true,false);				
+		checkWepKey(4,true,false);		
+		
+		
+		//wep-default key bit
+		/* //Qwest only use 128bit key as default key
+		if(wlKeyBit==0)
+			document.getElementById('security_wep_default_key_value').innerHTML = WepAutoGenKey128;		
+		else
+			document.getElementById('security_wep_default_key_value').innerHTML = WepAutoGenKey64;*/				
+		document.getElementById('security_wep_default_key_value').innerHTML = WepAutoGenKey128			
+		
+		
+		//3.8.4.9.5.10 -- tkip / aes / tkip+aes
+		authModeChange();
+		if((wlWpa.toLowerCase()=='tkip+aes' || wlWpa.toLowerCase()=='tkip') && phy=='n' && nmode != "off" && nreqd=="1")
+				 setSelect(encryption_type0,'aes');				 
+		else setSelect(encryption_type0,wlWpa.toLowerCase());
+		
+		//<waiting> if use default key, security_wpa_key.selectedIndex = 0
+		document.getElementById('security_wpa_default_key_value').innerHTML = wlAutoPSKKeys;
+		if(wlAutoPSKEnbled==0){
+			security_wpa_key[1].checked = true; //Pre-Shared Key
+			//security_wpa_custom_security_key.value = wlWpaPsk;						
+			var tmpPskKey = decodeSpecialChars(wlWpaPsk);
+			security_wpa_custom_security_key.value = tmpPskKey;			
+		}else{
+			security_wpa_key[0].checked = true;; //default Key	
+			security_wpa_custom_security_key.value = "";
+		}		
+
+
+		//PSK.WPA. change display info base on radius settings
+		if (var_is8021xEnabled==1){				
+				security_wpa_key[0].disabled=1;
+				security_wpa_key[1].disabled=1;	
+				security_wpa_custom_security_key.disabled = 1;			
+
+				security_wep_key[0].disabled = 1;
+				security_wep_key[3].disabled = 1;				
+				security_wep_key_value[0].disabled=1;
+				security_wep_key_bit[0].disabled=1;				
+				security_wep_key_value[3].disabled=1;	
+				security_wep_key_bit[3].disabled=1;				
+				security_wep_security_key[0].disabled=1;
+				security_wep_security_key[1].checked=1;
+
+				encryption_type1.disabled=1;					
+		}
+	}
+}
+
+function doAutoGenPSKKey() {
+   with (document.forms[0]) {
+      if (security_wpa_key[0].checked == true) {
+         //wlSsid.value = wlAutoSsid;
+         //security_wpa_custom_security_key.value = "";
+         //wlSsid.disabled = true;
+         security_wpa_custom_security_key.disabled = true;		
+      } else {
+         //wlSsid.disabled = false;
+         security_wpa_custom_security_key.disabled = false;
+      }
+   }
+}
+
+function isValidWPAPskKey(val) {
+   var ret = false;
+   var len = val.length;
+   var maxSize = 64;
+   var minSize = 8;
+
+   if ( len >= minSize && len < maxSize )
+      ret = true;
+   else if ( len == maxSize ) {
+      for ( i = 0; i < maxSize; i++ )
+         if ( isHexaDigit(val.charAt(i)) == false )
+            break;
+      if ( i == maxSize )
+         ret = true;
+   } else
+      ret = false;
+
+   return ret;
+}
+
+function btnApply(place){
+//change by ssid
+	var loc = '';
+	var isSecurityOff=0;	
+	var_is8021xEnabled = is8021xEnabled(wlAuthMode,wlWep,wlKeyBit);
+/*
+	if ( enblWireless == '0' ) {
+		AlertOpen('Cannot apply the change since wireless is currently disabled.');
+		return;
+	}	*/
+
+	with(document.forms[0]){	
+		loc += place+'?wlSsidIdx='+getSelect(ssid);	
+		
+		var	divMode=0;
+		var q_authMode;
+		var q_wep;
+		var q_keyBit;		
+		
+		switch (place){
+			case "wirelesssetup_wirelesssecurity.wl":
+				var securityType = getSelect(security_type);
+
+				if (securityType == 'wpa_wpa2_personal'){
+					if (var_is8021xEnabled==1){//802.1x enabled
+						loc += "&wlAuthMode="+"wpa wpa2";	//encodeUrl
+					}else{
+						loc += "&wlAuthMode="+"psk psk2";					
+						//loc += wpsEnable(true,ssidIdx,wpsManullyDisable,WscAPMode);																							
+					}
+					loc += "&wlWep=disabled";
+				}else if (securityType == 'wpa_personal_1'){
+					if (var_is8021xEnabled==1){//802.1x enabled
+						loc += "&wlAuthMode=wpa";					
+					}else{				
+						loc += "&wlAuthMode=psk";	
+						//loc += wpsEnable(true,ssidIdx,wpsManullyDisable,WscAPMode);
+					}
+					loc += "&wlWep=disabled";	
+				}else if (securityType == 'wpa_personal_2'){
+					if (var_is8021xEnabled==1){//802.1x enabled
+						loc += "&wlAuthMode=wpa2";					
+					}else{								
+						loc += "&wlAuthMode=psk2";	
+						//loc += wpsEnable(true,ssidIdx,wpsManullyDisable,WscAPMode);									
+					}	
+					loc += "&wlWep=disabled";				
+				}else if (securityType == 'wep'){
+					var enc1 = getSelect(encryption_type1) ;
+					if (var_is8021xEnabled==1){//802.1x enabled
+						loc += "&wlAuthMode=radius";
+						loc += '&wlAuth=0';								
+					}else{
+						if (enc1=="shared"){
+							loc += "&wlAuthMode=shared";	
+							loc += '&wlAuth=1';				
+						}else{
+							loc += "&wlAuthMode=open";	
+							loc += '&wlAuth=0';									
+						}	
+                        //When WEP or security off  is selected as the security type, WPS will be automatically disabled
+						//loc += wpsEnable(false,ssidIdx,wpsManullyDisable,WscAPMode);								
+					}				
+					loc += "&wlWep=enabled";																		
+				}else if (securityType == 'off'){
+					loc += "&wlAuthMode=open";					
+					loc += "&wlWep=disabled";
+					loc += "&wlKeyBit=0";	
+					loc += '&wlAuth=0';					
+					//When WEP or security off  is selected as the security type, WPS will be automatically disabled	
+					//loc += wpsEnable(false,ssidIdx,wpsManullyDisable,WscAPMode);																		
+					isSecurityOff=1;
+				}			
+
+				
+
+				//WEP 
+				if (securityType.indexOf('wep')!=-1){
+					if(security_wep_security_key[1].checked == true){//customer_key
+						var wepKeyIdx=0;	
+						for (var i = 0 ; i < security_wep_key.length ; i++){
+							if(security_wep_key[i].checked == true) {						
+								wepKeyIdx = i+1;
+								break;
+							}
+						}											
+						var temp_keyBit = "security_wep_key_"+wepKeyIdx+"_bit";	
+	  				    var cbit = getSelect(eval(temp_keyBit));					
+						//check wep key						
+						var num = wepKeyIdx-1;
+						var temp_key = security_wep_key_value[num].value;
+				         if ( temp_key == '' && !(/*swep == 'enabled' && */wlAuthMode == 'radius')) {
+				            AlertOpen('Cannot choose key that has empty value.');
+				            return;
+				         }
+				         if ( temp_key != '' ) {
+				            if ( cbit == '0' ) {
+				               if ( isValidKey(temp_key, 13) == false ) {
+				                  //alert('Key "' + temp_key+ '" is invalid. Please enter 13 ASCII characters or 26 hexadecimal digits for a 128-bit WEP encryption key.');
+				                  AlertOpen('Invalid WEP key.  The 128 BIT WEP key must contain 26 characters.');
+				                  return;
+				               }
+				            } else {
+				               if ( isValidKey(temp_key, 5) == false ) {
+				                  //alert('Key "' + temp_key+ '" is invalid. Please enter 5 ASCII characters or 10 hexadecimal digits for a 64-bit WEP encryption key.');
+        				          AlertOpen('Invalid WEP key.  The 64 BIT WEP key must contain 10 characters.');
+				                  return;
+				               }
+				            }
+				         }						
+						loc += "&wlKeyBit="+getSelect(eval(temp_keyBit));						
+						loc += '&wlKeyIndex='+wepKeyIdx ;						
+						if(security_wep_key[0].checked==true)loc += '&wlKey1='+security_wep_key_value[0].value; //encodeUrl
+						if(security_wep_key[1].checked==true)loc += '&wlKey2='+security_wep_key_value[1].value;
+						if(security_wep_key[2].checked==true)loc += '&wlKey3='+security_wep_key_value[2].value;
+						if(security_wep_key[3].checked==true)loc += '&wlKey4='+security_wep_key_value[3].value;
+						loc += '&WepAutoEnbled=0';
+					}else { //default_key					    
+					    if(document.getElementById("security_wep_default_key_value").innerHTML.length<=10)
+					    	loc += "&wlKeyBit=1"; 
+					    else
+						    loc += "&wlKeyBit=0"; 
+						if (var_is8021xEnabled==1){
+							loc += "&wlKeyIndex=2";
+							loc += "&wlKey2="+document.getElementById("security_wep_default_key_value").innerHTML; //encodeUrl
+							//encodeUrl(wlAutoPSKKeys);
+						}else{
+							loc += "&wlKeyIndex=1";
+							loc += "&wlKey1="+document.getElementById("security_wep_default_key_value").innerHTML; //encodeUrl
+							//encodeUrl(wlAutoPSKKeys);						
+						}
+						loc += '&WepAutoEnbled=1';						
+					}
+				}				
+				
+				//PSK && !Radius					
+				if (securityType.indexOf("wpa")!= -1 && var_is8021xEnabled==0){			
+					if(security_wpa_key[1].checked == true){//customer_key
+						var temp_key = security_wpa_custom_security_key.value;
+						if ( temp_key=='' || isValidWPAPskKey(temp_key) == false ) {
+							AlertOpen('Invalid WPA key.  Please re-enter a valid WPA key with a character length of 8 to 63.');
+							return;
+						}
+						//__Qwest__, Ling-Chun, support special characters for the custom Preshared Key										
+						loc += "&wlWpaPsk="+encodeUrlPSK(security_wpa_custom_security_key.value);
+						loc += "&wlAutoEnbled=0";	
+					}else{ //default_key
+						//__Qwest__, Ling-Chun, support special characters for the custom Preshared Key										
+						loc += "&wlWpaPsk="+encodeUrlPSK(document.getElementById('security_wpa_default_key_value').innerHTML);
+						loc += "&wlAutoEnbled=1";	
+					}									
+				}	
+				//PSK || WPA
+				if (securityType.indexOf("wpa")!= -1){	
+					loc += '&wlWpa='+getSelect(encryption_type0);
+					//default-value			
+					loc += '&wlWpaGtkRekey='+wpaGTKRekey;					
+					loc += '&wlNetReauth='+varNetReauth;			
+      				loc += '&wlPreauth='+varPreauth;													
+				}		
+				
+				
+			    if (ssidIdx==0&& (WscMode=='enabled') && (WscAPMode=='0')) {
+		           loc += '&wsc_config_state=1';
+		    	}				
+				loc += '&wlSyncNvram=1';
+				break;
+			default:			
+				break;
+		}	
+	
+		
+
+		//switch wlSsidIdx	
+		/*
+		if (loc.indexOf('&')==-1){
+			loc += "wlSsidIdx="+getSelect(ssid);
+		}else{
+			loc += "&wlSsidIdx="+getSelect(ssid);
+		}
+		var questionMark = loc.indexOf('&'); //replace '?&' to '?'
+		if (questionMark!=-1){
+			loc = loc.substr(0,questionMark).concat(loc.substr(questionMark+1,loc.length));
+		}*/	
+
+		
+	}			
+/*	
+	var code = 'location="' + loc + '"'; 
+	alert(code);
+	eval(code);		*/
+	
+   loc += '&sessionKey=<%ejGetOther(sessionKey)%>';				
+//Please uses the following style to send this page.   
+	with (document.forms[0]) {
+		switch (place){
+		case 'wirelesssetup_wirelesssecurity.wl':	
+			checkSSIDSecurity(isSecurityOff,loc);
+			break;
+		default:
+			submitFrm(loc);
+			break;	
+		}	
+	}	
+//Don't do anything here. Because checkSSIDSecurity may reject to send out this form.//by LC	
+}
+
+function checkSSIDSecurity(isSecurityOff,loc){					
+	if(isSecurityOff){						
+		ConfirmOpen('Disabling security allows any wireless device to access your wireless network creating an unsecure environment.    \
+		Press OK to continue or Cancel to set up wireless security.',function(){submitFrm(loc);});
+	}else submitFrm(loc);	
+}
+
+function frmLoad(){
+	/*
+			q_authMode = wlAuthMode;
+			q_wep = wlWep;
+			q_keyBit = wlKeyBit;		*/
+	with(document.forms[0]){			
+		divMode = parseInt(authModeDisplay(wlAuthMode,wlWep,wlKeyBit));
+		showByMode(divMode);
+	}
+}
+
+//done nothing-->
+</script>
+
+</head>
+<body id="wirelesssetup_wirelesssecurity" onload="frmLoad()">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!-- hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">			
+<SCRIPT LANGUAGE="JavaScript">
+ WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>  
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('security', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			<div id="content_right_header">
+        </div>
+			<div id="content_right_contentarea">
+				<h1 class="wirelesssetup_wep">Wireless Security <span>Secure your wireless traffic as it transmits through the air.</span></h1>
+				<form method="post" onkeypress="return handleEnter(this,event) ;">
+<script language="javascript">/*
+var_is8021xEnabled = is8021xEnabled(wlAuthMode,wlWep,wlKeyBit);
+if(var_is8021xEnabled==1){
+	document.write("<div class=\"stepWrapper\">");
+	document.write("<p><font color=\"white\">");
+	document.write("<strong>Notes&#65306;<br>802.1x is enabled. <br>The related radius setting information is located in 802.1x page.");
+	document.write("<br>You also can use \"SecurityOff\" to disable all security setting.</strong></p>");
+	document.write("</font>");	
+	document.write("</div>");
+}			*/
+</script>
+				
+					<div class="stepWrapper">
+					<p><strong>1. Select the SSID (Network Name).</strong></p>
+					<table>
+                        <tr>
+                            <td width="150"><label for="ssid">SSID:</label></td>
+                            <td><select name="ssid" id="ssid" onChange="btnApply('wirelesssetup_wirelesssecurity_refresh.wl')"> 
+									<%ejGetWl(wlSsidList)%>                            						
+									<script language="JavaScript">/*									
+                                    <option value="0" selected="selected">SSID1<%ejGetWl(wlSsid)%></option>
+                                    <option value="1">SSID2<%ejGetWl(wlSsid_wl0v1)%></option>
+                                    <option value="2">SSID3<%ejGetWl(wlSsid_wl0v2)%></option>
+                                    <option value="3">SSID4<%ejGetWl(wlSsid_wl0v3)%></option>		
+                                    */
+                                    </script>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+					</div>
+                    <div class="stepWrapper">
+					<p><strong>2. Select security type.</strong></p>
+					<table>
+                        <tr>
+                            <td width="150"><label for="security_type">Security Type:</label></td>
+                            <td>
+                            <select name="select" id="security_type" >
+                                <option value="wpa_wpa2_personal">WPA - WPA2 Personal</option>
+                                <option value="wpa_personal_1">WPA - Personal</option>
+                                <option value="wpa_personal_2">WPA2 - Personal</option>
+                                <option value="wep">WEP</option>
+                                <!--option selected="selected" value="off">Security Off</option-->
+                                <option value="off">Security Off</option>
+                            </select>
+                            </td>
+                        </tr>
+                    </table>                    
+					</div>
+                    <div id="security_off">
+                      <div class="stepWrapper">
+
+                        <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+                        <a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_wirelesssecurity.wl')">Apply</a>
+                    </div>
+                    </div>
+                   
+                    <div id="security_wpa">
+                     <div class="stepWrapper">
+                    	<p><strong>3. Select encryption type.</strong></p>
+                            <table>
+                                <tr>
+                                    <td width="150"><label for="security_type">Security Type:</label></td>
+                                    <td>
+                                    <select name="encryption_type0" id="encryption_type0">
+                                    </select>
+                                    </td>
+                                </tr>
+                            </table>  
+                        </div>
+                         <div class="stepWrapper">
+                          <p><strong>4. Enter security key/passphrase.</strong></p>
+                          <table>
+                                <tr>
+                                    <td><input name="security_wpa_key" id="security_wpa_key" type="radio" value="default_key" onClick="doAutoGenPSKKey()" checked="CHECKED" /></td>
+                                    <td colspan="2"><label for="default_key" id="default_key">Use Default Security Key/Passphrase</label></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Security Key:</td>
+                                    <td class="greentext"><label id="security_wpa_default_key_value"></label></td>
+                                </tr>
+                                <tr>
+                                    <td><input name="security_wpa_key" id="security_wpa_custom_key" type="radio" value="custom_key" onClick="doAutoGenPSKKey()"/></td>
+                                    <td colspan="2"><label for="custom_key">Use Custom Security Key/Passphrase</label></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td><label for="security_wpa_custom_security_key">Security Key/Passphrase:</label></td>
+                                    <td><input id="security_wpa_custom_security_key" type="text" size="35" maxlength='64'/></td>
+                                </tr>
+                            </table>  
+                            </div>
+                             <div class="stepWrapper">
+                            <p><strong>5. Click &quot;Apply&quot; to save your changes.</strong></p>
+                            <a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_wirelesssecurity.wl')">Apply</a>
+
+                            </div>
+                    </div>
+                    <div id="security_wep">
+                     <div class="stepWrapper">
+                    	<p><strong>3. Select authentication type.</strong></p>
+                        <table>
+                            <tr>
+                                <td width="150"><label for="security_type">Authentication Type:</label></td>
+                                <td>
+                                <select name="encryption_type1" id="encryption_type1">
+                                    <option value="open" selected="selected">Open</option>
+                                    <option value="shared">Shared</option>
+                                    <!--option value="both">Both</option-->
+                                </select>
+                                </td>
+                            </tr>
+                        </table>  
+                       </div>
+                        <div class="stepWrapper">
+                      <p><strong>4. Enter security key/passphrase.</strong></p>
+                      <table>
+    <tr>
+                                <td width="13"><input name="security_wep_security_key" id="security_wep_default_key" type="radio" value="security_wep_default_key" checked="CHECKED" onclick="changeWEPKeyType(false)"/></td>
+                                <td colspan="4"><label for="security_wep_default_key">Use Default Security Key/Passphrase</label></td>
+                            </tr>
+                            <tr class="security_wep_default_key_group">
+                                <td width="13"></td>
+                                <td colspan="4">Default Key: <span class="greentext" id="security_wep_default_key_value"></span></td>
+                            </tr>
+                            <tr>
+                                <td width="13"><input name="security_wep_security_key" id="security_wep_custom_key" type="radio" value="security_wep_custom_key" onclick="changeWEPKeyType(false)"/></td>
+                                <td colspan="4"><label for="security_wep_custom_key">Use Custom Security Key/Passphrase</label></td>
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td width="13">1:</td>
+                                <td><input name="security_wep_key" type="radio" id="security_wep_key_1" value="security_wep_key_1" onclick="changeWEPCustomKeyClick(false)" /></td>
+                                <td><label for="security_wep_key_1">Key</label></td>
+                                <td><input name="security_wep_key_value" id="security_wep_key_1_value" type="text" size="35" maxlength='26' disabled="disabled" onkeyup="checkWepKey(1,false,false)" onmouseout="checkWepKey(1,false,true)"/></td>
+                                <td>
+                                <select name="security_wep_key_bit" id="security_wep_key_1_bit" disabled="disabled" onchange="changeWepKeyBit(1)">
+                                    <option value="1" selected="selected">64 Bits</option>
+                                    <option value="0">128 Bits</option>
+                                    <!--option value="2">256 Bits</option-->
+                                </select>
+                              </td>
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td colspan="3"></td>                            
+                                <td colspan="2"><span id="wepKeyLeft1">0</span> Digits Left</td>                            
+                            </tr> 
+                            <tr class="security_wep_custom_key_group">
+                                <td width="13">2:</td>
+                                <td><input name="security_wep_key" id="security_wep_key_2" type="radio" value="security_wep_key_2" onclick="changeWEPCustomKeyClick(false)"/></td>
+                                <td><label for="security_wep_key_2">Key</label></td>
+                                <td><input name="security_wep_key_value" id="security_wep_key_2_value" type="text" size="35" maxlength='26' disabled="disabled" onkeyup="checkWepKey(2,false,false)" onmouseout="checkWepKey(2,false,true)"/></td>
+                                <td>
+                                <select name="security_wep_key_bit" id="security_wep_key_2_bit" disabled="disabled" onchange="changeWepKeyBit(2)">
+                                    <option value="1" selected="selected">64 Bits</option>
+                                    <option value="0">128 Bits</option>
+                                    <!--option value="2">256 Bits</option-->
+                                </select>
+                              </td>
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td colspan="3"></td>                            
+                                <td colspan="2"><span id="wepKeyLeft2">0</span> Digits Left</td>                            
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td width="13">3:</td>
+                                <td><input name="security_wep_key" id="security_wep_key_3" type="radio" value="security_wep_key_3" onclick="changeWEPCustomKeyClick(false)"/></td>
+                                <td><label for="security_wep_key_3">Key</label></td>
+                                <td><input name="security_wep_key_value" id="security_wep_key_3_value" type="text" size="35" maxlength='26' disabled="disabled" onkeyup="checkWepKey(3,false,false)" onmouseout="checkWepKey(3,false,true)"/></td>
+                                <td>
+                                <select name="security_wep_key_bit" id="security_wep_key_3_bit" disabled="disabled" onchange="changeWepKeyBit(3)">
+                                    <option value="1" selected="selected">64 Bits</option>
+                                    <option value="0">128 Bits</option>
+                                    <!--option value="2">256 Bits</option-->
+                                </select>
+                              </td>
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td colspan="3"></td>                            
+                                <td colspan="2"><span id="wepKeyLeft3">0</span> Digits Left</td>                            
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td width="13">4:</td>
+                                <td><input name="security_wep_key" id="security_wep_key_4" type="radio" value="security_wep_key_4" onclick="changeWEPCustomKeyClick(false)"/></td>
+                                <td><label for="security_wep_key_4">Key</label></td>
+                                <td><input name="security_wep_key_value" id="security_wep_key_4_value" type="text" size="35" maxlength='26' disabled="disabled" onkeyup="checkWepKey(4,false,false)" onmouseout="checkWepKey(4,false,true)"/></td>
+                                <td>
+                                <select name="security_wep_key_bit" id="security_wep_key_4_bit" disabled="disabled" onchange="changeWepKeyBit(4)">
+                                    <option value="1" selected="selected">64 Bits</option>
+                                    <option value="0">128 Bits</option>
+                                    <!--option value="2">256 Bits</option-->
+                                </select>
+                              </td>
+                            </tr>
+                            <tr class="security_wep_custom_key_group">
+                                <td colspan="3"></td>                            
+                                <td colspan="2"><span id="wepKeyLeft4">0</span> Digits Left</td>                            
+                            </tr>                      
+                        </table>  
+                        </div>
+                         <div class="stepWrapper">
+                        <p><strong>5. Click &quot;Apply&quot; to save your changes.</strong></p>
+                        <a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_wirelesssecurity.wl')">Apply</a>
+                    </div>
+                    
+                    </div>
+                    
+				</form>				
+			</div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

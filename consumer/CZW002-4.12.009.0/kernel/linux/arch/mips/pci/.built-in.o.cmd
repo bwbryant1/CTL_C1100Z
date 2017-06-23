@@ -1,0 +1,1 @@
+cmd_arch/mips/pci/built-in.o :=  /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld  -m elf32btsmip   -r -o arch/mips/pci/built-in.o arch/mips/pci/pci.o arch/mips/pci/fixup-bcm63xx.o arch/mips/pci/pci-bcm63xx.o arch/mips/pci/ops-bcm63xx.o 

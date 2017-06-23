@@ -1,0 +1,12 @@
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/chipinfo//bcm963268/chipinfo.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/pktflow/bcm963268/pktflow.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/fap/bcm963268/bcmfap.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/xtmcfg/bcm963268/bcmxtmcfg.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/adsl/bcm963268/adsldd.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/p8021ag/bcm963268/p8021ag.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/opensource/net/enet/bcm963268/bcm_enet.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/vlan/bcm963268/bcmvlan.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/net/wl/bcm963268/wl.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/ingqos/bcm963268/bcm_ingqos.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/bpm/bcm963268/bcm_bpm.ko
+kernel//home/brandon/consume/CZW002-4.12.009.0/bcmdrivers/broadcom/char/arl/bcm963268/bcmarl.ko

@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+ <script language="javascript">
+<!-- hide
+var lanInfo= "<%ejGetOtherBig(dhcpLeasesinfo)%>";
+var UrlInfo= "<%ejGetOtherBig(urllist)%>";
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var ipaddress;
+var dev_name;
+var j;
+
+function frmLoad() 
+{
+  with ( document.forms[0] )
+  {
+     srcaddr.value = '';
+     dev_name = '';
+  }
+}
+
+function encapChange() {
+  var loc;
+with ( document.forms[0] ) 
+{
+  var its= lanInfo.split("|");
+	
+  if(mode.value=="Manually Enter IP Address")
+  {
+       srcaddr.value = '';
+	dev_name = '';
+	$('.manual_ip_address').show();
+	srcaddr.disabled = false;
+       srcaddr.style.background = "#FFF";
+  }
+  else if(mode.value=="All LAN Devices")
+  {
+  	srcaddr.value = '';
+	dev_name = '';
+	$('.manual_ip_address').hide();
+	srcaddr.disabled = true;
+       srcaddr.style.background = "#999";
+  }
+  else 
+  {
+	$('.manual_ip_address').hide();
+	srcaddr.disabled = true;
+       srcaddr.style.background = "#999";
+
+      for (i = 0 ; i < its.length ; i++) 
+     {
+        var names = its[i].split("/");
+        if (names.length > 2) 
+        {
+         
+           if((mode.value==names[1])||(mode.value==names[2]))
+	    {
+	       srcaddr.value=names[2];
+	       if(mode.value==names[1])
+	          dev_name=names[0];
+		else
+		   dev_name=names[2];
+	       break;
+	      }  //else
+         } // if name.length
+       } // for
+     }// else
+  } //with
+}
+  
+function btnApply() {
+   var its= lanInfo.split("|");
+   with ( document.forms[0] ) {
+   	var str=TodUrlAdd.value;	
+	var Urlitems= UrlInfo.split("|");
+	var UrlNames;
+
+	if(mode.value=="All LAN Devices"){
+		srcaddr.value = '0.0.0.0';
+	}
+	if ( srcaddr.value == '' && mode.value!="All LAN Devices") {
+		AlertOpen( 'The IP address entered in step 1 is invalid.  Please enter a valid IP address.' );
+		return false;
+	}
+	else if(isValidIpAddress(srcaddr.value)!=true && mode.value!="All LAN Devices")
+	{
+		AlertOpen('The IP address entered in step 1 is invalid.  Please enter a valid IP address.');
+		srcaddr.value='';		
+		return false;
+	}
+	else if (isValidUrl(TodUrlAdd.value)==false)
+	{
+		AlertOpen( 'The IP address or URL entered in step 2 is invalid.  Please enter a valid IP address or URL.' );
+		return false;
+	}
+	else if (TodUrlAdd.value.length > 128)
+      	{
+	      AlertOpen( 'Url address must be less than 128 characters');
+	      TodUrlAdd.value='';	  
+      	}
+      else if (TodUrlAdd.value == '')
+      	{
+	      AlertOpen( 'Please enter the Url address');
+		  return false;
+      	}
+      else if(isValidIpAddress(TodUrlAdd.value)==true)
+      	{
+	  	AlertOpen('Please do not enter IP address as Url address');
+		TodUrlAdd.vlue='';
+		return false;
+      	}
+      else {
+	      //loc += 'TodUrlAdd=' + TodUrlAdd.value;
+    	      //loc += '&port_num=80' //+ port_num.value;
+	      //loc += '&listtype=Exclude';		  
+   	      //var code = 'location="' + loc + '"';
+   	      //eval(code);
+		UrlNames=srcaddr.value+TodUrlAdd.value;
+		for (j = 0 ; j < Urlitems.length ; j++){
+	       	if(Urlitems[j]==UrlNames){
+             		 AlertOpen('The rule defined currently exists for the selected IP address. ');
+			 return false;
+	       	}
+         	}   
+	       if (dev_name == '')
+      		{
+        		 //loc += '&dev_name='+ srcaddr.value;	 
+	 		 FilterName.value = 'unknown';
+			 for (i = 0 ; i < its.length ; i++){
+        			var names = its[i].split("/");		
+       			if (names.length > 2){	 
+           				if(srcaddr.value == names[2]){
+						dev_name=names[0];
+						FilterName.value = dev_name;
+	       				break;
+	    				} 
+         			} 
+       		} 	 
+      		}
+      		else
+      		{
+	  		//loc += '&dev_name='+ dev_name;
+	  		FilterName.value = dev_name; 
+      		}
+	      SourceIp.value = srcaddr.value;	
+	  document.forms[0].sessionKey.value = gblsessionKey;	
+	  document.forms[0].submit();
+
+	  //Return false to avoid do submit twice.
+	return false;
+	  }      
+   }
+}
+
+function removeClick(rml, url, ip) {
+	with ( document.forms[0] ) {
+		Webaction.value="remove";
+		WebrmLst.value=rml;
+		TodUrlAdd.value=url;
+		SourceIp.value=ip;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+// done hiding -->
+</script>
+</head>
+
+<body id="advancedsetup_websiteblocking">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+<div id="content_left">
+		<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('websiteblocking');
+</script>
+		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_websiteblocking">Website Blocking <span>Website blocking provides the ability to block websites from the LAN.</span></h1>
+			  <form action="advancedsetup_websiteblocking.cgi" method="post" onSubmit="return btnApply();">
+			  	<input type="hidden" name="Webaction" id="Webaction" value="add">
+			  	<input type="hidden" name="FilterName" id="FilterName" value="">
+			  	<input type="hidden" name="SourceIp" id="SourceIp" value="">
+			  	<input type="hidden" name="WebrmLst" id="WebrmLst" value="">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+              <div class="stepWrapper">
+                    <p><strong>1. Select Device.</strong></p>
+                    
+                    <table>
+                        <tr>
+                            <td width="150">Select Device: </td>
+                            <td><select name="mode" id="mode" onChange="encapChange()">
+                                    <option value="Manually Enter IP Address" selected="selected">Manually Enter IP Address </option>
+					 <option value="All LAN Devices">All LAN Devices</option>
+<script language="javascript">
+<!-- hide
+	{
+		var i=0;
+		var hinfo = lanInfo.split('|');
+		var hostname = '';
+		if (hinfo != '') {
+			for ( i = 0; i < hinfo.length; i++ ) 
+			{
+				if (hinfo[i] == '')
+					break;
+				var names = hinfo[i].split('/');
+				if ( names[0] != 'unknown' ) {
+					hostname = names[0];
+				}
+				else if ( names[2] != '' ) {
+					hostname = names[2];
+				}
+				else {
+					hostname = names[1];
+				}
+				document.writeln("<option value=\""+names[1]+"\">"+names[0]+" - "+names[2]+" </option>");
+			}
+		}
+	}
+//-->
+</script>  
+                                </select>
+                            </td>
+                        </tr>
+                        <tr class="manual_ip_address">
+                            <td width="150">Enter IP Address:</td>
+                            <td><input name="srcaddr" id="srcaddr" type="text" size="25" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+              <div class="stepWrapper">			  
+			  <p><strong>2. Enter the website below.</strong></p>					
+					<table>
+                      <tr>
+                        <td width="150">Website Address:</td>
+                        <td>                            <input name="TodUrlAdd" type="text" id="TodUrlAdd" size="40" />                        </td>
+                      </tr>
+                    </table>
+					</div>
+                    <div class="stepWrapper">
+					<p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                    </div>
+                    <div class="stepWrapperdark">
+                    <table>
+                	<tr>
+							<th colspan="5" class="tableTitle">Blocked Websites List</th>
+						</tr>
+                        <tr>
+                            <th width="39" align="center">&nbsp;</th>
+                            <th width="60">Device Name</th>
+                            <th width="80">IP &nbsp;Address</th>
+                            <th width="129">Website Blocked</th>
+                            <th width="92">Edit</th>
+                        </tr>
+                        <%ejGetOtherBig(urlfltable)%>
+                    </table>
+                </div>
+		      </form>
+<script language='JavaScript'>
+<!--
+$(document).ready(function() {
+
+	frmLoad();
+});
+//-->
+</script>   		      
+				<div class="clear_left"></div>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

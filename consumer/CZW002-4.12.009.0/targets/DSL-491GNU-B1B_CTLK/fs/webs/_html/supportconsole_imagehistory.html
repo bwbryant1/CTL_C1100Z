@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+//var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+//var	bootinfo='<%ejGetOther(sysInfo, bootinfo)%>';
+function frmLoad()
+{
+	document.getElementById("facortyimageversion").innerHTML = '<%ejGetOther(facortyimageversion)%>';
+	/*with (document.forms[0]) {
+		var info = bootinfo.split('|');
+		if (info[0] != '' ) {
+			if ( info[0] != null ) {
+				if ( info[0] == 1 ) { //current 1
+					document.getElementById("currentimage").innerHTML = "Image 1";
+					document.getElementById("currentimageversion").innerHTML = info[1];
+					bootimage[0].checked = true;
+				}
+				else if ( info[0] == 2 ) { //current 2
+					document.getElementById("currentimage").innerHTML = "Image 2";
+					document.getElementById("currentimageversion").innerHTML = info[2];
+					bootimage[1].checked = true;
+				}
+				document.getElementById("facortyimageversion").innerHTML = '<%ejGetOther(facortyimageversion)%>';
+			}
+			if ( info[1] != null && info[1] != '' ) {
+				document.getElementById("image1").innerHTML = info[1];
+				document.getElementById("image1status").innerHTML = "OK";
+			}
+			else {
+				document.getElementById("image1").innerHTML = "N/A";
+				document.getElementById("image1status").innerHTML = "<font color=#FF0000>Corrupted</font>";
+			}
+			if ( info[2] != null && info[2] != '' ) {
+				document.getElementById("image2").innerHTML = info[2];
+				document.getElementById("image2status").innerHTML = "OK";
+			}
+			else {
+				document.getElementById("image2").innerHTML = "N/A";
+				document.getElementById("image2status").innerHTML = "<font color=#FF0000>Corrupted</font>";
+			}
+
+		}
+	}*/
+}
+
+/*function btnApply () {
+	with ( document.forms[0]) {
+		var info = bootinfo.split('|');
+		if (info[0] != '' ) {
+			if ( info[0] == 1 ) {
+				if ( bootimage[0].checked ) {
+					image.value=0;
+				}
+				else {
+					image.value=2;
+				}
+			}
+			else if ( info[0] == 2 ) {
+				if ( bootimage[1].checked ) {
+					image.value=0;
+				}
+				else {
+					image.value=1;
+				}
+			}
+			else {
+				return;
+			}
+		}
+		else {
+			return;
+		}
+		document.forms[0].sessionKey.value = gblsessionKey;
+		document.forms[0].submit();
+	}
+	return;	
+}*/
+</script>
+</head>
+<body onLoad="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+    </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('imagehistory', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+
+        </ul>
+                <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+            </div>
+        </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="supportconsole_upgradehistory">Upgrade History <span>Provides upgrade history data for the modem.</span></h1>
+            <!-- <form action="supportconsole_imagehistory.cgi" method="post">
+				<input type="hidden" name="image" id="image" value="0">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/> -->
+                <div class="stepWrapper">
+                <table>
+                    <tr>
+                        <td>Factory Version: </td>
+                        <td><div align="left"><span id="facortyimageversion">&nbsp;</span></div></td>
+                    </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p align="center"><strong>Upgrade History</strong></p>
+                <table>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="15%">Time</th>
+                        <th width="10%">Type</th>
+                        <th width="10%">Image</th>
+                        <th width="15%">Status</th>
+                        <th width="35%">Firmware Version</th>
+                    </tr>
+<script language="javascript">
+{
+	var i = 0;
+	var bootlog = '<%ejGetOtherBig(bootlog)%>';
+	var bootlogs = bootlog.split('&');
+
+	if(bootlogs.length == 0)
+	{
+		document.writeln("<tr>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("<td>N/A</td>");
+		document.writeln("</tr>"); 
+	}
+	else
+	{
+		for ( i = 0; i < bootlogs.length; i++ )
+		{
+			if(bootlogs[i] != '')
+			{
+				var bootlogentries = bootlogs[i].split('|');
+
+				if((bootlogentries[0] == '1') || (bootlogentries[0] == '2'))
+				{
+					document.writeln("<tr>");
+					document.writeln("  <td>"+bootlogentries[2]+"</td>");
+					document.writeln("  <td>"+bootlogentries[3]+"</td>");
+					document.writeln("  <td>"+bootlogentries[1]+"</td>");
+					document.writeln("  <td>"+bootlogentries[0]+"</td>");
+
+					if ( bootlogentries[5] == 'Complete' ) {
+						document.writeln("  <td>Complete</td>");
+					} else {
+						document.writeln("  <td><font color=\"#FF0000\">Failed</font></td>");
+					}
+
+					document.writeln("<td>"+bootlogentries[4]+"</td>");
+					document.writeln("</tr>"); 
+				}
+			}
+		}
+	}
+}
+</script>
+                </table>
+                </div>
+                <!--
+                <div class="stepWrapper">
+                <p align="center"><strong>Image Management</strong> </p>
+                <table>
+                    <tr>
+                        <td width="50%">Active Image:</td>
+                        <td width="50%"><div align="left"><span id="currentimage"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td width="50%">Active Image Firmware:</td>
+                        <td width="50%"><div align="left"><span id="currentimageversion"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td width="50%">Image 1 Firmware Version:</td>
+                        <td width="50%"><div align="left"><span id="image1"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td width="50%">Image 1 Firmware Status:</td>
+                        <td width="50%"><div align="left"><span id="image1status"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td width="50%">Image 2 Firmware Version:</td>
+                        <td width="50%"><div align="left"><span id="image2"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td width="50%">Image 2 Firmware Status:</td>
+                        <td width="50%"><div align="left"><span id="image2status"></span></div></td>
+                    </tr>
+                    <tr>
+                        <td width="50%"> Active Image: </td>
+                        <td width="50%"><label><input name="bootimage" id="bootimage" type="radio" value=0 />
+                            Image 1</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label><input name="bootimage" type="radio" id="bootimage" value=1 />
+                            Image 2 </label></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">NOTE: The active
+                            image cannot be reloaded. Make the image inactive,
+                            then select
+                            the inactive image to reload.</td>
+                    </tr>
+                </table>
+                <p><strong>Click &quot;Apply&quot; to save your changes.</strong></p>
+                <a href="#" class="btn apply_btn" onClick="btnApply()">Apply</a>
+                </div>
+            </form>
+            -->
+            <div class="clear_left">
+            </div>
+        </div>
+        
+    </div>
+    <div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

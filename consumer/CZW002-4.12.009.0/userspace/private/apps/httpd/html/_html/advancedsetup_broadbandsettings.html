@@ -1,0 +1,1315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<script language="javascript">
+<!-- hide
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';
+func_L2intf = l2Intf;
+var vlanMuxId='<%ejGet(vlanMuxIdDefault)%>';  /**< VLAN mux ID */
+var wanRedirect = '<%ejGet(wanRedirect)%>';
+
+var upRate = parseInt('<%ejGetOther(lineRate, 0, 0, K)%>');
+var pcrMax = 255000;   // Assuming nitro: 255000 * 49 * 8 = 100Mbps  // SASHA: VDSL
+// var pcrMax = 1887;   // 1887 * 53 * 8 = 800000
+var serviceCat = '<%ejGet(atmServiceCategory)%>';
+var vpi = '<%ejGet(atmVpi)%>';
+var vci = '<%ejGet(atmVci)%>';
+
+var defPrctl = '<%ejGetOther(sysInfo, defaultPrctl)%>';
+
+var encap;
+
+var ANNEX_A_SRA_ENABLE = 0x08000000;
+//From adslctlapi.h
+//For ADSL
+var ANNEX_A_MODE_GDMT = 0x00000001;
+var ANNEX_A_MODE_GLITE = 0x00000002;
+var ANNEX_A_MODE_T1413 = 0x00000004;
+var ANNEX_A_MODE_ADSL2 = 0x00000008;
+var ANNEX_A_MODE_ANNEXL = 0x00000010;
+var ANNEX_A_MODE_ADSL2PLUS = 0x00000020;
+var ANNEX_A_MODE_ANNEXM = 0x00000040;        // default ANNEXM is DISABLED. (bit clear)
+//var ANNEX_A_MODE_VDSL2 = 0x00000080;
+var ANNEX_A_MODE_ALL_MOD = (ANNEX_A_MODE_GDMT | ANNEX_A_MODE_GLITE | ANNEX_A_MODE_T1413 |ANNEX_A_MODE_ADSL2 | ANNEX_A_MODE_ANNEXL | ANNEX_A_MODE_ADSL2PLUS | ANNEX_A_SRA_ENABLE | ANNEX_A_MODE_ANNEXM);
+
+//For VDSL
+var ANNEX_A_MODE_VDSL2 = 0x00000080;
+var VDSL_PROFILE_8a = 0x00000100;
+var VDSL_PROFILE_8b = 0x00000200;
+var VDSL_PROFILE_8c = 0x00000400;
+var VDSL_PROFILE_8d = 0x00000800;
+var VDSL_PROFILE_12a = 0x00001000;
+var VDSL_PROFILE_12b = 0x00002000;
+var VDSL_PROFILE_17a = 0x00004000;
+var VDSL_PROFILE_30a = 0x00008000;
+var VDSL_PROFILE_US0 = 0x007F0000;
+var VDSL_PROFILE_MASK = (VDSL_PROFILE_8a | VDSL_PROFILE_8b | VDSL_PROFILE_8c |VDSL_PROFILE_8d |VDSL_PROFILE_12a | VDSL_PROFILE_12b | VDSL_PROFILE_17a | ANNEX_A_SRA_ENABLE | VDSL_PROFILE_US0);
+
+var g_adslFlagvalue = '<%ejGet(adslFlag)%>';
+var is30aSupport = ((g_adslFlagvalue & VDSL_PROFILE_30a) == VDSL_PROFILE_30a)
+if (is30aSupport) {
+	VDSL_PROFILE_MASK |= VDSL_PROFILE_30a;
+}
+
+
+if ( (isNaN(upRate) == false) && (upRate != 0) )
+	pcrMax = Math.ceil((upRate * 1000) / (49 * 8));  // SASHA new value for VDSL
+
+var vlanUsed = '<%ejGetOther(sysInfo, vlanUsed)%>';
+
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var g_dslstatus='<%ejGetOther(sysInfo, status)%>';
+function isVlanUsed(vlanId)
+{
+   var vlan = vlanUsed.split(',');
+
+   for (j = 0; j < vlan.length; j++)	
+   {
+	   if (vlanId == parseInt(vlan[j]) && vlanId != vlanMuxId)
+	   {
+		AlertOpen('VLAN ID '+vlanId+' is already used.');
+		return false;
+	   }
+   }
+   return true;
+}
+
+function cbClick() {
+   with ( document.forms[0] ) {
+	   var idx = atmServiceCategory.selectedIndex;
+	   var val = atmServiceCategory.options[idx].value;
+	   if ( val == "UBR" ){
+		atmPeakCellRate.disabled = true;
+		atmSustainedCellRate.disabled = true;
+		atmMaxBurstSize.disabled = true;
+	   }else if (val == "UBRWPCR" || val == "CBR"){
+		atmPeakCellRate.disabled = false;
+		atmSustainedCellRate.disabled = true;
+		atmMaxBurstSize.disabled = true;
+	   }else{
+		atmPeakCellRate.disabled = false;
+		atmSustainedCellRate.disabled = false;
+		atmMaxBurstSize.disabled = false;
+	   }
+
+	   if (val != serviceCat){
+		atmPeakCellRate.value = 0;
+		atmSustainedCellRate.value = 0;
+		atmMaxBurstSize.value = 0;
+	   }
+	   	
+   }
+}
+
+function atm_parameterChange()
+{
+	with ( document.forms[0] ) {
+		if(atm_parameter.value == 'Disable')
+		{
+			$('.atm_parameter_selected_tr').show();
+		}
+		else
+		{
+			$('.atm_parameter_selected_tr').hide();
+		}
+
+		if(atm_parameter.value == 'AutoSelect'){
+			$('.atm_parameter_detection').show();
+		}else{
+			$('.atm_parameter_detection').hide();
+		}
+	}
+}
+
+function ptm_parameterChange()
+{
+	with ( document.forms[0] ) {
+		if(ptm_parameter.value == 'ptmTag')
+		{
+			$('.ptm_parameter_selected_div_1').show();
+			$('.ptm_parameter_selected_div_2').hide();
+		}
+		else
+		{
+			$('.ptm_parameter_selected_div_1').hide();
+			$('.ptm_parameter_selected_div_2').show();
+		}
+		if(ptm_parameter.value == 'AutoSelect'){
+			$('.ptm_parameter_detection').show();
+		}else{
+			$('.ptm_parameter_detection').hide();
+		}
+	}
+}
+
+function ethernet_parameterChange()
+{
+	with ( document.forms[0] ) {
+		if(ethernet_parameter.value == 'ethTag')
+		{
+			$('.ethernet_parameter_selected_div_1').show();
+			$('.ethernet_parameter_selected_div_2').hide();
+		}
+		else
+		{
+			$('.ethernet_parameter_selected_div_1').hide();
+			$('.ethernet_parameter_selected_div_2').show();
+		}
+		if(ethernet_parameter.value == 'AutoSelect'){
+			$('.ethernet_parameter_detection').show();
+		}else{
+			$('.ethernet_parameter_detection').hide();
+		}
+	}
+}
+
+function atm_line_modeChange()
+{
+	with ( document.forms[0] ) {
+		if(atm_line_mode.value == 'Auto Select')
+		{
+			$('.atm_line_mode_selected_tr').show();
+		}
+		else
+		{
+			$('.atm_line_mode_selected_tr').hide();
+		}
+	}
+}
+
+function ptm_line_modeChange()
+{
+	with ( document.forms[0] ) {
+		if(ptm_line_mode.value == 'Auto Select')
+		{
+			$('.ptm_line_mode_selected_tr').show();
+		}
+		else
+		{
+			$('.ptm_line_mode_selected_tr').hide();
+		}
+	}
+}
+
+var g_atmEncap = '<%ejGet(atmEncap)%>';
+var g_ptmOverAdslDetect=0;
+var g_pTMoverADSLConfig=0;
+
+var g_configPtmOverADSL=0;
+
+function atm_encap_type_change(){
+	if($('#atm_encapsulation_type').attr('value') =='Auto Select'){
+		$('tr#auto_select_display3').show();
+	}else{
+		$('tr#auto_select_display3').hide();
+	}
+
+	//if ptm over adsl
+	if( ($('#atm_encapsulation_type').attr('value') =='Auto Select' && (g_ptmOverAdslDetect==1) ) ||  
+		($('#atm_encapsulation_type').attr('value') =='ptmTagged')||
+		($('#atm_encapsulation_type').attr('value') =='ptmUntagged') ){
+
+		g_configPtmOverADSL=1;
+
+		if($('#atm_encapsulation_type').attr('value') =='ptmTagged')
+			$('#adsl_ptm_div').show();
+		else
+			$('#adsl_ptm_div').hide();
+
+		$('#adsl_atm_div').hide(); 
+	}else{
+		g_configPtmOverADSL=0;
+
+		$('#adsl_ptm_div').hide();
+		$('#adsl_atm_div').show(); 
+	}
+}
+
+function checkTransportMode(a){
+	if (($('#transportMode').attr('value') == 'ATM') || ((a==0) && g_ptmOverAdslDetect==1) ||
+	    (($('#transportMode').attr('value') == 'Auto Select') && (func_L2intf == '1'))){
+
+		$('#non_atm_group').hide();	
+        $('#ethernet_group').hide();
+		$('#atm_group').show();
+
+		document.getElementById("WanTypeSelect").innerHTML = "<font color=\"#015F2C\"><strong>ADSL-ADSL2 </strong></font>";
+	}
+    else if (($('#transportMode').attr('value') == 'Ethernet') ||
+		(($('#transportMode').attr('value') == 'Auto Select') && (func_L2intf == '3'))){//Ethernet
+		$('#non_atm_group').hide();	
+		$('#atm_group').hide();
+      $('#ethernet_group').show();
+      document.getElementById("WanTypeSelect").innerHTML = "<font color=\"#015F2C\"><strong>Ethernet </strong></font>";
+	 } 
+    else {//VDSL
+		$('#atm_group').hide();
+		$('#ethernet_group').hide();
+		$('#non_atm_group').show();	
+
+		document.getElementById("WanTypeSelect").innerHTML = "<font color=\"#015F2C\"><strong>VDSL2 </strong></font>";
+	} 
+
+	if($('#transportMode').attr('value') =='Auto Select'){
+		$('tr#auto_select_display1').show();
+	}else{
+		$('tr#auto_select_display1').hide();
+	}
+}
+
+function frmLoad() {
+	var adslFlagvalue = g_adslFlagvalue;
+	var count = 0;
+	var atmEncap = g_atmEncap;
+	var pppMtuSize = '<%ejGetOther(sysInfo, defaultMtuSize)%>';
+	var vah_atm_enable = '<%ejGetOther(vah, atm, l2)%>';
+	var vah_ptm_enable = '<%ejGetOther(vah, ptm, l2)%>';
+	var vah_eth_enable = '<%ejGetOther(vah, ethernet, l2)%>';
+	var l2WanType = '<%ejGet(layer2WanType)%>';
+	var encapAutoSelectVar = '<%ejGet(encapAutoSelect)%>';
+	var showTime='<%ejGetOther(dslinfo, RTimer_2)%>';
+	var profileTotalCount = (is30aSupport)?5:4;
+
+	with ( document.forms[0] ) {
+
+		if( (l2Intf == 2) && (('<%ejGetOther(dslinfo, RMode_2)%>'!='VDSL') && showTime>'0') && 
+			( adslFlagvalue & ANNEX_A_MODE_ALL_MOD & (~ANNEX_A_SRA_ENABLE))){//sra always enable, ignore it
+			g_ptmOverAdslDetect = 1;
+		}
+
+		if(l2WanType=='2'){
+			setSelect(transportMode, "Auto Select");
+			$('tr#auto_select_display1').show();
+		}
+		else{
+			if ( (l2Intf == 1 && wanRedirect == 0) || (g_ptmOverAdslDetect == 1) || !( adslFlagvalue & ANNEX_A_MODE_VDSL2 ) ){ //ADSL
+				setSelect(transportMode, "ATM");
+			}
+         else if (l2Intf == 3 && wanRedirect == 0) //ethernet
+   		{
+		   	setSelect(transportMode, "Ethernet");
+   		} 
+			$('tr#auto_select_display1').hide();
+		}
+		checkTransportMode(0);
+
+		if(g_dslstatus=='NOT CONNECTED'){
+			document.getElementById("WanTypeSelect").innerHTML = "N/A";
+		}else if(g_dslstatus=='CONNECTING'){
+			document.getElementById("WanTypeSelect").innerHTML = "<font color=\"#FF6319\"><strong>Selecting </strong></font>";
+		}
+
+		if (pppMtuSize == 0 || pppMtuSize == 'N/A'){
+			if (defPrctl == 'PPPoE'){
+			   atm_paramenters_mtu.value = 1492; //default value
+			   paramenters_mtu.value = 1492;
+               eth_paramenters_mtu.value = 1492;
+			}else{
+			   atm_paramenters_mtu.value = 1500; //default value					
+			   paramenters_mtu.value = 1500;
+               eth_paramenters_mtu.value = 1500;
+			}
+		}else{
+			if (defPrctl == 'PPPoE'){
+				atm_paramenters_mtu.value = pppMtuSize;
+				paramenters_mtu.value = pppMtuSize;
+				eth_paramenters_mtu.value = pppMtuSize;
+			}else if (defPrctl == 'PPPoA'){
+				atm_paramenters_mtu.value = pppMtuSize;
+				paramenters_mtu.value = 1492; //PPPoE
+                eth_paramenters_mtu.value = 1492;
+			}else{
+				atm_paramenters_mtu.value = pppMtuSize;
+				paramenters_mtu.value = pppMtuSize;
+				eth_paramenters_mtu.value = pppMtuSize;
+			}
+		}
+	
+		atmVpi.value = '<%ejGet(atmVpi)%>';
+		atmVci.value = '<%ejGet(atmVci)%>';
+		atmPeakCellRate.value = '<%ejGet(atmPeakCellRate)%>';
+		atmSustainedCellRate.value = '<%ejGet(atmSustainedCellRate)%>';
+		atmMaxBurstSize.value = '<%ejGet(atmMaxBurstSize)%>';
+
+		if(encapAutoSelectVar=='1'){
+			atmEncap = "Auto Select";
+		}
+
+		if (atmEncap == '')
+			setSelect(atm_encapsulation_type, "LLC Bridged");
+		else{
+			if(atmEncap == 'ptmOverAdsl' ){ // PTM WAN and Ptm over ADSL
+				if(vah_ptm_enable=='1'){
+					atmEncap = "Auto Select";
+				}
+				else if(vlanMuxId == -1){
+					atmEncap = "ptmUntagged";
+				}else{
+					atmEncap = "ptmTagged";
+				}
+			}
+
+			setSelect(atm_encapsulation_type, atmEncap);
+		}
+
+		atm_encap_type_change();
+
+		var encapVar=g_atmEncap;
+
+		if(g_configPtmOverADSL){
+			//if ptm detected, display vlan setting ( PTM - Tagged or PTM - Untagged )
+			if(vlanMuxId == '-1')
+				encapVar = 'PTM - Untagged';
+			else
+				encapVar = 'PTM - Tagged';
+		}else{
+			if(g_atmEncap == 'ptmOverAdsl' || g_atmEncap == '')
+				encapVar='LLC Bridged';
+		}
+
+		document.getElementById("auto_select_display3_value").innerHTML = '<font color=#015F2C><strong>'+ encapVar +'</strong></font>';
+
+
+		if (serviceCat == '')
+			setSelect(atmServiceCategory, "UBR");
+		else
+			setSelect(atmServiceCategory, serviceCat);
+
+		cbClick();
+
+		if(vah_atm_enable == '1'){
+			$("#atm_parameter").attr("value",'AutoSelect');
+		}else{
+			if( atmVpi.value == '0' && atmVci.value == '32')
+			{
+				$("#atm_parameter").attr("value",'PVC_0_32');
+			}
+			else if( atmVpi.value == '8' && atmVci.value == '35')
+			{
+				$("#atm_parameter").attr("value",'PVC_8_35');
+			}
+			else if( atmVpi.value == '0' && atmVci.value == '35')
+			{
+				$("#atm_parameter").attr("value",'PVC_0_35');
+			}
+			else
+			{
+				$("#atm_parameter").attr("value",'Disable');
+			}
+		}
+		atm_parameterChange();
+
+
+
+		if (adslFlagvalue & ANNEX_A_MODE_T1413) 
+		{
+			count ++;
+			atm_line_mode.selectedIndex = 1;
+		}
+
+		if (adslFlagvalue & ANNEX_A_MODE_GDMT) 
+		{
+			count ++;
+			atm_line_mode.selectedIndex = 2;
+		}
+
+		if (adslFlagvalue & ANNEX_A_MODE_GLITE) 
+		{
+			count ++;
+			atm_line_mode.selectedIndex = 3;
+		}
+
+		if (adslFlagvalue & ANNEX_A_MODE_ADSL2) 
+		{
+			count ++;
+			atm_line_mode.selectedIndex = 4;
+		}
+
+		if (adslFlagvalue & ANNEX_A_MODE_ADSL2PLUS) 
+		{
+			count ++;
+			atm_line_mode.selectedIndex = 5;
+		}
+
+		if ( (adslFlagvalue & ANNEX_A_MODE_ADSL2PLUS) && (adslFlagvalue & ANNEX_A_MODE_ANNEXM)) 
+		{
+			count ++;
+			atm_line_mode.selectedIndex = 6;
+		}
+
+		if (count >=4)       //match at least 4
+		{
+			atm_line_mode.selectedIndex = 0;	
+		}
+		atm_line_modeChange();
+
+
+		
+
+		if (vlanMuxId != -1)
+		{
+		   vlanMuxIdDefaultADSL.value = vlanMuxId;
+		   vlanMuxIdDefault.value = vlanMuxId;
+		   ethVlanMuxIdDefault.value = vlanMuxId;
+		}
+
+		count = 0;
+
+		if(vah_ptm_enable == '1'){
+			$("#ptm_parameter").attr("value",'AutoSelect');
+		}else if( vlanMuxId == -1 ){
+			$("#ptm_parameter").attr("value",'ptmUntag');
+		}else{
+			$("#ptm_parameter").attr("value",'ptmTag');
+		}
+		ptm_parameterChange();
+
+		if(is30aSupport) {
+			var profileOpt = document.createElement("option");
+			profileOpt.text = "VDSL2 - 30A";
+			profileOpt.value = "VDSL2 - 30A";
+			var profileSel = document.getElementById("ptm_line_mode");
+			profileSel.appendChild(profileOpt);
+		}
+
+		if (adslFlagvalue & VDSL_PROFILE_8a)   
+		{
+			count ++;
+			ptm_line_mode.selectedIndex = 1;
+		}
+
+		if (adslFlagvalue & VDSL_PROFILE_8b)   
+		{
+			count ++;
+			ptm_line_mode.selectedIndex = 2;
+		}
+
+		if (adslFlagvalue & VDSL_PROFILE_12a) 
+		{
+			count ++;
+			ptm_line_mode.selectedIndex = 3;
+		}
+
+		if (adslFlagvalue & VDSL_PROFILE_12b) 
+		{
+			count ++;
+			ptm_line_mode.selectedIndex = 4;
+		}
+
+		if (adslFlagvalue & VDSL_PROFILE_17a) 
+		{
+			count ++;
+			ptm_line_mode.selectedIndex = 5;
+		}
+
+		if (is30aSupport && (adslFlagvalue & VDSL_PROFILE_30a)) 
+		{
+			count ++;
+			ptm_line_mode.selectedIndex = 6;
+		}
+
+		if (count >= profileTotalCount)
+		{
+			ptm_line_mode.selectedIndex = 0;	
+		}
+		ptm_line_modeChange();
+      
+		if(vah_eth_enable == '1'){
+			$("#ethernet_parameter").attr("value",'AutoSelect');
+		}else if( vlanMuxId == -1 ){
+			$("#ethernet_parameter").attr("value",'ethUntag');
+		}else{
+			$("#ethernet_parameter").attr("value",'ethTag');
+		}
+		ethernet_parameterChange();
+	}
+}
+
+
+function btnApply() {
+	var adslFlagvalue = 0;
+	var linkTypeValue = '<%ejGet(linkType)%>';
+
+	with ( document.forms[0] ) {		
+		
+		//      adslFlagvalue |= 0x00000080;		// ANNEX_A_MODE_VDSL2   
+		//      adslFlagvalue &= ~0x00FFFF00;
+		
+		if ( (transportMode.value == 'ATM') || 
+			 (l2Intf == '2' && g_configPtmOverADSL) || 
+ 			 ((transportMode.value == 'Auto Select') && (l2Intf=='1'))){
+			if(transportMode.value == 'Auto Select')
+				layer2WanType.value = '2';
+			else
+				layer2WanType.value = '0';
+
+            adslFlagvalue |= ( ANNEX_A_MODE_VDSL2 | ( g_adslFlagvalue & VDSL_PROFILE_MASK ) );
+			if (atm_line_mode.selectedIndex == 1) //ti143
+				adslFlagvalue |= (ANNEX_A_MODE_T1413);
+			else if (atm_line_mode.selectedIndex == 2) //dmt
+				adslFlagvalue |= (ANNEX_A_MODE_GDMT);
+			else if (atm_line_mode.selectedIndex == 3) //adsl2
+				adslFlagvalue |= (ANNEX_A_MODE_GLITE);
+			else if (atm_line_mode.selectedIndex == 4) //adsl2
+				adslFlagvalue |= (ANNEX_A_MODE_ADSL2);
+			else if (atm_line_mode.selectedIndex == 5) //adsl2+
+				adslFlagvalue |= (ANNEX_A_MODE_ADSL2PLUS);
+			else if (atm_line_mode.selectedIndex == 6) //adsl2+ with AnnexM
+				adslFlagvalue |= (ANNEX_A_MODE_ADSL2PLUS|ANNEX_A_MODE_ANNEXM);
+			else //(adslMod.selectedIndex == 0) //multi-mode
+			{
+				adslFlagvalue |= ANNEX_A_MODE_ALL_MOD;
+			}
+
+			if(transportMode.value != 'Auto Select'){
+				adslFlagvalue = adslFlagvalue & (~ANNEX_A_MODE_VDSL2);
+			}
+
+			transportMode.value = 'ATM';
+			configADSL.value='1';
+
+			if(g_configPtmOverADSL == 1)
+			{
+				transportMode.value = 'PTM';
+
+				if (atm_encapsulation_type.value == 'Auto Select'){
+					if(vlanMuxId == -1)
+						setSelect(atm_encapsulation_type, 'ptmUntagged');
+					else{
+						setSelect(atm_encapsulation_type, 'ptmTagged');
+						vlanMuxIdDefaultADSL.value = vlanMuxId;
+					}
+					encapAutoSelect.value='1';
+				}else{
+					if (atm_encapsulation_type.value == 'ptmUntagged'){
+						vlanMuxIdDefaultADSL.value = '-1';
+					}else{
+
+						vlmId = parseInt(vlanMuxIdDefaultADSL.value);
+
+						if( isNaN(vlmId) == true ){
+							AlertOpen("VLAN ID should between 0 to 4094");
+							return false;
+						}
+							
+			 			if( vlmId  < 0 || vlmId  > 4094 )
+						{
+							AlertOpen("VLAN ID should between 0 to 4094");
+							return false;
+						}
+						
+						if (isVlanUsed(vlmId) == false)
+						{
+							return false;
+						}
+					}
+					encapAutoSelect.value='0';
+				}
+			}
+			else
+			{
+				if (linkTypeValue == 'Unconfigured' || l2Intf != 1)
+					linkType.value='EoA';
+				else
+					linkType.value=linkTypeValue;
+
+				//0~255 32~65535
+				//The VPI/VCI combination is invalid.  Please enter a valid VPI/VCI combination.
+				if (isNaN(parseInt(atmVpi.value)) == true ||isNaN(parseInt(atmVci.value)) == true){
+					AlertOpen("The VPI/VCI combination is invalid.  Please enter a valid VPI/VCI combination.");
+					return false;
+				}
+			
+				vpiNum = parseInt(atmVpi.value);
+				vciNum = parseInt(atmVci.value);
+				
+				if ((vpiNum < 0 || vpiNum > 255) || (vciNum < 32 || vciNum > 65535))
+				{
+					AlertOpen("The VPI/VCI combination is invalid.  Please enter a valid VPI/VCI combination.");
+					return false;
+				}
+
+				if( atm_parameter.value == 'PVC_0_32'){
+					atmVpi.value='0';
+					atmVci.value='32';
+				}
+				else if(atm_parameter.value == 'PVC_8_35')
+				{
+					atmVpi.value='8';
+					atmVci.value='35';
+				}
+				else if(atm_parameter.value == 'PVC_0_35')
+				{
+					atmVpi.value='0';
+					atmVci.value='35';
+				}
+				else if(atm_parameter.value == 'AutoSelect')
+				{
+					atmVahL2en.value = '1';
+					atmVpi.value='<%ejGet(atmVpi)%>';
+					atmVci.value='<%ejGet(atmVci)%>';
+				}
+
+				if (atmServiceCategory.value != 'UBR') {
+					if ( isNaN(parseInt(atmPeakCellRate.value)) == true) {
+						AlertOpen('Peak Cell Rate "' + atmPeakCellRate.value + '" is invalid.');
+						return false;
+					}
+					
+					peak = parseInt(atmPeakCellRate.value);
+					if ( peak <= 0 || peak > pcrMax ) {
+						AlertOpen('Peak Cell Rate "' + atmPeakCellRate.value + '" is out of range [1-' + pcrMax + '].');
+						return false;
+					}
+				} else
+					atmPeakCellRate.value=0;
+				
+				if (atmServiceCategory.value == 'VBR-nrt' || atmServiceCategory.value == 'VBR-rt') {
+					if ( isNaN(parseInt(atmSustainedCellRate.value)) == true) {
+						AlertOpen('Sustainable Cell Rate "' + atmSustainedCellRate.value + '" is invalid.');
+						return false;
+					}
+					sustainable = parseInt(atmSustainedCellRate.value);
+					if ( sustainable <= 0 || sustainable > pcrMax ) {
+						AlertOpen('Sustainable Cell Rate "' + atmSustainedCellRate.value + '" is out of range [1-' + pcrMax + '].');
+						return false;
+					}
+					if ( sustainable >= peak) {
+						AlertOpen('Sustainable Cell Rate "' + atmSustainedCellRate.value + '" has to be smaller than Peak Cell Rate');
+						return false;
+					}
+					if ( isNaN(parseInt(atmMaxBurstSize.value)) == true) {
+						AlertOpen('Maximum Burst Size "' + atmMaxBurstSize.value + '" is invalid.');
+						return false;
+					}
+					maximum = parseInt(atmMaxBurstSize.value);
+					if ( maximum <= 0 || maximum > 1000000 ) {
+						AlertOpen('Maximum Burst Size "' + atmMaxBurstSize.value + '" is out of range [1-1000000].');
+						return false;
+					}
+				} else {
+					atmSustainedCellRate.value=0;
+					atmMaxBurstSize.value=0;
+				}
+
+				maximum = parseInt(atm_paramenters_mtu.value);
+
+				if(isNaN(maximum) == true){
+					AlertOpen('MTU Size "' + atm_paramenters_mtu.value + '" is out of range [1-1500].');
+					return false;
+				}
+
+				if (maximum < 1 || maximum > 1500)
+				{
+					AlertOpen('MTU Size "' + atm_paramenters_mtu.value + '" is out of range [1-1500].');
+					return false;
+				}
+				else
+				{
+					mtuSize.value = maximum;
+				}
+
+				if (atm_encapsulation_type.value == 'Auto Select'){
+					if(g_atmEncap == '' || g_atmEncap=='ptmOverAdsl')
+						setSelect(atm_encapsulation_type, 'LLC Bridged');
+					else{
+						//if ptmOverAdsl, tagged or untagged
+						setSelect(atm_encapsulation_type, g_atmEncap);
+					}
+					encapAutoSelect.value='1';
+				}else{
+					encapAutoSelect.value='0';
+				}
+			}
+		}else if ( (transportMode.value == 'PTM') || ( (transportMode.value == 'Auto Select') && (l2Intf=='2')) ){ //PTM
+			if(transportMode.value == 'Auto Select')
+				layer2WanType.value = '2';
+			else
+				layer2WanType.value = '1';
+
+            adslFlagvalue |= ANNEX_A_MODE_VDSL2 | ( g_adslFlagvalue & ANNEX_A_MODE_ALL_MOD );
+
+			if (ptm_line_mode.selectedIndex == 1) //8a
+				adslFlagvalue |= (VDSL_PROFILE_8a);
+			else if (ptm_line_mode.selectedIndex == 2) //8b
+				adslFlagvalue |= (VDSL_PROFILE_8b);
+			else if (ptm_line_mode.selectedIndex == 3) //12a
+				adslFlagvalue |= (VDSL_PROFILE_12a);
+			else if (ptm_line_mode.selectedIndex == 4) //12b
+				adslFlagvalue |= (VDSL_PROFILE_12b);
+			else if (ptm_line_mode.selectedIndex == 5){ //17a
+				adslFlagvalue |= (VDSL_PROFILE_17a);
+			}else if (is30aSupport && (ptm_line_mode.selectedIndex == 6)){ //30a
+				adslFlagvalue |= (VDSL_PROFILE_30a);
+			}
+			else //(adslMod.selectedIndex == 0) //multi-mode
+			{
+				adslFlagvalue |= (VDSL_PROFILE_MASK);
+				adslFlagvalue &= (~VDSL_PROFILE_US0);
+			}
+			if(transportMode.value != 'Auto Select'){
+				adslFlagvalue = adslFlagvalue & (~ANNEX_A_MODE_ALL_MOD);
+			}else{
+				if((adslFlagvalue & ANNEX_A_MODE_ALL_MOD & (~ANNEX_A_SRA_ENABLE) ) == 0 )
+					adslFlagvalue |= ANNEX_A_MODE_ALL_MOD;
+			}
+
+			transportMode.value = 'PTM';
+
+			vlmId = parseInt(vlanMuxIdDefault.value);
+
+			if( (ptm_parameter.value == 'ptmTag') && ( isNaN(vlmId) == true )){
+				AlertOpen("VLAN ID should between 0 to 4094");
+				return false;
+			}
+				
+ 			if( (ptm_parameter.value == 'ptmTag') &&  (vlmId  < 0 || vlmId  > 4094 ))
+			{
+				AlertOpen("VLAN ID should between 0 to 4094");
+				return false;
+			}
+			
+			if (isVlanUsed(vlmId) == false)
+			{
+				return false;
+			}
+
+			if( ptm_parameter.value == 'AutoSelect'){
+				ptmVahL2en.value = '1';
+				ethVahL2en.value = '1';
+				vlanMuxIdDefault.value = vlanMuxId;
+			}
+			else if(ptm_parameter.value == 'ptmUntag')
+			{
+				vlanMuxIdDefault.value = '-1';
+			}
+
+			maximum = parseInt(paramenters_mtu.value);
+
+			if(isNaN(maximum) == true){
+				AlertOpen('MTU Size "' + paramenters_mtu.value + '" is out of range [1-1500].');
+				return false;
+			}
+
+			if (maximum < 1 || maximum > 1500)
+			{
+				AlertOpen('MTU Size "' + paramenters_mtu.value + '" is out of range [1-1500].');
+				return false;
+			}
+			else
+			{
+				mtuSize.value = paramenters_mtu.value;
+			}
+		}else{ //Ethernet
+
+            if(transportMode.value == 'Auto Select')
+				layer2WanType.value = '2';
+			else
+				layer2WanType.value = '3';
+				
+			if(transportMode.value == 'Auto Select')
+			{
+				adslFlagvalue |= ANNEX_A_MODE_VDSL2
+				adslFlagvalue |= (VDSL_PROFILE_MASK);
+				adslFlagvalue &= (~VDSL_PROFILE_US0);
+				adslFlagvalue |= ANNEX_A_MODE_ALL_MOD;
+			}
+			else
+			{
+			   /* Fix on ethernet mode */
+			   /* Set as same as PTM, but we not support any PTM mode */
+			   adslFlagvalue |= ANNEX_A_MODE_VDSL2 | ( g_adslFlagvalue & ANNEX_A_MODE_ALL_MOD );
+			   adslFlagvalue = adslFlagvalue & (~ANNEX_A_MODE_ALL_MOD);
+			}
+			transportMode.value = 'Ethernet';
+
+			vlmId = parseInt(ethVlanMuxIdDefault.value);
+
+			if( (ethernet_parameter.value == 'ethTag') && ( isNaN(vlmId) == true )){
+				AlertOpen("VLAN ID should between 0 to 4094");
+				return false;
+			}
+				
+ 			if( (ethernet_parameter.value == 'ethTag') &&  (vlmId  < 0 || vlmId  > 4094 ))
+			{
+				AlertOpen("VLAN ID should between 0 to 4094");
+				return false;
+			}
+			
+			if (isVlanUsed(vlmId) == false)
+			{
+				return false;
+			}
+
+			if( ethernet_parameter.value == 'AutoSelect'){
+				ethVahL2en.value = '1';
+				ethVlanMuxIdDefault.value = vlanMuxId;
+			}
+			else if(ethernet_parameter.value == 'ethUntag')
+			{
+				ethVlanMuxIdDefault.value = '-1';
+			}
+
+			maximum = parseInt(eth_paramenters_mtu.value);
+
+			if(isNaN(maximum) == true){
+				AlertOpen('MTU Size "' + eth_paramenters_mtu.value + '" is out of range [1-1500].');
+				return false;
+			}
+
+			if (maximum < 1 || maximum > 1500)
+			{
+				AlertOpen('MTU Size "' + eth_paramenters_mtu.value + '" is out of range [1-1500].');
+				return false;
+			}
+			else
+			{
+				mtuSize.value = eth_paramenters_mtu.value;
+			}
+		}
+		needReboot.value=0;
+		adslFlagvalue |= ANNEX_A_SRA_ENABLE;
+      adslFlagvalue |= VDSL_PROFILE_US0;
+		adslFlag.value = adslFlagvalue;
+
+		document.forms[0].sessionKey.value = gblsessionKey;	
+		document.forms[0].submit();
+
+		//Return false to avoid do submit twice.
+		return false;
+	}
+}
+
+function goSubmit() {
+	with ( document.forms[0] ) {
+		needReboot.value=1;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+	
+}
+
+// done hiding -->
+</script>
+<body id="advancedsetup_broadbandsettings" onLoad='frmLoad();'>
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+        
+            <!--li class="modemstatus"><a href="modemstatus_home.html">Modem Status</a></li>
+            <li class="quicksetup"><a href="quicksetup.html">Quick Setup</a></li>
+            <li class="wirelesssetup"><a href="wirelesssetup_basicsettings.html">Wireless Setup</a></li>
+            <li class="utilities"><a href="utilities_reboot.html">Utilities</a></li>
+            <li class="advancedsetup"><a href="advancedsetup_accessscheduler.html" id="selected">Advanced Setup</a></li-->
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+        
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+				WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left">
+    </div>
+    <div id="content_left">
+		<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('broadbandsettings');
+</script>
+		</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="advancedsetup_dslsettings">Broadband Settings <span>Broadband settings change the modem connection parameters to your service
+                    provider. Do not change the settings below unless instructed
+                    by a certified CenturyLink technician.</span></h1>
+		<form action="dslcfg.cmd" method="post" onSubmit="return btnApply();">
+		<input type="hidden" name="sessionKey" id="sessionKey" value="">
+		<input type="hidden" name="action" id="action" value="add">
+		<input type="hidden" name="adslFlag" id="adslFlag" value="">
+		<input type="hidden" name="defaultWan" id="defaultWan" value="1">
+		<input type="hidden" name="needReboot" id="needReboot" value="0">
+		<input type="hidden" name="linkType" id="linkType" value="">
+		<input type="hidden" name="dslMode" id="dslMode" value="">
+		<input type="hidden" name="mtuSize" id="mtuSize" value="1500">
+		<input type="hidden" name="atmVahL2en" id="atmVahL2en" value="0">
+		<input type="hidden" name="ptmVahL2en" id="ptmVahL2en" value="0">
+		<input type="hidden" name="ethVahL2en" id="ethVahL2en" value="0">
+		<input type="hidden" name="layer2WanType" id="layer2WanType" value="2">
+		<input type="hidden" name="encapAutoSelect" id="encapAutoSelect" value="1">
+		<input type="hidden" name="configADSL" id="configADSL" value="0">
+		<input type="hidden" name="connMode" id="connMode" value="1">
+		<input type="hidden" name="ethWanIfName" id="ethWanIfName" value="<%ejGet(EthWanIntf)%>">
+
+                <div class="stepWrapper">
+                <p><strong>1. Select the WAN connection type.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="transportMode">WAN Type:</label></td>
+                        <td><select name="transportMode" id="transportMode" onChange="checkTransportMode(1)">
+                                <option value="Auto Select">Auto Select </option>
+                                <option value="ATM">ADSL-ADSL2+ </option>
+                                <option value="PTM" selected="selected">VDSL2 </option>
+                                <option value="Ethernet">WAN Ethernet Port 5 </option>
+                            </select>
+                        </td>
+			            <tr id="auto_select_display1">
+			                <td>WAN Type Selected:</td>
+			                <td><span id="WanTypeSelect">VDSL2 </span></td>
+			            </tr>
+                    </tr>
+                </table>
+                </div>
+                <div id="atm_group">
+                	<div class="stepWrapper">
+                    <p><strong>2. Select the line mode.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="atm_line_mode">Line Mode:</label></td>
+                            <td><select name="atm_line_mode" id="atm_line_mode" onChange="atm_line_modeChange()">
+                                    <option value="Auto Select" selected="selected">Auto Select </option>
+                                    <option value="T1.413">T1.413 </option>
+                                    <option value="G.DMT">G.DMT </option>
+                                    <option value="G.Lite">G.Lite </option>
+                                    <option value="ADSL2">ADSL2 </option>
+                                    <option value="ADSL2Plus">ADSL2+ </option>
+                                    <option value="ADSL2PlusWithAnnexM">ADSL2+ with Annex M </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr class='atm_line_mode_selected_tr'>
+                            <td width="150"><label for="atm_line_mode_selected">Line Mode Selected:</label></td>
+                            <td><font color=#015F2C><strong><%ejGetOther(dslinfo, RMode)%></strong></font></td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>3. Select the transport mode.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="encapsulation_type">Transport Mode:</label></td>
+                            <td><select name="atm_encapsulation_type" id="atm_encapsulation_type" onChange="atm_encap_type_change()">
+                                    <option value="Auto Select" selected="selected">Auto Select </option>
+                                    <option value="ptmTagged">PTM - Tagged </option>
+                                    <option value="ptmUntagged">PTM - Untagged </option>
+                                    <option value="VC-Mux">ATM - VC-Mux </option>
+                                    <option value="LLC/SNAP">ATM - LLC/SNAP </option>
+                                    <option value="LLC Bridged">ATM - LLC Bridged </option>
+                                    <option value="LLC Routed">ATM - LLC Routed </option>
+                                </select>
+                            </td>
+                        </tr>
+			            <tr id="auto_select_display3">
+			                <td width="150">Transport Mode Selected:</td>
+			                <td><span id="auto_select_display3_value"></span></td>
+			            </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>4. Set the MTU value.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="atm_paramenters_mtu">MTU:</label></td>
+                            <td><input name="atm_paramenters_mtu" id="atm_paramenters_mtu" type="text" size="20" maxlength="4" /></td>
+                            <td>(1-1500)</td>
+                        </tr>
+                    </table>
+                    </div>
+
+<!-- if ptm over adsl -->
+	<!-- if ptm over adsl -->
+					<div id="adsl_ptm_div">
+						<div class="stepWrapper">
+							<p><strong>5. Enter the VLAN parameters.</strong></p>
+								<table>
+								<tr>
+									<td width="150"><label for="vlanMuxIdDefaultADSL">VLAN ID:</label></td>
+									<td><input name="vlanMuxIdDefaultADSL" id="vlanMuxIdDefaultADSL" type="text" size="25" maxlength="4" /></td>
+									<td>(0-4094)</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+	<!-- endif -->
+<!-- else -->
+
+                    <div id="adsl_atm_div">
+					<div class="stepWrapper">
+                    <p><strong>5. Set the ATM parameters.</strong></p>
+                    <table>
+                        <tr>
+						  <td width="150"><label for="atm_parameter">ATM Setting:</label></td>
+						    <td><select name="atm_parameter" id="atm_parameter" onChange="atm_parameterChange()">
+                                    <option value="AutoSelect" selected="selected">Auto Select </option>
+                                    <option value="PVC_0_32">0/32 </option>
+                                    <option value="PVC_8_35">8/35 </option>
+                                    <option value="PVC_0_35">0/35 </option>
+                                    <option value="Disable">Manual </option>
+                                </select>
+                            </td>
+							<td></td>
+						</tr>
+                  		<tr class='atm_parameter_detection'>
+                      		<td>Parameter Detection:</td>
+                     		<td>
+<script language="javascript">
+if('<%ejGetOther(vah, atm, l2)%>' == '1')
+{
+	document.writeln('<%ejGetOther(vah, atm, status)%>');
+}
+else
+{
+	document.writeln('N/A');
+}
+</script>
+							</td>
+							<td></td>
+                  		</tr>
+                        <tr class='atm_parameter_selected_tr'>
+                            <td width="150"><label for="atmVpi">VPI:</label></td>
+                            <td><input name="atmVpi" id="atmVpi" type="text" size="20" maxlength="3" /></td>
+                            <td>(0-255)</td>
+                        </tr>
+                        <tr class='atm_parameter_selected_tr'>
+                            <td width="150"><label for="atmVci">VCI:</label></td>
+                            <td><input name="atmVci" id="atmVci" type="text" size="20" maxlength="5" /></td>
+                            <td>(32 - 65535)</td>
+                        </tr>
+                        <tr>
+                            <td width="150"><label for="atmServiceCategory">Priority:</label></td>
+                            <td><select name="atmServiceCategory" size="1" onChange='cbClick()'>
+		                        <option value="UBR" selected>UBR without PCR
+		                        <option value="UBRWPCR">UBR with PCR
+		                        <option value="CBR">CBR
+		                        <option value="VBR-nrt">Non-Real Time VBR
+		                        <option value="VBR-rt">Real Time VBR</option>
+		                     </select></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">Traffic Parameters:</td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan="2">
+                                <table style="margin:0; width:100%">
+                                    <tr style="border-bottom:none;">
+                                        <td style="border-bottom:none;" width="20"><label for="atmPeakCellRate">PCR:</label></td>
+                                        <td style="border-bottom:none;"><input name="atmPeakCellRate" id="atmPeakCellRate" type="text" size="5" disabled/></td>
+                                        <td style="border-bottom:none;" width="20"><label for="atmSustainedCellRate">SCR:</label></td>
+                                        <td style="border-bottom:none;"><input name="atmSustainedCellRate" id="atmSustainedCellRate" type="text" size="5" disabled/></td>
+                                    </tr>
+                                </table>                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan="2">
+                            	<table style="border-bottom:none; margin:0; width:100%">
+                                    <tr style="border-bottom:none;">
+                                        <td style="border-bottom:none;" width="20"><label for="atmMaxBurstSize">MBS:</label></td>
+                                        <td style="border-bottom:none;"><input name="atmMaxBurstSize" id="atmMaxBurstSize" type="text" size="5" disabled/></td>
+<!--                                        <td width="20"><label for="atm_paramenters_cdvt">CDVT:</label></td>-->
+<!--                                       <td><input name="atm_paramenters_cdvt" id="atm_paramenters_cdvt" type="text" size="5" / disabled></td>-->
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table> 
+                   </div>
+				   </div>
+                   <div class="stepWrapper">
+                    <p><strong>6. Click &quot;Apply&quot; to save your changes. </strong></p>   
+               	<a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                    </div>               
+                </div>
+                <div id="non_atm_group">
+                    <div class="stepWrapper">
+                    <p><strong>2. Select the line mode.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="line_mode">Line Mode:</label></td>
+                            <td><select name="ptm_line_mode" id="ptm_line_mode"  onChange="ptm_line_modeChange()">
+                                    <option value="Auto Select" selected="selected">Auto Select </option>
+                                    <option value="VDSL2 - 8A">VDSL2 - 8A </option>
+                                    <option value="VDSL2 - 8B">VDSL2 - 8B </option>
+                                    <option value="VDSL2 - 12A">VDSL2 - 12A </option>
+                                    <option value="VDSL2 - 12B">VDSL2 - 12B </option>
+                                    <option value="VDSL2 - 17A">VDSL2 - 17A (U0) </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr class='ptm_line_mode_selected_tr'>
+                            <td width="150"><label for="ptm_line_mode_selected">Line Mode Selected:</label></td>
+                            <td><font color=#015F2C><strong><%ejGetOther(dslinfo, RMode)%></strong></font></td>
+                        </tr>
+                    </table>
+                    </div>
+					<div class="stepWrapper">
+                    <p><strong>3. Select the transport mode.</strong></p>
+                    <table>
+                        <tr>
+						  <td width="150"><label for="ptm_parameter">Transport Mode:</label></td>
+						    <td><select name="ptm_parameter" id="ptm_parameter" onChange="ptm_parameterChange()">
+                                    <option value="AutoSelect" selected="selected">Auto Select </option>
+                                    <option value="ptmTag">PTM - Tagged </option>
+                                    <option value="ptmUntag">PTM - Untagged </option>
+                                </select>
+                            </td>
+							<td></td>
+						</tr>
+                  		<tr class='ptm_parameter_detection'>
+                      		<td>Parameter Detection:</td>
+                     		<td>
+<script language="javascript">
+if('<%ejGetOther(vah, ptm, l2)%>' == '1')
+{
+	document.writeln('<%ejGetOther(vah, ptm, status)%>');
+}
+else
+{
+	document.writeln('N/A');
+}
+</script>
+							</td>
+							<td></td>
+                  		</tr>
+                    </table>
+                	</div>
+					<div class="stepWrapper">
+                    <p><strong>4. Set the MTU value.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="paramenters_mtu">MTU:</label></td>
+                            <td><input name="paramenters_mtu" id="paramenters_mtu" type="text" size="20" maxlength="4" /></td>
+                            <td>(1-1500)</td>
+                        </tr>
+                    </table>
+                    </div>
+					<div class="ptm_parameter_selected_div_1">
+						<div class="stepWrapper">
+							<p><strong>5. Enter the VLAN parameters.</strong></p>
+								<table>
+								<tr>
+									<td width="150"><label for="vlanMuxIdDefault">VLAN ID:</label></td>
+									<td><input name="vlanMuxIdDefault" id="vlanMuxIdDefault" type="text" size="25" maxlength="4" /></td>
+									<td>(0-4094)</td>
+								</tr>
+							</table>
+						</div>
+						<div class="stepWrapper">
+							<p><strong>6. Click &quot;Apply&quot; to save your changes. </strong></p>
+							<a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+						</div>       
+					</div>
+				<div class="ptm_parameter_selected_div_2">
+                <div class="stepWrapper">
+                <p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+               <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+                </div>
+               </div>
+               <div id="ethernet_group">
+					<div class="stepWrapper">
+                    <p><strong>2. Select the transport mode.</strong></p>
+                    <table>
+                        <tr>
+						  <td width="150"><label for="ethernet_parameter">Transport Mode:</label></td>
+						    <td><select name="ethernet_parameter" id="ethernet_parameter" onChange="ethernet_parameterChange()">
+                                    <option value="AutoSelect" selected="selected">Auto Select </option>
+                                    <option value="ethTag">Ethernet - Tagged </option>
+                                    <option value="ethUntag">Ethernet - Untagged </option>
+                                </select>
+                            </td>
+							<td></td>
+						</tr>
+                  		<tr class='ethernet_parameter_detection'>
+                      		<td>Parameter Detection:</td>
+                     		<td>
+<script language="javascript">
+if('<%ejGetOther(vah, ethernet, l2)%>' == '1')
+{
+	document.writeln('<%ejGetOther(vah, ethernet, status)%>');
+}
+else
+{
+	document.writeln('N/A');
+}
+</script>
+							</td>
+							<td></td>
+                  		</tr>
+                    </table>
+                	</div>
+					<div class="stepWrapper">
+                    <p><strong>3. Set the MTU value.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="eth_paramenters_mtu">MTU:</label></td>
+                            <td><input name="eth_paramenters_mtu" id="eth_paramenters_mtu" type="text" size="20" maxlength="4" /></td>
+                            <td>(1-1500)</td>
+                        </tr>
+                    </table>
+                    </div>
+					<div class="ethernet_parameter_selected_div_1">
+						<div class="stepWrapper">
+							<p><strong>4. Enter the VLAN parameters.</strong></p>
+								<table>
+								<tr>
+									<td width="150"><label for="ethVlanMuxIdDefault">VLAN ID:</label></td>
+									<td><input name="ethVlanMuxIdDefault" id="ethVlanMuxIdDefault" type="text" size="25" maxlength="4" /></td>
+									<td>(0-4094)</td>
+								</tr>
+							</table>
+						</div>
+						<div class="stepWrapper">
+							<p><strong>5. Click &quot;Apply&quot; to save your changes. </strong></p>
+							<a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+						</div>       
+					</div>
+				<div class="ethernet_parameter_selected_div_2">
+                <div class="stepWrapper">
+                <p><strong>4. Click &quot;Apply&quot; to save your changes. </strong></p>
+               <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+                </div>
+                </div>
+			   </div>
+               
+            </form>
+        </div>
+    </div>
+    <div class="clear_left">
+    </div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+
+</div>
+</body>
+</html>

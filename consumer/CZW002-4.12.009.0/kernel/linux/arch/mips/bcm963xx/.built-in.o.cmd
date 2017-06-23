@@ -1,0 +1,1 @@
+cmd_arch/mips/bcm963xx/built-in.o :=  /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld  -m elf32btsmip   -r -o arch/mips/bcm963xx/built-in.o arch/mips/bcm963xx/irq.o arch/mips/bcm963xx/prom.o arch/mips/bcm963xx/setup.o arch/mips/bcm963xx/smp-brcm.o 

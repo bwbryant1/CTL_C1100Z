@@ -1,0 +1,580 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<link href="../_css/slider_toggle.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/toggle-buttonC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+
+var apMode = '<%ejGetWl(wlMode)%>';
+var lazywds = '<%ejGetWl(wlLazyWds)%>';
+var enbl = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var wlWdsMac = new Array('<%ejGetWl(wlWds0)%>','<%ejGetWl(wlWds1)%>','<%ejGetWl(wlWds2)%>','<%ejGetWl(wlWds3)%>');
+var wdsStaCount =0;
+
+var wlWdsEnable = '<%ejGetWl(wlWdsEnable)%>';//1; //parseInt('##VAR_WLWDS_wlWdsEnable##');
+var wlWdsStaList = '<%ejGetWl(wlWdsStaList)%>';//'CentryLink|cc:5d:4e:a2:e2:4b|0;TELUS|c8:6c:87:13:26:1b|0;|;|';//'##VAR_WLWDS_wlWdsStaList##';
+
+var wlAuthMode = '<%ejGetWl(wlAuthMode_wl0v0)%>'; 
+var wep = '##VAR_WLWDS_wlWep##';
+var wlDeviceList = '';
+
+var sessionKey='<%ejGetOther(sessionKey)%>';
+
+function checkIsDuplicateMac(applyMac) {
+   with (document.forms[0]) {
+      var wdsStaList = wlWdsStaList.split(';');
+      var str = '';
+      var ret = 0;
+   
+      if (wlWdsStaList != '')
+      {
+         for(i = 0;i<wdsStaList.length;i++)
+         {
+            if(wdsStaList[i] != '') {
+               var staList = wdsStaList[i].split('|');
+
+               if(applyMac == staList[1]){
+                  ret = 1;
+                  break;
+               }
+            }
+         }
+      }
+
+      return ret;
+   }
+}
+
+function wdsBssListChange()
+{
+   with(document.forms[0]) {
+      if (wdsBssList.selectedIndex == 0){
+         $('#wdsMacAddr').parent().parent().show();
+         staName.value = "";
+         //staName.disabled = false;
+      } else {
+         $('#wdsMacAddr').parent().parent().hide();
+
+         var tmpBssid = wdsBssList.options[wdsBssList.selectedIndex].value;
+         var wdsDevList = wlDeviceList.split('|');
+         var str = '';
+         var ret = 0;
+         var i = 0;
+      
+         if (wlDeviceList != '')
+         {
+            for(i = 0;i<wdsDevList.length;i++)
+            {
+               if(wdsDevList[i] != '') {
+                  var devList = wdsDevList[i].split('/');
+
+                  if(tmpBssid == devList[1]){
+//----
+					var ssidStr = devList[0].split(';');
+					var strTmp='';
+					var k=0;
+					for(k=0;k<ssidStr.length;k++){
+						if(ssidStr[k].indexOf("&#")!=-1){
+							if(k==0)strTmp='';						
+							strTmp+=String.fromCharCode(ssidStr[k].substring(2));}
+					}
+//----
+                 
+                     staName.value = strTmp;//devList[0];
+                     break;
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+
+function generateDeviceList()
+{
+   var stationList = wlDeviceList.split('|');
+   var i = 0;
+   var str = '';
+
+   for(i = 0;i<stationList.length;i++)
+   {
+      if(stationList[i] != ''){
+         var station = stationList[i].split('/');
+         var ssid = station[0];
+         var bssid = station[1];
+
+         if(bssid == ''){
+            continue;
+         }
+
+//----
+		var ssidStr = station[0].split(';');
+		var k=0;
+		for(k=0;k<ssidStr.length;k++){
+			if(ssidStr[k].indexOf("&#")!=-1){
+				if(k==0)ssid='';
+				ssid+=String.fromCharCode(ssidStr[k].substring(2));	}
+		}
+//----
+
+         if(ssid.length < 25) {
+            str += '<option value="'+ bssid + '">' + ssid + ' - ' + bssid + '</option>';
+         } else {
+            var tmpName = ssid.substring(0,22)
+
+            str += '<option value="'+ bssid + '" title="' + ssid + ' - ' + bssid + '">';
+            str += tmpName + '... - ' + bssid;
+            str += '</option>';
+         }
+      }
+   }
+
+   $('#wdsBssList').append(str);
+}
+
+function getDeviceList()
+{
+   var objXMLHTTP = null;
+
+   if (window.XMLHttpRequest)
+   { 
+      objXMLHTTP=new XMLHttpRequest(); 
+   }// code for IE 
+   else if (window.ActiveXObject)
+   { 
+      objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+   }
+
+   if (objXMLHTTP != null) {
+      objXMLHTTP.open("POST", "wlwdsAutoScan.cmd", true);
+      //objXMLHTTP.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      objXMLHTTP.send(null);      
+      objXMLHTTP.onreadystatechange = function()
+      {
+         if (objXMLHTTP.readyState == 4) {
+            var respTxt = objXMLHTTP.responseText;
+
+            if ( (respTxt != null) && (respTxt != '') ) {
+               var upDate = respTxt.replace(/\r\n/ig, "");
+               wlDeviceList = upDate.replace(/\n/ig, "");
+
+               generateDeviceList();
+               generateWdsStationList();
+            }
+         }
+      }
+   }
+}
+
+function removeWdsSta(mac) {
+   with(document.forms[0]) {
+      //var loc = 'wlansetup.cgi?pageAct=wlWds&isSubmit=1&action=remove&rmLst=' + mac;
+      //var loc = 'wireless.cgi?page_name=wlWds&pageAct=wlWds&isSubmit=1&action=remove&rmLst=' + mac;
+      var loc = 'wirelesssetup_wds.wl?wlDelWdsAddr='+mac;      
+	  loc += '&sessionKey='+sessionKey;	
+      submitFrm(loc);
+   }
+}
+
+function generateWdsStationList() {
+   with(document.forms[0]) {
+      var wdsStaList = wlWdsStaList.split(';');
+      var i = 0;
+      var str = '';
+      wdsStaCount=0;
+
+      for(i = 0;i<wdsStaList.length;i++)
+      {
+         if(wdsStaList[i] != '') {
+            var staList = wdsStaList[i].split('|');
+
+            if(staList[1] != ''){
+               str += '<tr>';
+               str += '  <td>' + staList[0] + '</td>';
+               //str += '  <td>' + staList[1] + '</td>';
+			   str += '  <td>' + staList[1].substring(0, 9) + '<br />' + staList[1].substring(9) + '</td>';
+               if (apMode == "wds")
+                  str += '  <td>' + 'AP Client Station' + '</td>';
+               else
+                  str += '  <td>' + 'Repeater' + '</td>';
+
+               //search wlDeviceList               
+			   var stationList = wlDeviceList.split('|');
+			   var j = 0;
+			   var rssi=0;
+			   var noise=0;					   
+			   for(j = 0;j<stationList.length;j++)
+			   {
+				    if(stationList[j] != ''){
+				         var station = stationList[j].split('/');
+				     	 if(staList[1]==station[1]){
+				     	 	rssi = station[2];
+				     	 	noise = station[3];
+				     	 	break;
+						 }             
+				    }
+			   }               
+               
+               str += '  <td >' + rssi + 'dBm</td>';
+               var rssiInt = parseInt(rssi);
+               var noiseInt = parseInt(noise);
+               var snr = rssiInt - noiseInt;
+               str += '  <td >' + snr + 'dB</td>';
+               str += '  <td >' + noise + 'dBm</td>';
+			   if (rssiInt < 0) {
+                  var signal = parseInt(((rssiInt + 144) * 100) / 144);
+                  if (signal >= 36)
+                     str += '  <td class="greentext">' + signal + '%</td>';
+                  else
+                     str += '  <td class="redtext">' + signal + '%</td>';
+               } else
+			      str += '  <td class="redtext">' + '0%</td>';
+               str += '  <td><a href="#" class="btn remove_btn" onclick="removeWdsSta(\'' + staList[1] + '\')">Remove</a></td>';
+               str += '</tr>';
+
+               wdsStaCount++;
+            }
+         }
+      }
+      $('#wdsStationList').html(str);
+   }
+}
+
+function verifyMacAddress(mac){
+   var addrParts = mac.split(':');
+   var addrParts2 = mac.split('-');    
+   var targetMac ="";
+
+   if (addrParts2.length==1 && (addrParts.length==1))
+   {
+      //Just MAC charters, no dashes, no colons
+      if (mac.length>12) {
+         return "";
+      } else {
+         var str1 = mac.slice(0,2);
+         var str2 = mac.slice(2).slice(0,2);
+         var str3 = mac.slice(4).slice(0,2);
+         var str4 = mac.slice(6).slice(0,2);
+         var str5 = mac.slice(8).slice(0,2);
+         var str6 = mac.slice(10).slice(0,2);
+
+         targetMac = str1.concat(':').concat(str2).concat(':').concat(str3).concat(':').concat(str4).concat(':').concat(str5).concat(':').concat(str6);
+      }
+   }
+   else if(addrParts.length!= 6 && addrParts2.length!= 6) {
+      return "";
+   }
+   else if(mac.length==17&&addrParts.length ==6 )
+   {
+      //colons
+      targetMac = mac;
+   }
+   else if(mac.length==17&&addrParts2.length ==6 )
+   {
+      //dashes
+      for (var i=0;i<6;i++){
+         mac = mac.replace("-", ":");
+      }    	
+      targetMac = mac;
+   }
+   else
+   {
+      return "";    
+   }
+
+   if (isValidMacAddress(targetMac)) {
+      return targetMac;
+   } else {
+      return "";
+   }
+}
+
+function isRemoteNameUnsafe(compareChar) {
+   var unsafeString = "\"<>%\\^[]`\+\$='#&\t(){}|/;";
+
+   if ( unsafeString.indexOf(compareChar) == -1 && compareChar.charCodeAt(0) >= 32
+        && compareChar.charCodeAt(0) < 123 )
+      return false; // found no unsafe chars, return false
+   else
+      return true;
+}
+
+function isValidRemoteName(name) {
+   var i = 0;
+
+   if((name.length<2) ||(name.length>10))
+   {
+   	return false;
+   }
+   
+   for ( i = 0; i < name.length; i++ ) {
+      if ( isRemoteNameUnsafe(name.charAt(i)) == true )
+         return false;
+   }
+   return true;
+}
+
+function wdsEnblChange() {
+   with ( document.forms[0] ) {
+      if (wlWdsEnbl[0].checked == true ) {
+         if((wlAuthMode == 'radius') || (wlAuthMode == 'wpa2') || (wlAuthMode == 'wpa') || (wlAuthMode == 'wpa wpa2')){
+            var msg = 'WDS cannot support radius.';
+            AlertOpen(msg);
+
+            wlWdsEnbl[0].checked = false;
+            wlWdsEnbl[1].checked = true;
+
+            return;
+         }
+         showhide("wdsEnabled", 1);
+         showhide("wdsDisabled", 0);
+      } else {
+         showhide("wdsEnabled", 0);
+         showhide("wdsDisabled", 1);
+      }
+   }
+}
+
+function btnApply() {
+   with(document.forms[0]) {
+      //var loc = 'wlansetup.cgi?pageAct=wlWds&isSubmit=1&action=apply';
+      var loc = 'wirelesssetup_wds.wl';
+
+      if(wlWdsEnbl[0].checked == true) {
+         loc += '?wlWdsEnbl=1';
+
+         if(wdsStaCount>=4){
+            var msg = 'Only support 4 WDS stations.';
+            AlertOpen(msg);
+            return;
+         }
+
+         // check mac
+         var selectMac = "";
+         if (wdsBssList.selectedIndex == 0){
+            selectMac = wdsMacAddr.value.toUpperCase();
+         } else {
+            selectMac = getSelect(wdsBssList);
+         }
+
+         // check MAC if duplicate
+         if(checkIsDuplicateMac(selectMac) == 1) {
+            AlertOpen("The MAC address entered is not valid.  Please enter a valid MAC address.");
+            return ;
+         }
+
+         var targetMac = "";
+         if((targetMac = verifyMacAddress(selectMac)) != "") {
+            loc += '&wlWdsAddr=' + targetMac;
+         } else {
+            AlertOpen("The MAC address entered is not valid.  Please enter a valid MAC address.");	
+            return;
+         }
+
+	     if (!isValidRemoteName(staName.value)) {
+	        AlertOpen('The remote base station name entered is not valid.  Please enter a name containing 2 to 10 characters.');
+	        return ;
+	     }
+         if(staName.value != '') {
+            loc += '&wdsStaName=' + staName.value;
+         } else {
+            loc += '&wdsStaName=';
+         }
+
+         if(wdsMode[0].checked)
+            loc += '&wdsMode=wds';
+         if(wdsMode[1].checked)
+            loc += '&wdsMode=ap';
+
+   	     loc += '&sessionKey='+sessionKey;	         
+      } else {
+         loc += '?wlWdsEnbl=0';
+		 loc += '&sessionKey='+sessionKey;	         
+      }
+
+      submitFrm(loc);
+   }
+}
+
+function frmLoad(){
+   with(document.forms[0]){
+      // set wlWdsEnbl
+      if(wlWdsEnable == 1) {
+         wlWdsEnbl[0].checked = true;
+         wlWdsEnbl[1].checked = false;
+         showhide("wdsEnabled", 1);
+         showhide("wdsDisabled", 0);
+      } else {
+         wlWdsEnbl[0].checked = false;
+         wlWdsEnbl[1].checked = true;
+         showhide("wdsEnabled", 0);
+         showhide("wdsDisabled", 1);
+      }      
+
+      // get device List;
+      getDeviceList();
+      
+      generateWdsStationList();
+   }
+}
+
+</script>
+
+</head>
+
+<body id="wirelesssetup_wds" onload="frmLoad()">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+    		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>          	
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">				
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('wds', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+    <div id="connectionstatus">
+      <h1>Connection Status</h1>
+      <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+      </div>
+		</div>
+	</div>
+    <div id="content_right">
+        <div id="content_right_contentarea">
+            <h1 class="wirelesssetup_wds">WDS Wireless Distribution System<span>WDS allowes the wireless interconnection of access points via a wireless connection.</span></h1>
+            <form>
+		      <!--input size="15" type="hidden" name="wlMode" />
+		      <input size="15" type="hidden" name="wlLazyWds" />
+		      <input size="15" type="hidden" name="wlWds0" />
+		      <input size="15" type="hidden" name="wlWds1" />
+		      <input size="15" type="hidden" name="wlWds2" />
+		      <input size="15" type="hidden" name="wlWds3" />
+		      <input size="15" type="hidden" name="sessionKey" /-->
+            <div class="stepWrapper">
+                <p><strong>1. Set the WDS main base station state. </strong></p>
+                <table>
+                    <tr>
+                        <td width="150">WDS Main Base Station:</td>
+                        <td><input name="wlWdsEnbl" id="wlWdsEnbl" type="radio" value="1" onclick="wdsEnblChange()" />Enable</td>
+                        <td><input name="wlWdsEnbl" id="wlWdsEnbl" type="radio" value="0" onclick="wdsEnblChange()" />Disable</td>
+                    </tr>
+                </table>
+            </div>
+<div id="wdsEnabled">
+            <!--<div class="stepWrapper">
+                <p><strong>2. Select the WDS main base station SSID.</strong></p>
+                <table>
+                    <tr>
+                        <td width="172">WDS SSID:</td>
+                        <td width="301">
+                            <select name="ssid" id="ssid"><%ejGetWl(wlSsidList)%>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>-->
+            <div class="stepWrapper">
+                <p><strong>2. Enter the MAC address of the remote base station.</strong></p>
+                <table>
+                    <tr>
+                        <td width="172">Select Device:</td>
+                        <td width="301">
+                            <select name="wdsBssList" id="wdsBssList" onChange="wdsBssListChange()">
+                                <option selected="selected" value="0">Manually Enter MAC</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="172">Manually Add MAC Address: </td>
+                        <td><input name="wdsMacAddr" id="wdsMacAddr" type="text" size="35" maxlength='17' /></td>
+                    </tr>
+                </table>
+            </div>
+                <div class="stepWrapper">
+                    <p><strong>3. Enter a remote base station Name.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150"><label for="default_ssid_network_name">Remote Station Name:</label></td>
+                            <td><input id="staName" type="text" size="35" maxlength="10"/></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="stepWrapper">
+                    <p><strong>4. Set the remote base station type. </strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">Remote  Station Type:</td>
+                            <td><input name="wdsMode" id="wdsmode_wds" type="radio" value="on" checked="checked" />AP Client Station</td>
+                            <td><input name="wdsMode" id="wdsmode_ap" type="radio" value="off" />Repeater</td>
+                        </tr>
+                    </table>
+				</div>
+                <div class="stepWrapper">
+                    <p><strong>5. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a>
+			    </div>
+                <div class="stepWrapperdark">
+                    <table>
+                        <tr>
+                            <th colspan="8" class="tableTitle">WDS Remote Station List</th>
+                        </tr>
+                        <tr>
+                            <th >Station<br />Name</th>
+                            <th >MAC<br />Address</th>
+							<th >Type</th>
+                            <th >Signal</th>
+							<th >SNR</th>
+                            <th >Noise</th>
+							<th >Signal<br />Strength</th>
+                            <th >Edit</th>
+                        </tr>
+                        <tbody id="wdsStationList">
+                    </table>
+                </div>
+</div>
+<div id="wdsDisabled">
+    <div class="stepWrapper">
+        <p><strong>2. Click &quot;Apply&quot; to save your changes.</strong></p>
+        <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a>
+    </div>
+</div>
+			  </form>				
+		  </div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

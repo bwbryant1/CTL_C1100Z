@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ruleinfo = '<%ejGetOtherBig(srBkRule)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var info = ruleinfo.split('|');
+var defaultRule = new Array("Instant Messaging","FTP","Newsgroups","Email","HTTP","IPSec","L2TP","PPTP","PS2-PS3","Xbox 360","Real A/V","Telnet","H.323","MSN Gaming Zone","Doom I/II/III","World of Warcraft","Call of Duty 2","NetMeeting","BITtorrent");
+var found = 0;
+
+function removeRule( names, prot, sport, eport ) {
+	with( document.forms[0] ) {
+		action.value="remove";
+		srvName.value=names;
+		proto.value=prot;
+		eStart.value=sport;
+		eEnd.value=eport;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+	return;
+}
+
+function checkPortCover( cS, cE, rS, rE ) {
+	if ( cS >= rS && cS <= rE ) {
+		return true;
+	}
+	else if ( cE >= rS && cE <= rE ) {
+		return true;
+	}
+	else if ( rS >= cS && rS <= cE ) {
+		return true;
+	}
+	else if ( rE >= cS && rE <= cE ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function applyClick(){
+	var i = 0;
+	with ( document.forms[0]) {
+		action.value="add";
+		var eStartValue = port_start.value;
+		var eEndValue = port_end.value;
+		//var iStartValue = port_map.value;
+		var srviveName = rule_name.value;
+		var Prot = protocol.value;
+	}
+	
+	if ( Prot == "GRE" ) {
+			eStartValue = "0";
+			eEndValue = "0";
+			//iStartValue.value = "0";
+	}
+//	if ( !isValidPort(eStartValue+":"+eEndValue) || !isValidPort(iStartValue) ) {
+	else {
+		if ( !isValidPort(eStartValue)){
+			AlertOpen('The start port is not valued.  Enter a valid start port.');
+			return false;
+		}
+		if ( !isValidPort(eEndValue)){
+			AlertOpen('The end port is not valued.  Enter a valid end port.');
+			return false;
+		}
+		if ( !isValidPort(eStartValue+":"+eEndValue) ) {
+			AlertOpen('The IP port range is invalid.');
+			return false;
+		}
+	}
+	if ( !isAppValidName(srviveName) || srviveName =='') {
+		AlertOpen('The rule name entered is not valid. \nPlease enter a name containing 2 to 10 characters.');
+		return false;
+	}
+	if (srviveName.length > 10 || srviveName.length < 2){
+		AlertOpen('The rule name entered is not valid. \nPlease enter a name containing 2 to 10 characters.');
+		return false;
+	}
+
+	for ( i = 0 ; i < 18 ; i ++ ){
+		if ( defaultRule[i] == srviveName ) {
+				AlertOpen ( 'The Service name is in use.\nPlease use a different Service name.' );
+				return false;
+			}
+	}
+	
+	if ( info != '' ) {
+		for ( i = 0; i < info.length ; i ++ ) {
+			if (info[i] == '')
+				break;
+			var names = info[i].split('/');
+			if (names[0] == srviveName) {
+				AlertOpen ( 'The Service name is in use.\nPlease use a different Service name.' );
+				return false;
+			}
+			else{
+				if ( names[1] == "TCP or UDP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another rule.\nYou must remove the rule before the new rule can be applied.');
+						return false;
+					}
+				}
+				else if ( Prot == "TCP or UDP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another rule.\nYou must remove the rule before the new rule can be applied.');
+						return false;
+					}
+				}
+				else if ( names[1] == "TCP" && Prot == "TCP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another rule.\nYou must remove the rule before the new rule can be applied.');
+						return false;
+					}
+				}
+				else if ( names[1] == "UDP" && Prot == "UDP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another rule.\nYou must remove the rule before the new rule can be applied.');
+						return false;
+					}
+				}
+			}
+		}
+	}
+	with ( document.forms[0]) {
+		srvName.value=srviveName;
+		proto.value=Prot;
+		eStart.value=eStartValue;
+		eEnd.value=eEndValue;
+	//	iStart.value=iStartValue;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+
+	//Return false to avoid do submit twice.
+	return false;
+}
+function protoChange () {
+	with ( document.forms[0]) {
+		if ( protocol.value == "GRE" ) {
+			port_start.disabled = true;
+			port_end.disabled = true;
+		}
+		else {
+			port_start.disabled = false;
+			port_end.disabled = false;
+		}
+	}
+}
+</SCRIPT>
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('servicesblocking');
+</script>		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+	</div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_applications">Service Blocking Custom Rule</h1>
+			  <form action="srvblkrule.cmd" method="post" onSubmit="return applyClick();">
+				<input type="hidden" name="action" id="action" value="">
+				<input type="hidden" name="srvName" id="srvName" value="">
+				<input type="hidden" name="proto" id="proto" value="">
+				<input type="hidden" name="eStart" id="eStart" value="">
+				<input type="hidden" name="eEnd" id="eEnd" value="">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+				<!-- <input type="hidden" name="iStart" id="iStart" value=""> -->
+				<div class="stepWrapper">
+			          <p><strong>1. Enter the rule name.</strong></p>
+					<table>
+            <tr>
+							<td width="150">Rule Name: </td>
+						<td><input name="rule_name" id="rule_name" type="text" size="35" maxlength=20/></td>
+						</tr>
+		              </table>
+		            </div>
+					<div class="stepWrapper">
+                      <p><strong>2. Select the protocol.</strong></p>
+                      <table>
+						<tr>
+							<td width="150">Protocol:</td>
+							<td><select name="protocol" id="protocol" onChange="protoChange()">
+								<option value="1" selected="selected">TCP</option>
+								<option value="2">UDP</option>
+								<option value="3">GRE</option>
+								<option value="4">TCP, UDP</option>
+							</select></td>
+						</tr>
+                      </table>
+                    </div>
+					<div class="stepWrapper">
+			          <p><strong>3. Enter  port settings below.</strong></p>
+			          <table>
+						<tr>
+							<td width="150">Port Start: </td>
+							<td><input type="text" name="port_start" id="port_start"  size="35" /> 
+						  </td>
+						</tr>
+						<tr>
+						  <td width="150">Port End:</td>
+						  <td><input type="text" name="port_end" id="port_end" size="35" /></td>
+					  </tr>
+					</table>
+				  </div>
+                  <div class="stepWrapper">
+					<p><strong>4. Click &quot;Apply&quot; to save changes. </strong></p>
+					<a href="#" class="btn apply_btn" onClick='applyClick();'>Apply</a>
+                    </div>
+                    <div class="stepWrapperdark">
+				  <table>
+					<tr>
+							<th colspan="5" class="tableTitle">Service Blocking Custom Rule List</th>
+					</tr>
+                    <tr>
+                        <th width="119">Name</th>
+                        <th width="82">Protocol</th>
+                        <th width="55"> Start</th>
+                        <th width="50">End</th>
+                        <th width="97">Edit</th>
+                      </tr>
+<SCRIPT LANGUAGE="JavaScript">
+	var info = ruleinfo.split('|');
+	var i = 0;
+	if ( info != '' ) {
+		for ( i = 0; i < info.length ; i ++ ) {
+			if (info[i] == '')
+				break;
+			var names = info[i].split('/');
+
+			//var appname = processLongName( names[0], 13 );
+			var appname = names[0];
+
+			document.writeln('<tr align=\"center\">');
+			document.writeln('<td>'+appname+'</td>');
+			if (names[1] == 'TCP"or"UDP'){
+				document.writeln('<td>TCP/UDP</td>');
+			}
+			else{
+				document.writeln('<td>'+names[1]+'</td>');
+			}
+			if (names[1] == "GRE"){
+				document.writeln('<td>N/A</td>');
+				document.writeln('<td>N/A</td>');
+			}
+			else{
+				document.writeln('<td>'+names[2]+'</td>');
+				document.writeln('<td>'+names[3]+'</td>');
+			}
+			//document.writeln('<td>'+names[4]+'</td>');
+			document.writeln('<td><a href=\"#\" onClick=\'removeRule(\"'+names[0]+'\", \"'+names[1]+'\", \"'+names[2]+'\", \"'+names[3]+'\");\' class=\"btn remove_btn\">Remove</a></td>');
+			document.writeln('</tr>');
+		}
+	}
+	if ( i == 0 ) {
+		document.writeln("<tr align=\"center\" class=\"nattable\">");
+		document.writeln("<td colspan=5 style=\"padding:10px;\">No Rules Defined</td>");
+		document.writeln("</tr>");
+	}
+</SCRIPT>
+                    </table>
+                  </div>
+			  </form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

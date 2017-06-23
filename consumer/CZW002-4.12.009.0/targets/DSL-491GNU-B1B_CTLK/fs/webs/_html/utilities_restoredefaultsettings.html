@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var defPrctl = '<%ejGetOther(sysInfo, defaultPrctl)%>';
+function btnRestoredefault(type)
+{
+	with(document.forms[0])
+	{
+		var loc='';
+		var comStr ='';
+		switch(type){
+			case "all":
+				rebootType.value=1;
+				comStr="Restoring the modem to factory default settings will remove all custom configurations.  Click Ok to restore factory default settings.";
+				break;
+			case "ppp":
+				var dwinfo = '<%ejGetOther(dslinfo, Protocol)%>';
+				if (dwinfo == null || (dwinfo != "PPPoA" && dwinfo != "PPPoE") ) {
+					AlertOpen('Restore button for PPP usename/password only apply for PPP mode.' );
+					return;
+				}
+				rebootType.value=2;
+				comStr="Restoring the PPP username and password will place your modem in the walled garden.  You will not be able to surf the Internet when complete.  Click Ok to restore PPP settings.";
+				break;
+				
+			case "firewall":
+				rebootType.value=3;
+				comStr="Restoring the modem firewall settings will remove all firewall modifications including all port forwarding rules.  Click Ok to restore firewall settings.";	
+				break;
+
+			case "wlan":
+				rebootType.value=4;
+				comStr="Restoring the wireless settings will configure the modem to the wireless SSID and key found on the modem sticker.  Wireless clients must be configured to match the sticker settings.  Click Ok to restore wireless settings.";
+				break;
+			
+			case "admin":
+				rebootType.value=5;
+				comStr="Restoring the administrator credentials will remove custom credentials.  Click Ok to restore administrator credentials.";
+				break;
+			default:	
+				return;
+		}
+	}
+	ConfirmOpen(comStr, goSubmit);
+	return;
+
+}
+
+function goSubmit() {
+	document.forms[0].sessionKey.value = gblsessionKey;	
+	document.forms[0].submit();
+}
+</script >
+</head>
+
+<body>
+<form action="utilities_restoredefaultsettings.cgi" method="post">
+<input type="hidden" name="rebootType" id="rebootType" value="">
+<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+<div id="wrapper">
+	<div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+
+      
+
+<script language="javascript">
+   WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+
+    
+
+      <a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+
+      <div id="date">
+
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+
+	</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteUtilitiesMenuHeader('restoredefaultsettings', '<%ejGet(HpnaFeature)%>');
+</script>		
+			</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="utilities_restoredefaults">Restore  Defaults </h1>
+					<div class="stepWrapper">
+                    <p><strong>To restore a default setting, select the restore button to the right of the desired restore event.</strong></p>
+			  <table>
+                <tr>
+                        <th width="55">&nbsp;</th>
+                        <th>Restore Event</th>
+                        <th>Restore</th>
+                    </tr>
+<script language="javascript">
+					if (defPrctl == 'PPPoE' || defPrctl == 'PPPoA' ) {
+						document.writeln("<tr align=\"center\">");
+						document.writeln("<td><img src=\"../_images/h_quickconnect.png\" width=\"45\" height=\"40\" /></td>");
+						document.writeln("<td>Restore Default PPP Username and Password:</td>");
+						document.writeln("<td><a href=\"#\" class=\"btn restore_btn\" onClick=\"btnRestoredefault('ppp')\">Restore</a></td>");
+						document.writeln("</tr>");
+					}
+</script>                    
+                     <tr align="center">
+                        <td><img src="../_images/h_advancedsetup_adminusername.png" width="45" height="40" /></td>
+                        <td>Restore Default Administrator Credentials:</td>
+                        <td><a href="#" class="btn restore_btn" onClick="btnRestoredefault('admin')">Restore</a></td>
+                     </tr>
+                      <tr align="center">
+                        <td><img src="../_images/h_wirelesssetup_basic.png" width="45" height="40" /></td>
+                        <td>Restore Default Wireless Settings:</td>
+                        <td><a href="#" class="btn restore_btn" onClick="btnRestoredefault('wlan')">Restore</a></td>
+                     </tr>
+                     <tr align="center">
+                        <td><img src="../_images/icon_firewall_staticip.png" width="45" height="40" /></td>
+                        <td>Restore Default Firewall Settings:</td>
+                        <td><a href="#" class="btn restore_btn" onClick="btnRestoredefault('firewall')">Restore</a></td>
+                      </tr>
+                      <tr align="center">
+                        <td><img src="../_images/h_utilities_restoredefaults.png" width="45" height="40" /></td>
+                        <td>Restore Modem to Factory Default State:</td>
+                        <td><a href="#" class="btn restore_btn" onClick="btnRestoredefault('all')">Restore</a></td>
+                      </tr>
+                    </table>
+               </form>
+				</div>
+					<div class="clear_left"></div>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+
+      <div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

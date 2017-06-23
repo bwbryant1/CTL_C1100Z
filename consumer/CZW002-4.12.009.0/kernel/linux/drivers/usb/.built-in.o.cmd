@@ -1,0 +1,1 @@
+cmd_drivers/usb/built-in.o :=  /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld  -m elf32btsmip   -r -o drivers/usb/built-in.o drivers/usb/core/built-in.o drivers/usb/host/built-in.o drivers/usb/class/built-in.o drivers/usb/storage/built-in.o drivers/usb/misc/built-in.o 

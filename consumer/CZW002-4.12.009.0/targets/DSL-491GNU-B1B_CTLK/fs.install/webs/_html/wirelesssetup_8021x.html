@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide>
+var enblWireless = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var ssidIdx = /*1;//*/'<%ejGetWl(wlSsidIdx)%>';
+
+var wlAuthMode = /*"wpa2";//*/'<%ejGetWl(wlAuthMode)%>';
+var wlWep = /*"enabled";//*/'<%ejGetWl(wlWep)%>';
+var wlKeyBit =/*1;//*/'<%ejGetWl(wlKeyBit)%>';
+var wlAuth=/*0;//*/'<%ejGetWl(wlAuth)%>';
+
+//wpa.wpa2
+var wlWpaGTKRekey=/*3600//*/'<%ejGetWl(wlWpaGTKRekey)%>';
+var wlAutoGenKey ='<%ejGetWl(wlAutoGenKey)%>';
+var wlAutoEnbled = '<%ejGetWl(wlAutoEnbled)%>';
+
+//Radius Info
+var wlRadiusKey=/*"radiuskey"//*/'<%ejGetWl(wlRadiusKey)%>';
+var wlRadiusServerIP=/*"127.0.0.1"//*/'<%ejGetWl(wlRadiusServerIP)%>';
+var wlRadiusPort=/*"1218"//*/'<%ejGetWl(wlRadiusPort)%>';
+var divMode =0;
+var var_is8021xEnabled=0;
+
+//wep
+var WepAutoEnbled = '<%ejGetWl(WepAutoEnbled)%>'; 
+var WepAutoGenKey128 = '<%ejGetWl(WepAutoGenKey128)%>';
+var WepAutoGenKey64 = '<%ejGetWl(WepAutoGenKey64)%>';
+var wlKeyIndex =parseInt('<%ejGetWl(wlKeyIndex)%>');
+var wlKeyBit ='<%ejGetWl(wlKeyBit)%>';
+
+var wpsManullyDisable='<%ejGetWl(wpsManullyDisable)%>';
+var WscAPMode  = '<%ejGetWl(wlWscAPMode)%>';
+
+var sessionKey='<%ejGetOther(sessionKey)%>';
+
+function showByMode(divMode){
+	var_is8021xEnabled = is8021xEnabled(wlAuthMode,wlWep,wlKeyBit);
+	with(document.forms[0]){
+		ssid.options[ssidIdx].selected=true;
+		
+		if(var_is8021xEnabled==1){
+			wireless_on[0].checked=true;
+		}else{
+			wireless_on[1].checked=true;		
+		}
+		
+		if (isValidIpAddress(wlRadiusServerIP) != false) { 
+			single_static_ip22[0].value = wlRadiusServerIP;
+			single_static_ip22[1].value = wlRadiusPort;
+			single_static_ip22[2].value = wlRadiusKey;
+			single_static_ip22[3].value = wlWpaGTKRekey;
+		}		
+	}	
+}
+
+function change8021x(){
+	with(document.forms[0]){	
+		if(wireless_on[0].checked==true){
+			single_static_ip22[0].disabled = 0;
+			single_static_ip22[1].disabled = 0;
+			single_static_ip22[2].disabled = 0;
+			single_static_ip22[3].disabled = 0;		
+	         showhide("wl8021xEnabled", 1);
+	         showhide("wl8021xDisabled", 0);					
+			
+		}else if(wireless_on[1].checked==true){
+			single_static_ip22[0].disabled = 1;
+			single_static_ip22[1].disabled = 1;
+			single_static_ip22[2].disabled = 1;
+			single_static_ip22[3].disabled = 1;
+	         showhide("wl8021xEnabled", 0);
+	         showhide("wl8021xDisabled", 1);					
+		}
+	}
+}
+
+function btnApply(place){
+	var loc='';
+	var_is8021xEnabled = is8021xEnabled(wlAuthMode,wlWep,wlKeyBit);
+	divMode = parseInt(authModeDisplay(wlAuthMode,wlWep,wlKeyBit));
+
+	with(document.forms[0]){
+/*	
+		if ( enblWireless == '0' ) {
+			AlertOpen('Cannot apply the change since wireless is currently disabled.');
+			return;
+		}	*/
+	
+		loc += place+'?wlSsidIdx='+getSelect(ssid);		
+		
+		switch (place){
+		case 'wirelesssetup_8021x.wl':
+			if(wireless_on[0].checked==true){//802.1x on
+				switch (divMode){
+					case 1:/*wep64*/ case 2:/*wep128*/ case 6:/*wep64+802.1x*/ case 7:/*wep128+802.1x*/											
+						loc += "&wlAuthMode=radius";	
+						loc += "&wlWep=enabled";
+						loc += "&wlAuth=0";													
+						break;
+					case 3:/*psk*/ case 8:/*wpa*/
+						loc += "&wlAuthMode="+"wpa";	
+						loc += "&wlWep=disabled";						
+						break;				
+					case 4:	/*psk2*/ case 9: /*wpa2*/
+						loc += "&wlAuthMode="+"wpa2";
+						loc += "&wlWep=disabled";											
+						break;				
+					case 5:	/*psk psk2*/ case 10:/*wpa wpa2*/ case 0: /*off*/				
+						loc += "&wlAuthMode="+"wpa wpa2";
+						loc += "&wlWep=disabled";										
+						break;					
+					default:
+						break;				
+				}						
+				if(wlKeyIndex==1||wlKeyIndex==4){
+					if(parseInt(WepAutoEnbled)==1){ //change wepKey2 as default wepKey
+						loc += '&wlKeyBit=0';	
+						loc += '&wlKeyIndex=2';											
+						loc += '&wlKey2='+WepAutoGenKey128;						   
+						loc += '&WepAutoEnbled=0';													
+					}else{
+						loc += '&wlKeyBit='+wlKeyBit;						
+						loc += '&wlKeyIndex=2';	
+						if(wlKeyBit==0)										
+							loc += '&wlKey2='+WepAutoGenKey128;						   					
+						else
+							loc += '&wlKey2='+WepAutoGenKey64 ;						   					
+					}
+				}						
+				if(divMode==0){//Security-Off: use wpa-wpa2 / default psk key
+					loc += "&wlWpaPsk="+wlAutoGenKey;
+					loc += "&wlAutoEnbled=1";
+				}
+							
+				if ( isValidIpAddress(single_static_ip22[0].value) == false ) {
+					AlertOpen('The Server IP Address is invalid.  Please enter a valid address.');
+					return;
+				}
+				if(single_static_ip22[2].value=='' || isValidPassword(single_static_ip22[2].value) == false){
+					AlertOpen('The Secret is invalid.  Please enter a valid secret.');
+					return;								
+				}				
+				
+				if (!(single_static_ip22[1].value >0 && single_static_ip22[1].value<= 65536)){
+					AlertOpen('The Port is invalid.  Please enter a valid port.');
+					return;				
+				}				
+				if(!(single_static_ip22[3].value >= 0 && single_static_ip22[3].value <= 0xffffffff)){
+					AlertOpen('The Group Key Interval is invalid.  Please enter a valid group key interval.');
+					return;
+				}
+				
+				loc += "&wlRadiusServerIP="+single_static_ip22[0].value;					
+				loc += "&wlRadiusPort="+single_static_ip22[1].value;
+				loc += "&wlRadiusKey="+single_static_ip22[2].value;	
+				loc += "&wlWpaGtkRekey="+parseInt(single_static_ip22[3].value);		
+				
+				//if(ssidIdx==0) loc += wpsEnable(false,ssidIdx,wpsManullyDisable,WscAPMode);
+								
+			}else if(wireless_on[1].checked==true){//802.1x off
+				switch (divMode){
+					case 1:/*wep64*/ case 2:/*wep128*/ case 6:/*wep64+802.1x*/ case 7:/*wep128+802.1x*/	
+						if(wlAuth==0){
+							loc += "&wlAuthMode="+"open";	
+							loc += "&wlAuth=0";							
+						}else if(wlAuth==1){
+							loc += "&wlAuthMode="+"shared";							
+							loc += "&wlAuth=1";
+						}	
+						loc += "&wlWep=enabled";															
+						break;
+					case 3:/*psk*/ case 8:/*wpa*/
+						loc += "&wlAuthMode="+"psk";	
+						loc += "&wlWep=disabled";						
+						//if(ssidIdx==0) loc += wpsEnable(true,ssidIdx,wpsManullyDisable,WscAPMode);							
+						break;				
+					case 4:	/*psk2*/ case 9: /*wpa2*/
+						loc += "&wlAuthMode="+"psk2";
+						loc += "&wlWep=disabled";											
+						//if(ssidIdx==0) loc += wpsEnable(true,ssidIdx,wpsManullyDisable,WscAPMode);							
+						break;				
+					case 5:	/*psk psk2*/ case 10:/*wpa wpa2*/ case 0: /*off*/				
+						loc += "&wlAuthMode="+"psk psk2";
+						loc += "&wlWep=disabled";										
+						//if(ssidIdx==0) loc += wpsEnable(true,ssidIdx,wpsManullyDisable,WscAPMode);							
+						break;					
+					default:
+						break;				
+				}	
+			}
+			break;
+		default:
+			break;	
+		}	
+	}
+/*	
+	var code = 'location="' + loc + '"'; 
+	alert(code);
+	eval(code);*/
+	loc += '&sessionKey='+sessionKey;	
+	submitFrm(loc);			
+}
+
+function frmLoad(){
+	with(document.forms[0]){		
+		divMode = parseInt(authModeDisplay(wlAuthMode,wlWep,wlKeyBit));
+		showByMode(divMode);	
+		change8021x();
+	}
+}
+
+//done nothing-->
+</script>
+</head>
+
+<body onload="frmLoad()">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>            
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('security8021X', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="wirelesssetup_wep8021x">802.1x <span>802.1x allows you to combine wireless security methods using WEP or
+					  WPA with the benefits of a radius server.					</span></h1>
+				<form onkeypress="return handleEnter(this,event) ;">
+					<div class="stepWrapper">
+					<p><strong>1. Select the SSID (Network Name).</strong></p>
+				    <table>
+                     <tr>
+                        <td width="150">SSID:</td>
+                        <td> <select name="ssid" id="select" onchange="btnApply('wirelesssetup_8021x_refresh.wl')">
+									<%ejGetWl(wlSsidList)%>                            
+									<script language="JavaScript">/*									
+                                    <option value="0" selected="selected">SSID1<%ejGetWl(wlSsid)%></option>
+                                    <option value="1">SSID2<%ejGetWl(wlSsid_wl0v1)%></option>
+                                    <option value="2">SSID3<%ejGetWl(wlSsid_wl0v2)%></option>
+                                    <option value="3">SSID4<%ejGetWl(wlSsid_wl0v3)%></option>
+                                    */
+                                    </script>
+                            </select>                          </td>
+                      </tr>
+                    </table>
+			      </div>
+                  <div class="stepWrapper">
+					<p><strong>2. Set the 802.1x state. </strong> </p>
+					<table>
+                     <tr>
+                        <td width="150">802.1x:</td>
+                        <td><input name="wireless_on" type="radio" id="enabled" value="on" onclick="change8021x()" />Enable</td>
+                        <td><input name="wireless_on" type="radio" id="disabled" value="off" checked="checked" onclick="change8021x()" />Disable</td>
+                      </tr>
+                    </table>
+					</div>
+<div id="wl8021xEnabled">
+                    <div class="stepWrapper">
+					<p><strong>3. Enter your Radius Settings.</strong></p>
+					<table>
+					 <tr>
+                        <td width="150">Server IP Address:</td>
+                        <td>                            <input name="single_static_ip22" type="text" id="single_static_ip22" size="25" />                        </td>
+					  </tr>
+					 <tr>
+                        <td width="150">Port:</td>
+                        <td>                            <input name="single_static_ip22" type="text" id="single_static_ip22" size="25" maxlength="6"/>                        </td>
+					  </tr>
+					 <tr>
+                        <td width="150">Secret:</td>
+                        <td>                            <input name="single_static_ip22" type="text" id="single_static_ip22" size="25" maxlength="64"/>                        </td>
+					  </tr>
+					 <tr>
+                        <td width="150">Group Key Interval:</td>
+                        <td>                            <input name="single_static_ip22" type="text" id="single_static_ip22" size="25" maxlength="6"/>                        </td>
+					  </tr>
+                    </table>
+					</div>
+                    <div class="stepWrapper">
+					<p><strong>4. Click &quot;Apply&quot; to save your changes.</strong></p>
+					<a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_8021x.wl')">Apply</a>
+                    </div>
+</div>
+<div id="wl8021xDisabled">
+    <div class="stepWrapper">
+        <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+        <a href="#" class="btn apply_btn" onclick="btnApply('wirelesssetup_8021x.wl')">Apply</a>
+    </div>
+</div>
+				</form>				
+			</div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/common.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+
+var count = 0;
+var showimage=0;
+var rebootType='<%ejGet(rebootType)%>';
+
+function blink() {
+		if (showimage == 0)
+		{
+	  	document.getElementById("wait").style.color = "#ff0000";
+	  	showimage =1;
+	  }
+	  else
+   	{
+   		document.getElementById("wait").style.color = "";
+   		showimage=0;
+  	}
+   	setTimeout("blink()", 500);
+}
+
+function updateWlValue_take()
+{
+	var objXMLHTTP2 = null;
+
+	if (window.XMLHttpRequest)  {
+		objXMLHTTP2=new XMLHttpRequest();
+	}// code for IE
+	else if (window.ActiveXObject)  {
+		objXMLHTTP2=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+	if ( objXMLHTTP2 != null ) {
+		objXMLHTTP2.open("GET","./wireless-reset.cmd",true);
+
+		objXMLHTTP2.send(null);
+		objXMLHTTP2.onreadystatechange = function() 
+		{
+			if(objXMLHTTP2.readyState == 4)
+			{
+				if (objXMLHTTP2.status == 200 && "success" == objXMLHTTP2.responseText)
+				{
+					var loc = '<%ejGet(currPage)%>';
+   					var code = 'location="' + loc + '"';
+					eval(code);
+					return;
+				}
+				setTimeout("back()", 2000);
+			}
+		}
+	}
+}
+
+function applysetting() {
+	var tmp = "<%ejGet(applyPageType)%>";
+	if (tmp != ""){
+   		BackgroundUrl("apply_real.<%ejGet(applyPageType)%>");
+	}
+}
+
+function back() {
+   var loc = '<%ejGet(currPage)%>';
+   var code = 'location="' + loc + '"';
+
+//for wlan---
+   if (loc.indexOf("utilities_restoredefaultsettings") >= 0 && rebootType==4 )
+   {
+   	if( count++ < 10)
+   	{
+   		updateWlValue_take();
+		return;
+   	}
+   }
+
+   eval(code);
+
+}
+
+var refreshTime = '<%ejGet(refreshTime)%>';  
+function frmLoad() {
+   document.getElementById("wait").href = '<%ejGet(currPage)%>';
+   
+   if ( document.getElementById("wait").href == 'wirelesssetup_radiosetup.html' )
+      refreshTime = 15000;
+   
+   if (document.getElementById("wait").href == 'wirelesssetup_wireless5g.html' || document.getElementById("wait").href == 'wirelesssetup_wps5g.html' || document.getElementById("wait").href == 'supportconsole_5G_basicsettings.html' || document.getElementById("wait").href == 'supportconsole_5G_wps.html' || document.getElementById("wait").href == 'wirelesssetup_wireless5gmacauthentication.html' || document.getElementById("wait").href == 'supportconsole_5G_wireless5g.html')
+      refreshTime = 20000;
+
+   if (document.getElementById("wait").href == 'supportconsole_5G_radiosettings.html')
+      refreshTime = 30000;
+   
+   setTimeout("applysetting()", 1000);
+   if(refreshTime==0) setTimeout("back()", 5000);
+   else setTimeout("back()", refreshTime);
+   setTimeout("blink()", 500);
+}
+
+var MonthName = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var WeekName = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+// done hiding -->
+</script>
+</head>
+<body onLoad='frmLoad();'>
+<div id="wrapper">
+	<div id="masthead">
+        <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+        <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+        <script language="javascript">
+          WriteMenuHeader('', '<%ejGetOther(isSupportConsoleAllowed)%>');
+        </script>
+        <a href="help.html" title="Click here to launch" class="helplink">help</a>
+        <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+		</div>
+    </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+		<div class="message">
+			<p id="wait">PLEASE WAIT</p>
+		</div>
+		<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+	<div id="content_right">
+		
+		<div id="content_right_contentarea">
+			<h1 class="thankyou">Saving Settings</h1>
+            <div class="stepWrapper">
+			  <p>Please wait while  the modem saves the configuration change.</p>
+			  <p>The previous page will appear when complete.</p>
+              </div>
+		</div>
+	</div>
+	<div class="clear_left"></div>
+	<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

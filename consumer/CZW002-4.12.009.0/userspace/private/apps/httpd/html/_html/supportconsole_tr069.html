@@ -1,0 +1,393 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+ <title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+<!-- hide
+var interfaceInfo = '<%ejGetOther(tr69cInterfaceList)%>';
+var interfaces = interfaceInfo.split('|');
+var boundIfName = '<%ejGet(tr69cBoundIfName)%>';
+var newTime; 
+
+var isACSWanMode = '<%ejGetOther(sysInfo, isACSWanMode)%>';
+var ACSWanIfName = '<%ejGetOther(sysInfo, ACSWanIfName)%>';
+
+var objXMLHTTP2 = null;
+
+if (window.XMLHttpRequest)  {
+	objXMLHTTP2=new XMLHttpRequest();
+}// code for IE
+else if (window.ActiveXObject)  {
+	objXMLHTTP2=new ActiveXObject("Microsoft.XMLHTTP");
+}
+else {
+	AlertOpen("The browser no support XMLHttp Object");
+}
+
+function updateTr69Info (req)
+{
+	var tr69Info=req.responseText;
+	var tr69Infos;
+	if ( tr69Info != "" && tr69Info != null ) {
+		tr69Infos = tr69Info.split('|');
+		if ( tr69Infos.length == 5 ) {
+			document.getElementById("bootStrapState").innerHTML = tr69Infos[0];
+			document.getElementById("lastinformtime").innerHTML = tr69Infos[1];
+			document.getElementById("informtime").innerHTML = tr69Infos[2];
+			document.getElementById("authfail").innerHTML = tr69Infos[3];
+			document.getElementById("lastupgrate").innerHTML = tr69Infos[4];
+			if(tr69Infos[5] == 'N/A') {
+				document.getElementById("acsConnReq").innerHTML = tr69Infos[5];
+			} else {
+				document.getElementById("acsConnReq").innerHTML = '<a href="' + tr69Infos[5] +'">' + tr69Infos[5] + '</a>';
+			}
+	  }
+	}
+	setTimeout('updateTr69Value_take()', 5000);
+}
+
+function updateTr69Value_take()
+{
+	if ( objXMLHTTP2 != null ) {
+		objXMLHTTP2.open("GET","./GetTR69Info.html",true);
+		objXMLHTTP2.setRequestHeader("If-Modified-Since","0");
+		objXMLHTTP2.send(null);
+    objXMLHTTP2.onreadystatechange = function() 
+    {
+			if(objXMLHTTP2.readyState == 4)
+      	updateTr69Info(objXMLHTTP2);
+    }
+	}
+}
+setTimeout('updateTr69Value_take()', 5000);
+
+function convertDateTime(timeNow, index)
+{
+	var monthStr = new Array("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aus", "Sep",
+							"Oct", "Nov", "Dec");
+	var len = monthStr.length;
+	var i = 0;
+	var timeItem = timeNow.split(' ');
+	
+	if(timeItem.length > 5){
+		var week=timeItem[0];
+		var month=timeItem[1];
+		var date=timeItem[3];
+		var timeTemp=timeItem[4];
+		var year=timeItem[5];
+
+		var timeTempItem=timeTemp.split(':');
+		var hr=timeTempItem[0];
+		var min=timeTempItem[1];
+		var sec=timeTempItem[2];
+	}else{
+		var week=timeItem[0];
+		var month=timeItem[1];
+		var date=timeItem[2];
+		var timeTemp=timeItem[3];
+		var year=timeItem[4];
+
+		var timeTempItem=timeTemp.split(':');
+		var hr=timeTempItem[0];
+		var min=timeTempItem[1];
+		var sec=timeTempItem[2];
+	}
+
+	for ( i = 0; i < len; i++ ){
+		if ( month == monthStr[i] ) {
+			month = i;
+			break;
+		}
+	}
+
+	newTime = date+'/'+month+'/'+year+', '+hr+':'+min;
+	if (parseInt(hr) > 12)
+	{
+		hr -= 12;
+		newTime += " PM"
+	}
+	else
+		newTime += " AM"
+	AlertOpen(loc);
+}
+
+function dofocus () {
+	with ( document.forms[0] ) {
+		tr69cAcsPwd.value = "";
+		tr69cAcsPwd.focus();
+		tr69cAcsPwd.onfocus = null;
+	}
+}
+
+function change () {
+	setTimeout("dofocus();",10);
+}
+
+function frmLoad() {
+   with ( document.forms[0] ) {
+      enblInform = '<%ejGet(tr69cInformEnable)%>';
+      enblDebug = '<%ejGet(tr69cDebugEnable)%>';
+
+      if ( enblInform == '1' )
+         tr69cInformEnable[0].checked = true;
+      else
+         tr69cInformEnable[1].checked = true;
+
+      tr69cAcsPwd.onfocus = function () {change();};
+      tr69cAcsPwd.value = "*********";
+
+      var connReq = '<%ejGetOther(tr69, connReq)%>';
+      if(connReq == 'N/A') {
+         document.getElementById("acsConnReq").innerHTML = connReq;
+      } else {
+         document.getElementById("acsConnReq").innerHTML = '<a href="' + connReq +'">' + connReq + '</a>';
+      }
+   }
+}
+
+function btnApply() {
+   with ( document.forms[0] ) {
+      tr69RestoreSetting.value = 0;
+
+      if (tr69cAcsURL.value == '') {
+         AlertOpen('ACS URL is required.');
+         return false;
+      }
+
+      if (tr69cAcsURL.value.length > 256) {
+         AlertOpen('The length of ACS URL (' + tr69cAcsURL.value.length + ') is too long [1-256].');
+         return false;
+      }
+	  
+	  if (isValidUrl(tr69cAcsURL.value) == false)
+	  {
+		AlertOpen('The ACS URL is invalid.');
+		return false;
+	  }
+	  
+      tr69cAcsURL.value = encodeUrl(tr69cAcsURL.value);
+      
+      if (tr69cAcsUser.value.length > 256) {
+         AlertOpen('The length of ACS user name (' + tr69cAcsUser.value.length + ') is too long [0-256].');
+         return false;
+      }
+	  
+	  if (isValidName(tr69cAcsUser.value) == false)
+	  {
+		AlertOpen('The ACS username is invalid.');
+		return false;
+	  }
+      tr69cAcsUser.value = encodeUrl(tr69cAcsUser.value);
+      
+      if (tr69cAcsPwd.value.length > 256) {
+         AlertOpen('The length of sysName (' + tr69cAcsPwd.value.length + ') is too long [0-256].');
+         return false;
+      }
+	  if (isValidPassword(tr69cAcsPwd.value) == false)
+	  {
+		AlertOpen('The ACS password is invalid.');
+		return false;
+	  }
+      tr69cAcsPwd.value = encodeUrl(tr69cAcsPwd.value);
+
+      if( (tr69cInformInterval.value <1) || ( tr69cInformInterval.value >71582788) ){
+         AlertOpen('The value of periodic inform interval (' + tr69cInformInterval.value + ') is out of range [1-71582788].');
+         return false;
+      }
+      if( isNotNegativeInt(tr69cInformInterval.value)==false ){
+         AlertOpen('The periodic inform interval must be a whole number without decimal points representing minutes only.  Please insert a whole number.');
+         return false;
+      }
+
+      /* Using the specific wan for ACS */
+      if(isACSWanMode == '1')
+      {
+         tr69cBoundIfName.value = ACSWanIfName;
+      }
+  }
+  document.forms[0].submit();
+  
+  //Return false to avoid do submit twice.
+  return false;
+}
+
+function btnRestore() {
+   with ( document.forms[0] ) {
+      tr69RestoreSetting.value = 1;
+   }
+   document.forms[0].submit();
+  
+   //Return false to avoid do submit twice.
+   return false;
+}
+// done hiding -->
+</script>
+</head>
+
+<body onLoad='frmLoad();'>
+<div id="wrapper">
+  <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+		WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+  </div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('tr069', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+
+			</ul>
+      <div id="connectionstatus">
+        <h1>Connection Status</h1>
+        <div id="connectionstatus_wrapper">
+        <script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+        </script>
+        </div>
+      </div>
+  </div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+			  <h1 class="supportconsole_tr069">TR-069 <span>Do not change the setting below unless instructed 
+                  by a CenturyLink certified support representative.</span></h1>			  
+			  
+					<form id="form1" name="form1" method="post" action="supportconsole_tr069.cgi" onSubmit="return btnApply();">
+					<input type="hidden" name="tr69cBoundIfName" id="tr69cBoundIfName" value="Any_WAN">
+	                <input type="hidden" name="sessionKey" id="sessionKey" value="<%ejGetOther(sessionKey)%>">
+	                <input type="hidden" name="tr69RestoreSetting" id="tr69RestoreSetting" value="0">
+
+<div class="stepWrapper">
+                <p><strong>1. Set the Periodic Inform State.</strong></p>                  
+                <table border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                        <tr align="center">
+                          <td width="150"><div align="left"> Periodic Inform:</div></td>
+                          <td>
+					<input name='tr69cInformEnable' type='radio' value="1">Enabled</td>
+					<td><input name='tr69cInformEnable' type='radio' value="0">Disabled
+                          </td>
+                        </tr>
+  
+                      </table>
+			  
+</div>
+<div class="stepWrapper">
+                <p><strong>2. Enter the ACS connection parameters below.</strong></p>                  
+                <table border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                        <tr align="center">
+                          <td width="150"><div align="left">ACS URL:</div></td>
+                          <td><div align="left">
+                            <input name="tr69cAcsURL" type="text" id="tr69cAcsURL" size="35" value="<%ejGet(tr69cAcsURL)%>"/>
+                          </div></td>
+                        </tr>
+                        <tr align="center">
+                          <td width="150"><div align="left">Username:</div></td>
+                          <td><div align="left">
+                            <input name="tr69cAcsUser" type="text" id="tr69cAcsUser" size="35" value="<%ejGet(tr69cAcsUser)%>"/>
+                          </div></td>
+                        </tr>
+                        <tr align="center">
+                          <td width="150"><div align="left">Password:</div></td>
+                          <td><div align="left">
+                            <input name="tr69cAcsPwd" type="password" id="tr69cAcsPwd"  size="35"/>
+                          </div></td>
+                        </tr>
+                        <tr align="center">
+                          <td width="150"><div align="left">Periodic Inform Interval:</div></td>
+                          <td>
+                              <div align="left">
+                                <input name="tr69cInformInterval" type="text" id="tr69cInformInterval"  size="25" maxlength="9" value="<%ejGet(tr69cInformInterval)%>"/>&nbsp;&nbsp;&nbsp;Minutes
+                              </div></td>
+                        </tr>
+                      </table>
+                      <p>&nbsp;</p>
+</div>
+					<div class="stepWrapper">					  
+                      <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>					
+                      <a href="#" class="btn apply_btn" onClick='btnApply()'>Apply</a>
+					</div>	           
+
+<div class="stepWrapper">                  
+                  
+                <p align="center"><strong>TR-069 Table</strong></p>
+                <table border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                  <tr align="center">
+                    <td width="180"><div align="left">Bootstrapped:</div></td>
+                    <td class="greentext"><div align="left"><span id="bootStrapState">
+<%ejGetOther(tr69, bootStrapState)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">Last Periodic Inform:</div></td>
+                    <td><div align="left"><span id="lastinformtime">
+<%ejGetOther(tr69, lastinformtime)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">Periodic Inform Time:</div></td>
+                    <td><div align="left"><span id="informtime">
+<%ejGetOther(tr69, informtime)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">HDM Authentication Failures:</div></td>
+                    <td><div align="left"><span id="authfail">
+<%ejGetOther(tr69, authfail)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">ACS URL Contacted:</div></td>
+                    <td><div align="left"><span id="acsLastContact">
+<%ejGetOther(tr69, lastcontact)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">Connection Request URL:</div></td>
+                    <td><div align="left"><span id="acsConnReq"></span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">Remote Support Console State:</div></td>
+                    <td><div align="left"><span id="remoteSupportConosleState">
+<%ejGetOther(tr69, remoteSCstate)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">Last TR-069 Upgrade:</div></td>
+                    <td><div align="left"><span id="lastupgrate">
+<%ejGetOther(tr69, lastupgrate)%>
+                    </span></div></td>
+                  </tr>
+                  <tr align="center">
+                    <td width="180"><div align="left">Restore Default TR-69 Settings:</div></td>
+                    <td><div align="left"><a href="#" class="btn restore_btn" onClick='btnRestore()'>Restore</a></div></td>
+                  </tr>
+                </table>
+</div>
+					</form>
+
+		  </div>
+  </div>
+		<div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

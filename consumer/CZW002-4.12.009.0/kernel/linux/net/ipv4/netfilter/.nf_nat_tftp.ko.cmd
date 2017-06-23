@@ -1,0 +1,1 @@
+cmd_net/ipv4/netfilter/nf_nat_tftp.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/ipv4/netfilter/nf_nat_tftp.ko net/ipv4/netfilter/nf_nat_tftp.o net/ipv4/netfilter/nf_nat_tftp.mod.o

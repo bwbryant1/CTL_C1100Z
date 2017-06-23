@@ -1,0 +1,768 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+<!-- hide
+var update = '<%ejFncCmd(updatestatic)%>';
+var update_5g ='<%ejGetOther(update5gclnt, 1)%>';
+var gblSessionKey = '<%ejGetOther(sessionKey)%>';
+var activeUsers = '<%ejGetOtherBig(stbactiveusers, 1)%>';
+
+var activeInfo;
+var assoclist_5g = '<%ejGetOtherBig(stb5gassoclist)%>';
+var assoc_info_5g = assoclist_5g.split(';');
+var userSelected = 0;
+var clearSkip = 0;
+var vht = '<%ejGetExtWl(wlVhtMode)%>';
+var ssid = '<%ejGetExtWl(wlSsid_wl0v0)%>';
+
+function updateValue_take()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)  { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+		else if (window.ActiveXObject)  { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+	
+	if (clearSkip == 1)
+	{
+		setTimeout('updateValue_take()',5000);
+		clearSkip = 0;
+		return;
+	}
+
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./GetSTBStatus.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+		objXMLHTTP.onreadystatechange = function() 
+		{
+			if(objXMLHTTP.readyState == 4){
+				var info_5g;
+				var counter;				
+				var info;
+				var optionStr = '';
+				var clientListStr =
+				'<table>\n\
+				<tr><th colspan="5" class="tableTitle">Prism STB Client List</th></tr>\n\
+				<tr>\n\
+				<th>Device Name</th>\n\
+				<th>MAC Adderess</th>\n\
+				<th>Connection Type</th>\n\
+				<th>Packets Sent</th>\n\
+				<th>Packets Received</th>\n\
+				</tr>\n';
+
+				var alltext = objXMLHTTP.responseText.split('=');
+				
+				activeInfo = alltext[0].split('|');				
+				assoc_info_5g = alltext[1].split(';');
+				
+				if (userSelected > (activeInfo.length - 1))
+				{
+					userSelected = 0;
+				}
+
+				if ((activeInfo!='') && (clearSkip != 1) )
+				{
+					for (i = 0; i < activeInfo.length ; i++)
+					{
+						info = activeInfo[i].split('/');					
+				
+						/* Client List */
+						clientListStr += '<tr align="center">\n';
+						clientListStr += '<td>' + info[1] + '</td>\n';
+						clientListStr += '<td>' + info[3] + '</td>\n';
+						clientListStr += '<td>' + info[4] + '</td>\n';
+						for(j=0;j<assoc_info_5g.length;j++){
+							info_5g = assoc_info_5g[j].split('&');
+							if(info_5g[0]==info[3]){
+								counter = info_5g[2].split('/');
+								clientListStr += '<td>' + counter[1] + '</td>\n';		
+								clientListStr += '<td>' + counter[8] + '</td>\n';
+								clientListStr +='</tr>\n';	
+								break;
+							}					
+						}
+						
+						optionStr = optionStr + '<option>' + info[1] + '</option>\n';
+						if (i == userSelected)
+						{						
+							if(vht=='1')
+								document.getElementById('stbConnectionType').innerHTML='5GHz Radio 802.11ac';
+							else
+								document.getElementById('stbConnectionType').innerHTML='5GHz Radio 802.11n';
+							document.getElementById('brgMacAddress').innerHTML=info[3];
+							document.getElementById('brgDriverVer').innerHTML='N/A';			
+							document.getElementById('clntDriverVer').innerHTML='N/A';			
+							document.getElementById('assocSsid').innerHTML=ssid;
+							document.getElementById('retries').innerHTML='N/A';			
+							document.getElementById('rssi').innerHTML=counter[14] ;		
+							document.getElementById('mcs').innerHTML='N/A';			
+							document.getElementById('lastConAttempt').innerHTML='N/A';			
+							document.getElementById('packetsRx').innerHTML=counter[8];
+							document.getElementById('packetsTx').innerHTML=counter[1];			
+							document.getElementById('packetsRx30min').innerHTML='N/A';	/*counter[16];*/				
+							document.getElementById('packetsTx30min').innerHTML='N/A';	/*counter[17];*/			
+							document.getElementById('unicastPacketsRx').innerHTML=counter[11];	
+							document.getElementById('unicastPacketsTx').innerHTML=counter[4];
+							document.getElementById('multicastPacketsRx').innerHTML=counter[12];
+							document.getElementById('multicastPacketsTx').innerHTML=counter[5];
+							document.getElementById('broadcastPacketsRx').innerHTML=counter[13];		
+							document.getElementById('broadcastPacketsTx').innerHTML=counter[6];
+							document.getElementById('packetsDroppedTx').innerHTML=counter[2];
+							document.getElementById('packetsDroppedRx').innerHTML=counter[9];
+							document.getElementById('uncorrectPacketsRx').innerHTML='N/A';		
+							document.getElementById('uncorrectPacketsTx').innerHTML='N/A';
+							document.getElementById('fifoErrRx').innerHTML='N/A';			
+							document.getElementById('fifoErrTx').innerHTML='N/A';			
+							document.getElementById('shortRx').innerHTML='N/A';			
+							document.getElementById('longRx').innerHTML='N/A';			
+							document.getElementById('framingErrRx').innerHTML='N/A';			
+							document.getElementById('jabberFrameRx').innerHTML='N/A';			
+							document.getElementById('fragmentRx').innerHTML='N/A';			
+							document.getElementById('taggedRx').innerHTML='N/A';			
+							document.getElementById('codeViolationRx').innerHTML='N/A';			
+							document.getElementById('totalBytesRx').innerHTML=counter[7];
+							document.getElementById('totalBytesTx').innerHTML=counter[0];		
+							document.getElementById('rxBitRate').innerHTML=counter[18]+' Mbps';		
+							document.getElementById('txBitRate').innerHTML=counter[19]+' Mbps';	
+							document.getElementById('snr').innerHTML=counter[15] +' dB' ;
+							document.getElementById('linkUptime').innerHTML=info_5g[1];							
+						}
+					}
+					
+					document.getElementById('stbClientList').innerHTML = clientListStr + '</table>';
+					document.getElementById('stbDevice').innerHTML =
+					'<select name="stbDeviceSelected" id="stbDeviceSelected" onchange="stbDeviceChange()">\n'
+					+ optionStr
+					+ '</select>';
+				
+					document.getElementById('stbDeviceSelected').selectedIndex = userSelected;
+					
+				}
+				else if (clearSkip != 1)
+				{					
+					clientListStr += '<tr align="center">\n';
+					clientListStr += '<td>N/A</td>\n';
+					clientListStr += '<td>N/A</td>\n';
+					clientListStr += '<td>N/A</td>\n';		
+					clientListStr += '<td>N/A</td>\n';
+					clientListStr += '<td>N/A</td>\n';
+					clientListStr +='</tr>\n';
+						
+					/* Link Status */
+					optionStr = optionStr + '<option>N/A</option>\n';
+					document.getElementById('stbConnectionType').innerHTML='N/A';
+					document.getElementById('brgMacAddress').innerHTML='N/A';
+					document.getElementById('brgDriverVer').innerHTML='N/A';
+					document.getElementById('clntDriverVer').innerHTML='N/A';
+					document.getElementById('assocSsid').innerHTML='N/A';
+					document.getElementById('retries').innerHTML='N/A';
+					document.getElementById('rssi').innerHTML='N/A';
+					document.getElementById('mcs').innerHTML='N/A';
+					document.getElementById('lastConAttempt').innerHTML='N/A';
+					document.getElementById('packetsRx').innerHTML='N/A';
+					document.getElementById('packetsTx').innerHTML='N/A';
+					document.getElementById('packetsRx30min').innerHTML='N/A';
+					document.getElementById('packetsTx30min').innerHTML='N/A';
+					document.getElementById('unicastPacketsRx').innerHTML='N/A';
+					document.getElementById('unicastPacketsTx').innerHTML='N/A';
+					document.getElementById('multicastPacketsRx').innerHTML='N/A';
+					document.getElementById('multicastPacketsTx').innerHTML='N/A';
+					document.getElementById('broadcastPacketsRx').innerHTML='N/A';
+					document.getElementById('broadcastPacketsTx').innerHTML='N/A';
+					document.getElementById('packetsDroppedTx').innerHTML='N/A';
+					document.getElementById('packetsDroppedRx').innerHTML='N/A';
+					document.getElementById('uncorrectPacketsRx').innerHTML = 'N/A';
+					document.getElementById('uncorrectPacketsTx').innerHTML ='N/A';
+					document.getElementById('fifoErrRx').innerHTML='N/A';
+					document.getElementById('fifoErrTx').innerHTML='N/A';
+					document.getElementById('shortRx').innerHTML='N/A';
+					document.getElementById('longRx').innerHTML='N/A';
+					document.getElementById('framingErrRx').innerHTML='N/A';
+					document.getElementById('jabberFrameRx').innerHTML='N/A';
+					document.getElementById('fragmentRx').innerHTML='N/A';
+					document.getElementById('taggedRx').innerHTML = 'N/A';
+					document.getElementById('codeViolationRx').innerHTML='N/A';
+					document.getElementById('totalBytesRx').innerHTML='N/A';
+					document.getElementById('totalBytesTx').innerHTML='N/A';
+					document.getElementById('rxBitRate').innerHTML='N/A';
+					document.getElementById('txBitRate').innerHTML='N/A';
+					document.getElementById('snr').innerHTML='N/A';
+					document.getElementById('linkUptime').innerHTML='N/A';
+					document.getElementById('stbClientList').innerHTML = clientListStr + '</table>';
+					document.getElementById('stbDevice').innerHTML =
+						'<select name="stbDeviceSelected" id="stbDeviceSelected" onchange="stbDeviceChange()">\n'
+						+ optionStr+  '</select>';					
+				}
+				
+				setTimeout('updateValue_take()',5000);
+			}
+		}
+		objXMLHTTP.send(null);
+	}
+}
+
+function stbDeviceChange()
+{
+	userSelected = document.getElementById('stbDeviceSelected').selectedIndex;
+	
+	var info = activeInfo[userSelected].split('/');
+	var counter ;  
+	for(j = 1;j<assoc_info_5g.length;j++){		
+				var	info_5g = assoc_info_5g[j].split('&');
+					if(info_5g[0] == info[3]){	
+						counter = info_5g[2].split('/');	
+						break;
+					}
+				}
+				document.getElementById('brgMacAddress').innerHTML=info[3];
+				document.getElementById('brgDriverVer').innerHTML='N/A';			
+				document.getElementById('clntDriverVer').innerHTML='N/A';			
+
+				document.getElementById('assocSsid').innerHTML=ssid;
+				document.getElementById('retries').innerHTML='N/A';			
+				document.getElementById('rssi').innerHTML=counter[14] ;			
+				document.getElementById('mcs').innerHTML='N/A';			
+				document.getElementById('lastConAttempt').innerHTML='N/A';			
+				document.getElementById('packetsRx').innerHTML=counter[8];
+				document.getElementById('packetsTx').innerHTML=counter[1];			
+				document.getElementById('packetsRx30min').innerHTML='N/A';	/*counter[16];*/				
+				document.getElementById('packetsTx30min').innerHTML='N/A';	/*counter[17];*/			
+				document.getElementById('unicastPacketsRx').innerHTML=counter[11];	
+				document.getElementById('unicastPacketsTx').innerHTML=counter[4];
+				document.getElementById('multicastPacketsRx').innerHTML=counter[12];
+				document.getElementById('multicastPacketsTx').innerHTML=counter[5];
+				document.getElementById('broadcastPacketsRx').innerHTML=counter[13];		
+				document.getElementById('broadcastPacketsTx').innerHTML=counter[6];
+				document.getElementById('packetsDroppedTx').innerHTML=counter[2];
+				document.getElementById('packetsDroppedRx').innerHTML=counter[9];
+				document.getElementById('uncorrectPacketsRx').innerHTML='N/A';		
+				document.getElementById('uncorrectPacketsTx').innerHTML='N/A';
+				document.getElementById('fifoErrRx').innerHTML='N/A';			
+				document.getElementById('fifoErrTx').innerHTML='N/A';			
+				document.getElementById('shortRx').innerHTML='N/A';			
+				document.getElementById('longRx').innerHTML='N/A';			
+				document.getElementById('framingErrRx').innerHTML='N/A';			
+				document.getElementById('jabberFrameRx').innerHTML='N/A';			
+				document.getElementById('fragmentRx').innerHTML='N/A';			
+				document.getElementById('taggedRx').innerHTML='N/A';			
+				document.getElementById('codeViolationRx').innerHTML='N/A';			
+				document.getElementById('totalBytesRx').innerHTML=counter[7];
+				document.getElementById('totalBytesTx').innerHTML=counter[0];		
+				document.getElementById('rxBitRate').innerHTML=counter[18]+' Mbps';	
+				document.getElementById('txBitRate').innerHTML=counter[19]+' Mbps';		
+				document.getElementById('snr').innerHTML=counter[15] +' dB' ;		
+				document.getElementById('linkUptime').innerHTML=info_5g[1];			
+}
+
+
+function setStatisticsValueToZero()
+{
+	var info;
+	var clientListStr =
+	'<table>\n\
+	<tr><th colspan="5" class="tableTitle">Prism STB Client List</th></tr>\n\
+	<tr>\n\
+	<th>Device Name</th>\n\
+	<th>MAC Adderess</th>\n\
+	<th>Connection Type</th>\n\
+	<th>Packets Sent</th>\n\
+	<th>Packets Received</th>\n\
+	</tr>\n';
+	if (activeInfo!='')
+	{
+		for (i = 0; i < activeInfo.length; i++)
+		{
+			info = activeInfo[i].split('/');
+			/* Client List */
+			clientListStr += '<tr align="center">\n';
+			clientListStr += '<td>' + info[1] + '</td>\n';
+			clientListStr += '<td>' + info[3] + '</td>\n';
+			clientListStr += '<td>' + info[4] + '</td>\n';
+			clientListStr += '<td>' + '0' + '</td>\n';
+			clientListStr += '<td>' + '0' + '</td>\n';
+			clientListStr +='</tr>\n';
+		}
+		document.getElementById('stbClientList').innerHTML = clientListStr + '</table>';
+		document.getElementById('rssi').innerHTML='0';
+		document.getElementById('mcs').innerHTML='0';
+		document.getElementById('lastConAttempt').innerHTML='0';
+		document.getElementById('packetsRx').innerHTML='0';
+		document.getElementById('packetsTx').innerHTML='0';
+		document.getElementById('packetsRx30min').innerHTML='0';
+		document.getElementById('packetsTx30min').innerHTML='0';
+		document.getElementById('unicastPacketsRx').innerHTML='0';
+		document.getElementById('unicastPacketsTx').innerHTML='0';
+		document.getElementById('multicastPacketsRx').innerHTML='0';
+		document.getElementById('multicastPacketsTx').innerHTML='0';
+		document.getElementById('broadcastPacketsRx').innerHTML='0';
+		document.getElementById('broadcastPacketsTx').innerHTML='0';
+		document.getElementById('packetsDroppedTx').innerHTML='0';
+		document.getElementById('packetsDroppedRx').innerHTML='0';
+		document.getElementById('uncorrectPacketsRx').innerHTML='0';
+		document.getElementById('uncorrectPacketsTx').innerHTML='0';
+		document.getElementById('fifoErrRx').innerHTML='0';
+		document.getElementById('fifoErrTx').innerHTML='0';
+		document.getElementById('shortRx').innerHTML='0';
+		document.getElementById('longRx').innerHTML='0';
+		document.getElementById('framingErrRx').innerHTML='0';
+		document.getElementById('jabberFrameRx').innerHTML='0';
+		document.getElementById('fragmentRx').innerHTML='0';
+		document.getElementById('taggedRx').innerHTML='0';
+		document.getElementById('codeViolationRx').innerHTML='0';
+		document.getElementById('totalBytesRx').innerHTML='0';
+		document.getElementById('totalBytesTx').innerHTML='0';
+		document.getElementById('rxBitRate').innerHTML='0 Mbps';
+		document.getElementById('txBitRate').innerHTML='0 Mbps';
+		document.getElementById('snr').innerHTML='0 dB';
+		document.getElementById('linkUptime').innerHTML='0';
+	}	
+}
+
+function Clear() {
+   setStatisticsValueToZero();
+	clearSkip = 1;	
+}
+
+function frmLoad()
+{
+	var info;	
+	var info_5g;
+	var counter;
+	$('div#enabled').show();
+
+	activeInfo = activeUsers.split('|');
+
+	var old_clientListStr='';
+	var optionStr = '';
+	var clientListStr =
+   '<table>\n\
+	<tr><th colspan="5" class="tableTitle">Prism STB Client List</th></tr>\n\
+	<tr>\n\
+	<th>Device Name</th>\n\
+	<th>MAC Adderess</th>\n\
+	<th>Connection Type</th>\n\
+	<th>Packets Sent</th>\n\
+	<th>Packets Received</th>\n\
+	</tr>\n';
+	var sum = 0;
+	var flag = 0;
+	if (activeInfo!='')
+	{
+		for (i = 0; i < activeInfo.length; i++)
+		{			
+			flag = 0;
+			info = activeInfo[i].split('/');			
+		       old_clientListStr = clientListStr;
+			/* Client List */
+			clientListStr += '<tr align="center">\n';
+			clientListStr += '<td>' + info[1] + '</td>\n';
+			clientListStr += '<td>' + info[3] + '</td>\n';
+			clientListStr += '<td>' + info[4] + '</td>\n';
+			if(assoc_info_5g.length>0){				
+				for(j = 1;j<assoc_info_5g.length;j++){							
+					info_5g = assoc_info_5g[j].split('&');
+					if(info_5g[0] == info[3]){	
+						counter = info_5g[2].split('/');						
+						clientListStr += '<td>' + counter[1] + '</td>\n';
+						clientListStr += '<td>' + counter[8] + '</td>\n';
+						clientListStr +='</tr>\n';
+						flag = 1;
+						break;
+					}
+				}
+			}		
+
+			if(flag == 0){
+				clientListStr = old_clientListStr;
+				continue;
+			}
+			
+			/* Link Status */
+			optionStr = optionStr + '<option>' + info[1] + '</option>\n';
+			if (i == userSelected)
+			{
+				if(vht=='1')
+					document.getElementById('stbConnectionType').innerHTML='5GHz Radio 802.11ac';
+				else
+					document.getElementById('stbConnectionType').innerHTML='5GHz Radio 802.11n';
+					
+				document.getElementById('brgMacAddress').innerHTML=info[3];
+				document.getElementById('brgDriverVer').innerHTML='N/A';			
+				document.getElementById('clntDriverVer').innerHTML='N/A';			
+
+				document.getElementById('assocSsid').innerHTML=ssid;
+				document.getElementById('retries').innerHTML='N/A';			
+				document.getElementById('rssi').innerHTML=counter[14] ;	
+				document.getElementById('mcs').innerHTML='N/A';			
+				document.getElementById('lastConAttempt').innerHTML='N/A';			
+				document.getElementById('packetsRx').innerHTML=counter[8];
+				document.getElementById('packetsTx').innerHTML=counter[1];			
+				document.getElementById('packetsRx30min').innerHTML='N/A';	/*counter[16];*/		
+				document.getElementById('packetsTx30min').innerHTML='N/A';	/*counter[17];*/	
+				document.getElementById('unicastPacketsRx').innerHTML=counter[11];	
+				document.getElementById('unicastPacketsTx').innerHTML=counter[4];
+				document.getElementById('multicastPacketsRx').innerHTML=counter[12];
+				document.getElementById('multicastPacketsTx').innerHTML=counter[5];
+				document.getElementById('broadcastPacketsRx').innerHTML=counter[13];		
+				document.getElementById('broadcastPacketsTx').innerHTML=counter[6];
+				document.getElementById('packetsDroppedTx').innerHTML=counter[2];
+				document.getElementById('packetsDroppedRx').innerHTML=counter[9];
+				document.getElementById('uncorrectPacketsRx').innerHTML='N/A';		
+				document.getElementById('uncorrectPacketsTx').innerHTML='N/A';
+				document.getElementById('fifoErrRx').innerHTML='N/A';			
+				document.getElementById('fifoErrTx').innerHTML='N/A';			
+				document.getElementById('shortRx').innerHTML='N/A';			
+				document.getElementById('longRx').innerHTML='N/A';			
+				document.getElementById('framingErrRx').innerHTML='N/A';			
+				document.getElementById('jabberFrameRx').innerHTML='N/A';			
+				document.getElementById('fragmentRx').innerHTML='N/A';			
+				document.getElementById('taggedRx').innerHTML='N/A';			
+				document.getElementById('codeViolationRx').innerHTML='N/A';			
+				document.getElementById('totalBytesRx').innerHTML=counter[7];
+				document.getElementById('totalBytesTx').innerHTML=counter[0];		
+				document.getElementById('rxBitRate').innerHTML=counter[18]+' Mbps';			
+				document.getElementById('txBitRate').innerHTML=counter[19]+' Mbps';			
+				document.getElementById('snr').innerHTML=counter[15] +' dB' ;			
+				document.getElementById('linkUptime').innerHTML=info_5g[1];							
+			}
+		}
+		document.getElementById('stbClientList').innerHTML = clientListStr + '</table>';
+		document.getElementById('stbDevice').innerHTML =
+		'<select name="stbDeviceSelected" id="stbDeviceSelected" onchange="stbDeviceChange()">\n'
+		+ optionStr
+		+ '</select>';
+	}
+	else
+	{
+
+		
+			clientListStr += '<tr align="center">\n';
+			clientListStr += '<td>N/A</td>\n';
+			clientListStr += '<td>N/A</td>\n';
+			clientListStr += '<td>N/A</td>\n';		
+			clientListStr += '<td>N/A</td>\n';
+			clientListStr += '<td>N/A</td>\n';
+			clientListStr +='</tr>\n';
+					
+			
+			/* Link Status */
+			optionStr = optionStr + '<option>N/A</option>\n';
+		document.getElementById('stbConnectionType').innerHTML='N/A';
+		document.getElementById('brgMacAddress').innerHTML='N/A';
+		document.getElementById('brgDriverVer').innerHTML='N/A';
+		document.getElementById('clntDriverVer').innerHTML='N/A';
+		document.getElementById('assocSsid').innerHTML='N/A';
+		document.getElementById('retries').innerHTML='N/A';
+		document.getElementById('rssi').innerHTML='N/A';
+		document.getElementById('mcs').innerHTML='N/A';
+		document.getElementById('lastConAttempt').innerHTML='N/A';
+		document.getElementById('packetsRx').innerHTML='N/A';
+		document.getElementById('packetsTx').innerHTML='N/A';
+		document.getElementById('packetsRx30min').innerHTML='N/A';
+		document.getElementById('packetsTx30min').innerHTML='N/A';
+		document.getElementById('unicastPacketsRx').innerHTML='N/A';
+		document.getElementById('unicastPacketsTx').innerHTML='N/A';
+		document.getElementById('multicastPacketsRx').innerHTML='N/A';
+		document.getElementById('multicastPacketsTx').innerHTML='N/A';
+		document.getElementById('broadcastPacketsRx').innerHTML='N/A';
+		document.getElementById('broadcastPacketsTx').innerHTML='N/A';
+		document.getElementById('packetsDroppedTx').innerHTML='N/A';
+		document.getElementById('packetsDroppedRx').innerHTML='N/A';
+		document.getElementById('uncorrectPacketsRx').innerHTML='N/A';
+		document.getElementById('uncorrectPacketsTx').innerHTML='N/A';
+		document.getElementById('fifoErrRx').innerHTML='N/A';
+		document.getElementById('fifoErrTx').innerHTML='N/A';
+		document.getElementById('shortRx').innerHTML='N/A';
+		document.getElementById('longRx').innerHTML='N/A';
+		document.getElementById('framingErrRx').innerHTML='N/A';
+		document.getElementById('jabberFrameRx').innerHTML='N/A';
+		document.getElementById('fragmentRx').innerHTML='N/A';
+		document.getElementById('taggedRx').innerHTML='N/A';
+		document.getElementById('codeViolationRx').innerHTML='N/A';
+		document.getElementById('totalBytesRx').innerHTML='N/A';
+		document.getElementById('totalBytesTx').innerHTML='N/A';
+		document.getElementById('rxBitRate').innerHTML='N/A';
+		document.getElementById('txBitRate').innerHTML='N/A';
+		document.getElementById('snr').innerHTML='N/A';
+		document.getElementById('linkUptime').innerHTML='N/A';
+		document.getElementById('stbClientList').innerHTML = clientListStr + '</table>';
+		document.getElementById('stbDevice').innerHTML =
+		'<select name="stbDeviceSelected" id="stbDeviceSelected" onchange="stbDeviceChange()">\n'
+		+ optionStr+  '</select>';
+	}
+	
+	setTimeout('updateValue_take()', 5000);
+}
+// done hiding -->
+</script>
+</head>
+
+<body id="supportconsole_5G_prismlinkstatus" onload="frmLoad()">
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('supportconsole', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+      <div id="subnav_header"></div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteSupportConsoleMenuHeader('5glinkstatus', '<%ejGet(wifi5GFeature)%>', '<%ejGet(voiceFeature)%>');
+</script>
+      </ul>
+      <div id="subnav_footer"></div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+         </div>
+      </div>
+    </div>
+	 <form method=post name="stbstatus" action="stbstatus.cgi">     	
+		<input type="hidden" name="sessionKey" id="sessionKey" value=""/>
+		<div id="content_right">
+            <div id="content_right_contentarea">
+                <h1 class="supportconsole_5G_prismlinkstatus">Prism Link Status<span>The following tables provide detailed information on the Prism STB's 
+                connected on all interface types.</span></h1>              
+	        <div id="enabled">
+                <div class="stepWrapperdark">
+					 <div id="stbClientList">
+		         <table>
+                	<tr>
+							<th colspan="5" class="tableTitle">Prism STB Client List</th>
+						</tr>
+		            <tr>
+		              <th>Device Name</th>
+		              <th>MAC Adderess</th>
+		              <th>Connection Type</th>
+		              <th>Packets Sent</th>
+		              <th>Packets Received</th>
+	                </tr>
+		            <tr align="center">
+		              <td>N/A</td>
+		              <td>N/A</td>
+		              <td>N/A</td>
+		              <td>N/A</td>
+		              <td>N/A</td>
+	                </tr>
+	              </table>
+				    </div>
+		          </div>
+
+		        <div class="stepWrapperdark">
+			      <table>
+                	<tr>
+							<th colspan="2" class="tableTitle">STB Link Status for CenturyLink Prism</th>
+                    </tr>
+			        <tr>
+			          <th width="225">Parameter</th>
+			          <th> Status</th>
+		            </tr>
+                	<tr>
+                    <th>Connected STB:</th>
+							<th align="center">
+							<span id="stbDevice">
+                            <select name="stbDeviceSelected" id="stbDeviceSelected" onchange="stbDeviceChange()">
+                                <option>N/A</option>
+                            </select>
+                            </span>
+									 </th>
+                    </tr>
+                    <tr>
+			          <td width="225">Connection Type:</td>
+			          <td align="center"><span id="stbConnectionType">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Bridge MAC Address:</td>
+			          <td align="center"><span id="brgMacAddress">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Bridge Driver Version:</td>
+			          <td align="center"><span id="brgDriverVer">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td>Client Driver Version:</td>
+			          <td align="center"><span id="clntDriverVer">N/A</span></td>
+		            </tr>
+		            <tr>
+			          <td>Associated SSID:</td>
+			          <td align="center"><span id="assocSsid">N/A</span></td>
+		            </tr>
+		            <tr>
+			          <td>Retries:</td>
+			          <td align="center"><span id="retries">N/A</span></td>
+		            </tr>
+		            <tr>
+			          <td>RSSI:</td>
+			          <td align="center"><span id="rssi">N/A</span></td>
+		            </tr>
+		            <tr>
+			          <td>MCS:</td>
+			          <td align="center"><span id="mcs">N/A</span></td>
+		            </tr>
+		            <tr>
+			          <td>Last Connection Attempt:</td>
+			          <td align="center"><span id="lastConAttempt">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Packets Rx:</td>
+			          <td align="center"><span id="packetsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Packets Tx:</td>
+			          <td align="center"><span id="packetsTx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td width="225">Packets Rx - 30 minute:</td>
+			          <td align="center"><span id="packetsRx30min">0</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Packets Tx - 30 minute:</td>
+			          <td align="center"><span id="packetsTx30min">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Unicast Packets Rx:</td>
+			          <td align="center"><span id="unicastPacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Unicast Packets Tx:</td>
+			          <td align="center"><span id="unicastPacketsTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Multicast Packets Rx:</td>
+			          <td align="center"><span id="multicastPacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Multicast Packets Tx:</td>
+			          <td align="center"><span id="multicastPacketsTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Broadcast Packets Rx:</td>
+			          <td align="center"><span id="broadcastPacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Broadcast Packets Tx:</td>
+			          <td align="center"><span id="broadcastPacketsTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Packets Dropped Tx:</td>
+			          <td align="center"><span id="packetsDroppedTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Packets Dropped Rx:</td>
+			          <td align="center"><span id="packetsDroppedRx">0</span></td>
+		            </tr>
+			        <tr>
+			        <tr>
+			          <td>Uncorrected Packets (CRC) Rx:</td>
+			          <td align="center"><span id="uncorrectPacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Uncorrected Packets (CRC) Tx:</td>
+			          <td align="center"><span id="uncorrectPacketsTx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>FIFO Error Rx:</td>
+			          <td align="center"><span id="fifoErrRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>FIFO Error Tx:</td>
+			          <td align="center"><span id="fifoErrTx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Short (Runts) Rx:</td>
+			          <td align="center"><span id="shortRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Long (Oversized) Rx:</td>
+			          <td align="center"><span id="longRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Framing Error Rx:</td>
+			          <td align="center"><span id="framingErrRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Jabber Frames Rx:</td>
+			          <td align="center"><span id="jabberFrameRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Fragemented Frames Rx:</td>
+			          <td align="center"><span id="fragmentRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>VLAN Tagged Frames Rx:</td>
+			          <td align="center"><span id="taggedRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Code Violation Rx:</td>
+			          <td align="center"><span id="codeViolationRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Total Bytes Rx:</td>
+			          <td align="center"><span id="totalBytesRx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Total Bytes Tx:</td>
+			          <td align="center"><span id="totalBytesTx">0</span></td>
+		            </tr>
+		            <tr>
+			          <td>Rx BIT Rate:</td>
+			          <td align="center"><span id="rxBitRate">0 Mbps</span></td>
+		            </tr>
+		            <tr>
+			          <td>Tx BIT Rate:</td>
+			          <td align="center"><span id="txBitRate">0 Mbps</span></td>
+		            </tr>
+		            <tr>
+			          <td>SNR:</td>
+			          <td align="center"><span id="snr">0 dB</span></td>
+		            </tr>
+			          <td>Link Uptime:</td>
+			          <td align="center"><span id="linkUptime">0</span></td>
+		            </tr>			        
+		          </table>
+			    </div>
+		        <div class="stepWrapper">
+		          <p><strong>Clear Statistics </strong></p>
+		          <a href="#" onClick="Clear();" class="btn clear_btn">Clear</a>
+		        </div>
+	          </div>
+		  </div>
+  </div>
+  </form>
+</div>
+		<div class="clear_left"></div>
+<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2012, CenturyLink Communications International Inc., All Rights Reserved.</div>
+        </div>
+</body>
+</html>

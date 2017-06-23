@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.hidepassword-1.0.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+</head>
+<style type="text/css">
+   input {
+       font-family: sans-serif;
+   }
+</style>
+<script type="text/javascript">
+var onDemand = '<%ejGet(enblOnDemand)%>';
+var authMethod = '<%ejGet(pppAuthMethod)%>';
+var pppShowAuthErrorRetry = '<%ejGet(pppShowAuthErrorRetry)%>';
+var pppAuthErrorRetry = '<%ejGet(pppAuthErrorRetry)%>';
+var pppAuthErrorRetryInterval = '<%ejGet(pppAuthErrorRetryInterval)%>';
+//var enblIpAddr = '<%ejGet(useStaticIpAddress)%>';
+
+var defPrctl = '<%ejGetOther(sysInfo, defaultPrctl)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+
+function btnApply()
+{
+	var loc = '';
+	var username = '';
+	var defUsername = '<%ejGet(defPppUserName)%>';
+	var defPassword = '**********';
+	with ( document.forms[0] ) {		
+		username = pppUserName.value;
+	
+		if (username == '')
+		{
+			pppUserName.value = encodeUrl(defUsername);
+			pppPassword.value = defPassword;
+			pppPasswordConfirm.value = defPassword;
+		}
+		else
+		{
+			if (isp.selectedIndex == 0 || isp.selectedIndex == 1)
+			{
+				if (defUsername != username)
+				{
+					//strip @
+					if(username.indexOf('@') != -1)
+					{
+						username = username.substring(0, username.indexOf('@'));
+					}
+		
+					username += isp.options[isp.selectedIndex].value;
+				}
+			}
+			pppUserName.value=encodeUrl(username);
+		}
+
+		// validate user name
+		var len = pppUserName.value.length;
+		if ( len > 64 ) {
+			msg = 'The length of username (' + len + ') is too long [0-64].';
+			AlertOpen(msg);
+			return false;
+		}
+		// validate password
+		len = pppPassword.value.length;
+		if ( len > 64 ) {
+			msg = 'The length of password (' + len + ') is too long [0-64].';
+			AlertOpen(msg);
+			return false;
+		}
+		if(hide_password.checked==true)
+		{
+			if( (pppPasswordConfirm.value!=pppPassword.value))
+			{
+				AlertOpen("The passwords entered do not match. Please enter matching passwords.");
+				return false;
+			}
+		}
+		
+		pppPassword.value = encodePassword(pppPassword.value);
+		pppPassword.value = decodePassword(pppPassword.value); 
+		if (useStaticIpAddress.value == 2)
+			enblLan2.value = 1;
+		else
+			enblLan2.value = 0;
+
+		lan2IpAddress.value = '<%ejGet(lan2IpAddress)%>';
+		lan2SubnetMask.value = '<%ejGet(lan2SubnetMask)%>';
+
+      if (defPrctl == 'PPPoA')
+         ntwkPrtcl.value = 1;
+      else if (defPrctl == 'PPPoE')
+         ntwkPrtcl.value = 0;
+         
+	}
+	return true;
+}
+
+function doSubmit () {
+	if ( btnApply() ) {
+		document.forms[0].sessionKey.value = gblsessionKey;
+		document.forms[0].submit();
+	}
+}
+
+function frmLoad()
+{
+//	var defPrctl = '<%ejGetOther(sysInfo, defaultPrctl)%>';
+	var username = '';
+//	MM_preloadImages('../_images/quicksetup_btn_advancedip_roll.png');
+
+	with ( document.forms[0] ) {
+
+		if (defPrctl == 'PPPoE' || defPrctl == 'PPPoA' ) {
+			username = '<%ejGet(pppUserName)%>';
+			username = decodeSpecialChars(username);
+			pppPassword.value = "*********";
+			pppPasswordConfirm.value = "*********";
+		}
+		else {
+			username = '<%ejGet(defPppUserName)%>';
+			pppPassword.value = "**********";
+			pppPasswordConfirm.value = "**********";
+		}
+	
+		if (username == '')
+		{
+			username = '<%ejGet(defPppUserName)%>';
+			pppPassword.value = "**********";
+			pppPasswordConfirm.value = "**********";
+		}
+
+		if (username.indexOf('@centurylink.net') != -1)
+		{
+			username = username.split('@');
+			pppUserName.value = username[0];
+			isp.selectedIndex = 0;
+		}
+		else if (username.indexOf('@qwest.net') != -1)
+		{
+			username = username.split('@');
+			pppUserName.value = username[0];
+			isp.selectedIndex = 1;
+		}
+		else
+		{
+			pppUserName.value = username;
+			isp.selectedIndex = 2;
+		}
+
+		hide_password.checked = true;
+		hide_password_change();
+	}
+}
+
+function hide_password_change(){
+   with ( document.forms[0] ) {
+      if(hide_password.checked == true)
+      {
+         $('.PasswordConfirmID').show();
+      }
+      else{
+         $('.PasswordConfirmID').hide();
+      }
+   }	
+}
+
+function change(){
+	document.forms[0].pppPassword.value = "";
+	$('#pppPassword').showPassword('#pppPassword');
+}
+
+function doRelase()
+{
+	var loc="ipoeConfig.cgi";
+	BackgroundUrl('SetipDown.cgi');
+}
+
+function Release(){
+	var msg = '';
+	msg = 'The Internet connection will be released.  Select Ok to continue or cancel to stay connected.';
+
+    if(func_dslStatus=='Idle' || func_dslStatus=='ethWanDown' )
+    {
+      AlertOpen('The Internet connection is released.' );
+      return;
+    }
+
+    if(func_wanStatus=='DISCONNECTED' || func_wanStatus=='CONNECTING')
+    {
+      AlertOpen('The Internet connection is released.' );
+      return;
+    }
+	ConfirmOpen(msg, doRelase);
+}
+
+function Renew(){
+    if(func_dslStatus=='Idle'  || func_dslStatus=='ethWanDown' )
+    {
+			AlertOpen('Please check if DSL line is connected.' );
+      return;
+    }
+
+    AlertOpen('You are about to Connect from the Internet.');
+    if(func_wanStatus=='CONNECTED')
+    {
+      return;
+    }
+
+	BackgroundUrl('SetipUp.cgi');
+}
+$(function(){
+  $('#pppPassword').hidePassword('#hide_password');
+});
+func_dslStatus = '<%ejGetOther(sysInfo, status)%>';
+func_wanStatus = '<%ejGetOther(sysInfo, defaultWan)%>';
+
+$(document).ready(function(){  
+  	if(defPrctl == 'RFC1483 via DHCP')
+    {
+  			$('.main_group').hide();
+  			$('.main_explain').hide();
+  			$('.ipoe_group').show();
+  			$('.ipoe_explain').show();
+    }
+    else
+    {
+  			$('.main_group').show();
+  			$('.main_explain').show();
+  			$('.ipoe_group').hide();
+  			$('.ipoe_explain').hide();
+    }
+});
+</script>
+
+
+<body id="quicksetup" onload="frmLoad()">
+<div id="wrapper">
+    <div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('quicksetup', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+       
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+			WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>	
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+				<li><a href="#" class="selected">Quick Setup</a></li>
+			</ul>
+			<div id="subnav_footer"></div>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+  </div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+        <div class="main_explain">
+				<h1 class="quicksetup">Quick Setup <span>Quick Setup provides a quick and easy way to insert the PPP username and password
+				  for Internet access. The PPP password is case sensitive. If other ISP is selected from
+				  the drop down box, insert the ISP domain in the PPP username text box. If you
+				  currently have an @msndsl.net realm, use the @centurylink.net realm below.</span></h1>
+        </div>
+        <div class="ipoe_explain">
+				<h1 class="quicksetup">Quick Setup <span>Quick Setup provides a quick and easy way to refresh your Internet connection. When a refresh is performed, a new IP address will be obtained in most cases.</span></h1>
+        </div>
+				<form action="quicksetup.cgi" method="post" onSubmit="return btnApply();">
+				<input name="enblOnDemand" type="hidden" id="enblOnDemand" value="0"/>
+				<input name="useStaticIpAddress" type="hidden" id="useStaticIpAddress" value="<%ejGet(useStaticIpAddress)%>"/>
+				<input name="pppLocalIpAddress" type="hidden" id="pppLocalIpAddress" value="<%ejGet(pppLocalIpAddress)%>"/>
+				<input name="pppIpExtension" type="hidden" id="pppIpExtension" value="0"/>
+				<input name="enblFirewall" type="hidden" id="enblFirewall" value="0"/>
+				<input name="enblNat" type="hidden" id="enblNat" value="1"/>
+				<input name="enblFullcone" type="hidden" id="enblFullcoe" value="0"/>
+				<input name="pppAuthErrorRetry" type="hidden" id="pppAuthErrorRetry" value="1"/>
+				<input name="pppAuthErrorRetryInterval" type="hidden" id="pppAuthErrorRetryInterval" value="120"/>
+				<input name="enblPppDebug" type="hidden" id="enblPppDebug" value="0"/>
+				<input name="enblIgmp" type="hidden" id="enblIgmp" value="0"/>
+				<input name="ntwkPrtcl" type="hidden" id="ntwkPrtcl" value="0"/>
+				<input name="defaultWanCfg" type="hidden" id="defaultWanCfg" value="1"/>
+				<input name="delayConfigType" type="hidden" id="delayConfigType" value="none"/>
+				<input name="lan2IpAddress" type="hidden" id="lan2IpAddress" value="0.0.0.0">
+				<input name="lan2SubnetMask" type="hidden" id="lan2SubnetMask" value="0.0.0.0">
+				<input name="enblLan2" type="hidden" id="enblLan2" value="">
+				<input name="sessionKey" type="hidden" id="sessionKey" value="">
+<div class="main_group">
+				 <div class="stepWrapper">
+				<p><strong>1. Enter the PPP username and  PPP password.</strong></p>
+				<table width="460" border="0" align="center" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                  <tr align="center">
+                    <td width="150"><div align="left">PPP Username:</div>
+                    </td>
+                    <td width="194"><div align="left">
+                      <input name="pppUserName" type="text" id="pppUserName" size="30" />
+                    </div></td>
+                    <td width="142">
+                      <div align="left">
+                          <select name="isp" id="isp">
+                            <option value="@centurylink.net">@centurylink.net</option>
+                            <option value="@qwest.net">@qwest.net</option>
+                            <option selected="selected" >Custom Realm</option>
+                        </select>
+                      </div></td>
+                  </tr>
+                  <tr align="center">
+                    <td><div align="left">PPP Password:</div>
+                    </td>
+                    <td colspan="2"><div align="left">
+                      <input name="pppPassword" type="password" id="pppPassword" size="30"/>
+                    </div></td>
+                  </tr>
+                  <tr class='PasswordConfirmID' align="center">
+                    <td><div align="left" style="white-space:nowrap;overflow:hidden;word-break:keep-all;">Confirm Password:</div>
+                    </td>
+                    <td colspan="2"><div align="left">
+                      <input name="pppPasswordConfirm" type="password" id="pppPasswordConfirm" size="30"/>
+                    </div></td>
+                  </tr>
+                  <tr>
+        	     <td colspan="3"><input type="checkbox" checked="checked" id="hide_password" name="hide_password" size="25" onClick="hide_password_change()">
+                      Hide Password </td>
+                  </tr>
+                </table>
+				</div>
+                 <div class="stepWrapper">
+                        	<p><strong>2. Click &quot;Apply&quot; to save your settings.</strong></p>
+               	 <a href="#" class="btn apply_btn" onClick='doSubmit();'>Apply</a>
+                </div>
+</div>
+<div class="ipoe_group">
+  <div class="stepWrapper">
+				<p><strong>1. Select release or renew to refresh your Internet connection. </strong></p>
+                <div id="quick_set_buttons">
+                    <a href="#" title="Release" class="btn" onClick="Release();">Release</a>
+                    <a href="#" title="Renew" class="btn" onClick="Renew();">Renew</a>
+                </div>
+  </div>
+</div>
+			  </form>
+		<p><a href="advancedsetup_wanipaddress.html" id="advancedipconfiguration_btn" class="" style="margin:0 -5px 20px 0; float:right;"></a></p>
+		  	<div class="clear_both"></div>
+		  </div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Router Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wanStatus.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var g_wanStatus = '<%ejGetOther(sysInfo, defaultWan)%>';
+var l2Intf = '<%ejGetOther(sysInfo, l2Intf)%>';
+var dslStatus = '<%ejGetOther(sysInfo, status)%>';
+var upRate = '<%ejGetOther(lineRate, 0, 0)%>';
+var downRate = '<%ejGetOther(lineRate, 1, 0)%>';
+
+function setStatisticsValueToZero()
+{
+	
+	document.getElementById("pktrx").innerHTML=0;
+	document.getElementById("pkttx").innerHTML=0;
+	document.getElementById("eth24rx").innerHTML='0.000 MB';
+	document.getElementById("eth24tx").innerHTML='0.000 MB';
+	document.getElementById("xtmpktrxerr").innerHTML=0;
+	document.getElementById("xtmpkttxerr").innerHTML=0;
+	document.getElementById("ethrx").innerHTML='0.000 MB';
+	document.getElementById("ethtx").innerHTML='0.000 MB';
+}
+
+function Clear() {
+	setStatisticsValueToZero();
+	BackgroundUrl("modemstatus_ethernetstatus_clear.cgi");
+	//setTimeout('updateValue_take()', 3000);
+}
+</SCRIPT>
+
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+    <h1 id="modem_type">CenturyLink&reg; Router Configuration ZyXEL FR1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+		
+		<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+        <script language="javascript">
+		WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+        </script>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+  </div>
+	<div class="clear_left"></div>
+	<div id="content_left">
+			<div id="subnav_header"></div>
+			<ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('wanstatus','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+			</ul>
+	  <div id="subnav_footer"></div>
+			<div id="connectionstatus_header"></div>
+      <div id="connectionstatus">
+        <h1>Connection Status</h1>
+        <div id="connectionstatus_wrapper">
+        <script language="javascript">        	
+<!-- hide
+	document.writeln('<h2>CenturyLink<sup>&reg;</sup> DSL</h2><span id="broadband2">');
+
+	if (dslStatus == 'CONNECTED'){
+	     document.writeln('<img src="../_images/connectionStatus_Connected.png" alt="Connected" width="152" height="25" />');
+	     document.writeln('<p class="connected">'+ downRate + '/' + upRate + ' Mbps</p>');
+	}
+	else if (dslStatus == 'CONNECTING')
+	{
+	     document.writeln('<img src="../_images/connectionStatus_Connecting.png" alt="Connecting" width="152" height="25" /><p class="notconnected">N/A Mbps</p>');
+	}
+	else
+	{
+	     document.writeln('<img src="../_images/connectionStatus_notConnected.png" alt="Not Connected" width="152" height="25" />');
+	     document.writeln('<p class="notconnected">N/A Mbps</p>');
+	}
+	document.writeln('</span>');
+  document.writeln('<h2>Internet Status</h2><span id="ISPSTATS2">');
+
+  if (g_wanStatus == 'CONNECTED')
+      document.writeln('<img src="../_images/connectionStatus_Connected.png" alt="Connected" width="152" height="25" />');
+  else if (g_wanStatus == 'WALLED GARDEN')
+      document.writeln('<img src="../_images/connectionStatus_walledgarden.png" alt="Walled Garden" width="152" height="25" />');
+  else if (g_wanStatus == 'CONNECTING')
+      document.writeln('<img src="../_images/connectionStatus_Connecting.png" alt="Walled Garden" width="152" height="25" />');
+  else
+      document.writeln('<img src="../_images/connectionStatus_notConnected.png" alt="Not Connected" width="152" height="25" />');
+	document.writeln('</span>');
+				// done hiding -->
+        </script>
+        </div>
+      </div>
+			<div id="connectionstatus_footer"></div>
+  </div>
+		<div id="content_right">
+			<div id="content_right_header"></div>
+			<div id="content_right_contentarea">
+				<h1 class="modemstatus_wanstatus">WAN Ethernet Status 
+					<span>Wan Status reflects the status of the BLUE WAN port located on the back of the router. The WAN light on the front of the router provides a visual status of the WAN port. </span>
+				</h1>
+			    <form onSubmit="return false;">
+			  
+			  <div class="stepWrapper">
+			  <p><strong>WAN Status</strong></p>	
+				
+				  <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                    <th width="237"><div align="left"><strong>Connection</strong></div>
+                    </th>
+                    <th width="183">
+                      <div align="left"><strong>Status</strong></div>
+                    </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">WAN Downstream :</div></td>
+                      <td><div align="left"><span id="dspeed">
+<script language="javascript">        	
+<!-- hide
+
+	if ( l2Intf != 3 ) {
+	     document.writeln('<strong> N/A Mbps</strong>');
+	}
+	else if (dslStatus != 'NOT CONNECTED'){
+	     document.writeln('<strong>'+ downRate + ' Mbps</strong>');
+	}
+	else
+	{
+	     document.writeln('<strong> N/A Mbps</strong>');
+	}
+				// done hiding -->
+</script>
+					  </div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">WAN Upstream :</div></td>
+                      <td><div align="left"><span id="uspeed">
+<script language="javascript">        	
+<!-- hide
+	
+	if ( l2Intf != 3 ) {
+	     document.writeln('<strong> N/A Mbps</strong>');
+	}
+	else if (dslStatus != 'NOT CONNECTED'){
+	     document.writeln('<strong>'+ upRate + ' Mbps</strong>');
+	}
+	else
+	{
+	     document.writeln('<strong> N/A Mbps</strong>');
+	}
+				// done hiding -->
+</script>
+					  </div></td>
+                    </tr>
+
+                  </table>
+				</div><!--end of stepWrapper-->
+				
+				<div class="stepWrapper"> 
+		        <table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                    <tr align="center">
+                      <th width="260"><div align="left"><strong>WAN Link </strong></div>                      </th>
+                      <th width="160">
+                        <div align="left"><strong>Status</strong></div>                      </th>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">WAN Connection Type: </div>                      </td>
+                      <td><div align="left"><span id="connectiontype"><%ejGetOther(ethinfo, connectionType)%></div>                      </td>
+                    </tr>
+					<tr align="center">
+                      <td><div align="left">VLAN Type Selected: </div></td>
+                      <td><div align="left"><span id="VlanType">
+<script language="JavaScript" type="text/javascript">
+var vah_eth_enable = '<%ejGetOther(vah, ethernet, l2)%>';
+var VlanType = '<%ejGetOther(ethinfo, VlanType)%>';
+var VlanId = '<%ejGetOther(ethinfo, VlanID)%>';
+if (vah_eth_enable == 1 && VlanId != 'N/A' && VlanType != 'Selecting') {
+	document.writeln('Auto Detect - '+VlanType+' '+VlanId);
+}
+else if (vah_eth_enable == 1) {
+	document.writeln('Auto Detect - '+VlanType);
+}
+else if(VlanId != -1 && VlanId != 'N/A' && VlanType != 'Selecting'){
+         	document.writeln(VlanType+' '+VlanId);
+}
+else {
+	document.writeln(VlanType);
+}
+                        </script>
+                      </div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">ONT IP Address: </div></td>
+                      <td><div align="left">
+                        <div align="left"><span id="ModemIP">
+<script language="JavaScript" type="text/javascript">
+	var wanip = '<%ejGetOther(dslinfo, WANIP)%>';
+   
+	if ( l2Intf != 3 || wanip == '' || wanip == '&nbsp;' || wanip == '0.0.0.0' || wanip == 'N/A' || (g_wanStatus != 'CONNECTED' && g_wanStatus != 'WALLED GARDEN') ) {
+		document.writeln( 'N/A' );
+	}
+	else {
+		document.writeln( wanip );
+	}
+                        </script>
+                        </span></div>
+                      </div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Ethernet Link Uptime: </div></td>
+                      <td><div align="left"><span id="ethtimer">
+                        <%ejGetOther(ethinfo, ETHTIMER)%>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Connection Failures:</div></td>
+                      <td><div align="left"><span id="ETHConFail">
+                        <%ejGetOther(ethinfo, ETHConFail)%>
+                      </span></div></td>
+                    </tr>
+                    <tr align="center">
+                      <td><div align="left">Connection Failures in Last 24 Hours:</div></td>
+                      <td><div align="left"><span id="ETHConFail24">
+                        <%ejGetOther(ethinfo, ETHConFail24)%>
+                      </span></div></td>
+                    </tr>
+                </table>
+				</div><!--end of stepWrapper-->
+<div class="stepWrapper"> 
+			      <p><strong>WAN Ethernet Transport </strong></p>
+					<table width="80%" border="0" cellpadding="5" cellspacing="0" class="defaultstyle" style="margin:10px auto 0 auto;">
+                      <tr align="center">
+                        <th width="226"><div align="left"><strong>Transport</strong></div>                        </th>
+                        <th width="135">
+                          <div align="left"><strong>Downstream</strong></div>                        </th>
+                        <th width="135">Upstream</th>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Packets:</div>                        </td>
+                        <td><div align="left"><span id="pktrx">
+                        <%ejGetOther(ethinfo, ETHPKTRX)%>
+                        </span></div>                        </td>
+                        <td><div align="left"><span id="pkttx">
+                        <%ejGetOther(ethinfo, ETHPKTTX)%>
+                        </span></div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">Error Packets:</div>                        </td>
+                        <td><div align="left"><span id="xtmpktrxerr">
+                          <%ejGetOther(ethinfo, ETHPKTRXERR)%>
+                        </span></div></td>
+                        <td><div align="left"><span id="xtmpkttxerr">
+                          <%ejGetOther(ethinfo, ETHPKTTXERR)%>
+                        </span></div></td>
+                      </tr>
+                      <tr align="center">
+                        <td><div align="left">24 Hour Usage: </div>                        </td>
+                        <td><div align="left"><span id="eth24rx">
+                          <%ejGetOther(ethinfo, ETH24RX)%>
+                        </span></div>                        </td>
+                        <td><div align="left"><span id="eth24tx">
+                          <%ejGetOther(ethinfo, ETH24TX)%>
+                        </span></div></td>
+                      </tr>
+                      <!--<tr align="center">
+                        <td><div align="left">VLAN Priority:</div>
+                        </td>
+                        <td><div align="left"><span id="VlanPriority"><%ejGetOther(sysInfo, VlanPriority)%></span></div>
+                        </td>
+                      </tr>--> 
+                      <tr align="center">
+                        <td><div align="left">Total Usage: </div>                        </td>
+                        <td><div align="left"><span id="ethrx">
+                          <%ejGetOther(ethinfo, ETHRX)%>
+                        </span></div></td>
+                        <td><div align="left"><span id="ethtx">
+                          <%ejGetOther(ethinfo, ETHTX)%>
+                        </span></div></td>
+                        </tr>
+                      <tr align="center">
+                        <td><div align="left">30 Minute Discarded: </div>                        </td>
+                        <td><div align="left"><span id="pktrxdrop">
+                          <%ejGetOther(ethinfo, PKT30DROPRX)%>
+                        </span></div></td>
+                        <td><div align="left"><span id="pkttxdrop">
+                          <%ejGetOther(ethinfo, PKT30DROPTX)%>
+                        </span></div></td>
+                        </tr>
+						                                          </table>
+                  </div>
+<!--end of stepWrapper-->
+<!--end of stepWrapper-->
+<div class="stepWrapper"> 
+					<p>Clear Statistics</p>
+					<a href="#" onClick="Clear();" id="clear_btn" class="btn clear_btn">Clear</a>
+         
+</div><!--end of stepWrapper-->
+			  </form>
+			</div>
+  </div>
+
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript" src="../_js/util.js"></script>
+<script language="javascript">
+<!-- hide
+var update = '<%ejFncCmd(updatestatic)%>';
+var gblHpnaEnable = '<%ejGet(hpnaEnable)%>';
+var gblSessionKey = '<%ejGetOther(sessionKey)%>';
+var activeUsers = '<%ejGetOtherBig(hpnaActiveUsers,0)%>';
+var activeInfo;
+var userSelected = 0;
+var clearSkip = 0;
+
+function updateValue_take()
+{
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest)  { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+		else if (window.ActiveXObject)  { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}
+	
+	if (clearSkip == 1)
+	{
+		setTimeout('updateValue_take()',5000);
+		clearSkip = 0;
+		return;
+	}
+
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("GET","./GetHPNAStatus.html",true);
+		objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+		objXMLHTTP.onreadystatechange = function() 
+		{
+			if(objXMLHTTP.readyState == 4){
+				//var allInfo = objXMLHTTP.responseText.split('||');
+				var info;
+				var optionStr = '';
+				var clientListStr =
+				'<table>\n\
+				<tr><th colspan="5" class="tableTitle">HPNA Client List</th></tr>\n\
+				<tr>\n\
+				<th>Device Name</th>\n\
+				<th>MAC Adderess</th>\n\
+				<th>HPNA Version</th>\n\
+				<th>Packets Sent</th>\n\
+				<th>Packets Received</th>\n\
+				</tr>\n';
+				
+				activeInfo = objXMLHTTP.responseText.split('|');
+				//activeInfo = allInfo[1].split('|');
+				//alert(activeInfo);
+				
+				if (userSelected > (activeInfo.length - 2))
+				{
+					userSelected = 0;
+				}
+
+				if ((activeInfo.length > 1) && (clearSkip != 1))
+				{
+					for (i = 0; i < activeInfo.length - 1; i++)
+					{
+						info = activeInfo[i].split('/');
+						
+						/* HPNA Port Status */
+						if (i == 0)
+						{
+							//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+							sum = parseInt(info[5]);
+							document.getElementById('portStatusTx').innerHTML=sum.toString();
+							//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+							sum = parseInt(info[4]);
+							document.getElementById('portStatusRx').innerHTML=sum.toString();
+						}
+						
+						/* HPNA Client List */
+						clientListStr += '<tr align="center">\n';
+						clientListStr += '<td>' + info[0] + '</td>\n';
+						clientListStr += '<td>' + info[1] + '</td>\n';
+						clientListStr += '<td>' + info[3] + '</td>\n';
+						//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+						sum = parseInt(info[5]);
+						clientListStr += '<td>' + sum.toString() + '</td>\n';
+						//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+						sum = parseInt(info[4]);
+						clientListStr += '<td>' + sum.toString() + '</td>\n';
+						clientListStr +='</tr>\n';
+						
+						/* HPNA Link Status */
+						optionStr = optionStr + '<option>' + info[0] + '</option>\n';
+						if (i == userSelected)
+						{
+							document.getElementById('hpnaMacAddress').innerHTML=info[1];
+							if (info[2] == '1')
+							{
+								document.getElementById('role').innerHTML='Master Unit';
+							}
+							else
+							{
+								document.getElementById('role').innerHTML='Remote Unit';
+							}
+							document.getElementById('hpnaIfVer').innerHTML=info[3];
+							//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+							sum = parseInt(info[4]);
+							document.getElementById('realTimePacketsRx').innerHTML=sum.toString();
+							//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+							sum = parseInt(info[5]);
+							document.getElementById('realTimePacketsTx').innerHTML=sum.toString();
+							document.getElementById('multicastPacketsRx').innerHTML=info[6];
+							document.getElementById('multicastPacketsTx').innerHTML=info[7];
+							document.getElementById('broadcastPacketsRx').innerHTML=info[8];
+							document.getElementById('broadcastPacketsTx').innerHTML=info[9];
+							document.getElementById('packetsDroppedTx').innerHTML=info[10];
+							document.getElementById('packetsDroppedRx').innerHTML=info[11];
+							document.getElementById('crcRx').innerHTML=info[12];
+							/*document.getElementById('errorPackets').innerHTML=info[10];
+							document.getElementById('txPacketCollision').innerHTML=info[11];
+							document.getElementById('rxPacketCollision').innerHTML=info[12];
+							document.getElementById('totalPacketCollisions').innerHTML=info[13];
+							document.getElementById('txBitCounter').innerHTML=info[14];
+							document.getElementById('rxBitCounter').innerHTML=info[15];*/
+							document.getElementById('snr').innerHTML=info[13]+' dBm';
+							document.getElementById('hpnaLinkUptime').innerHTML=info[14];
+						}
+					}
+					
+					document.getElementById('hpnaClientList').innerHTML = clientListStr + '</table>';
+					document.getElementById('hpanDevice').innerHTML =
+					'<select name="hpnaDeviceSelected" id="hpnaDeviceSelected" onchange="hpnaDeviceChange()">\n'
+					+ optionStr
+					+ '</select>';
+				
+					document.getElementById('hpnaDeviceSelected').selectedIndex = userSelected;
+				}
+				else if (clearSkip != 1)
+				{
+					document.getElementById('hpnaMacAddress').innerHTML="N/A";
+					document.getElementById('role').innerHTML="N/A";
+					document.getElementById('hpnaIfVer').innerHTML="N/A";
+					document.getElementById('realTimePacketsRx').innerHTML="N/A";
+					document.getElementById('realTimePacketsTx').innerHTML="N/A";
+					document.getElementById('multicastPacketsRx').innerHTML="N/A";
+					document.getElementById('multicastPacketsTx').innerHTML="N/A";
+					document.getElementById('broadcastPacketsRx').innerHTML="N/A";
+					document.getElementById('broadcastPacketsTx').innerHTML="N/A";
+					document.getElementById('packetsDroppedTx').innerHTML="N/A";
+					document.getElementById('packetsDroppedRx').innerHTML="N/A";
+					document.getElementById('crcRx').innerHTML="N/A";
+					/*document.getElementById('errorPackets').innerHTML="N/A";
+					document.getElementById('txPacketCollision').innerHTML="N/A";
+					document.getElementById('rxPacketCollision').innerHTML="N/A";
+					document.getElementById('totalPacketCollisions').innerHTML="N/A";
+					document.getElementById('txBitCounter').innerHTML="N/A";
+					document.getElementById('rxBitCounter').innerHTML="N/A";*/
+					document.getElementById('snr').innerHTML="N/A";
+					document.getElementById('hpnaLinkUptime').innerHTML="N/A";
+					document.getElementById('hpnaClientList').innerHTML = clientListStr + '</table>';
+					document.getElementById('hpanDevice').innerHTML =
+					'<select name="hpnaDeviceSelected" id="hpnaDeviceSelected" onchange="hpnaDeviceChange()">\n'
+					+ '</select>';
+				}
+				
+				setTimeout('updateValue_take()',5000);
+			}
+		}
+		objXMLHTTP.send(null);
+	}
+}
+
+function hpnaDeviceChange()
+{
+	userSelected = document.getElementById('hpnaDeviceSelected').selectedIndex;
+	
+	var info = activeInfo[userSelected].split('/');
+	document.getElementById('hpnaMacAddress').innerHTML=info[1];
+	if (info[2] == '1')
+	{
+		document.getElementById('role').innerHTML='Master Unit';
+	}
+	else
+	{
+		document.getElementById('role').innerHTML='Remote Unit';
+	}
+	document.getElementById('hpnaIfVer').innerHTML=info[3];
+	//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+	sum = parseInt(info[4]);
+	document.getElementById('realTimePacketsRx').innerHTML=sum.toString();
+	//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+	sum = parseInt(info[5]);
+	document.getElementById('realTimePacketsTx').innerHTML=sum.toString();
+	document.getElementById('multicastPacketsRx').innerHTML=info[6];
+	document.getElementById('multicastPacketsTx').innerHTML=info[7];
+	document.getElementById('broadcastPacketsRx').innerHTML=info[8];
+	document.getElementById('broadcastPacketsTx').innerHTML=info[9];
+	document.getElementById('packetsDroppedTx').innerHTML=info[10];
+	document.getElementById('packetsDroppedRx').innerHTML=info[11];
+	document.getElementById('crcRx').innerHTML=info[12];
+	/*document.getElementById('errorPackets').innerHTML=info[10];
+	document.getElementById('txPacketCollision').innerHTML=info[11];
+	document.getElementById('rxPacketCollision').innerHTML=info[12];
+	document.getElementById('totalPacketCollisions').innerHTML=info[13];
+	document.getElementById('txBitCounter').innerHTML=info[14];
+	document.getElementById('rxBitCounter').innerHTML=info[15];*/
+	document.getElementById('snr').innerHTML=info[13]+' dBm';
+	document.getElementById('hpnaLinkUptime').innerHTML=info[14];
+}
+
+function btnActive()
+{
+	with ( document.forms[0] ) {
+		if($('span.toggle-button-label').text() == 'Click the button to enable HPNA.')
+		{
+			hpnaEnable.value = 1;
+		}
+		else
+		{
+			hpnaEnable.value = 0;
+		}
+		document.forms[0].sessionKey.value = gblSessionKey;
+		document.forms[0].submit();
+	}	
+}
+
+function setStatisticsValueToZero()
+{
+	var info;
+	var clientListStr =
+	'<table>\n\
+	<tr><th colspan="5" class="tableTitle">HPNA Client List</th></tr>\n\
+	<tr>\n\
+	<th>Device Name</th>\n\
+	<th>MAC Adderess</th>\n\
+	<th>HPNA Version</th>\n\
+	<th>Packets Sent</th>\n\
+	<th>Packets Received</th>\n\
+	</tr>\n';
+	if (activeInfo.length > 1)
+	{
+		for (i = 0; i < activeInfo.length - 1; i++)
+		{
+			info = activeInfo[i].split('/');
+			/* HPNA Client List */
+			clientListStr += '<tr align="center">\n';
+			clientListStr += '<td>' + info[0] + '</td>\n';
+			clientListStr += '<td>' + info[1] + '</td>\n';
+			clientListStr += '<td>' + info[3] + '</td>\n';
+			clientListStr += '<td>' + '0' + '</td>\n';
+			clientListStr += '<td>' + '0' + '</td>\n';
+			clientListStr +='</tr>\n';
+		}
+		document.getElementById('hpnaClientList').innerHTML = clientListStr + '</table>';
+	}
+
+	/* HPNA Port Status */
+	document.getElementById('portStatusTx').innerHTML='0';
+	document.getElementById('portStatusRx').innerHTML='0';
+	
+	/* HPNA Link Status */
+	document.getElementById('realTimePacketsRx').innerHTML='0';
+	document.getElementById('realTimePacketsTx').innerHTML='0';
+	document.getElementById('multicastPacketsRx').innerHTML='0';
+	document.getElementById('multicastPacketsTx').innerHTML='0';
+	document.getElementById('broadcastPacketsRx').innerHTML='0';
+	document.getElementById('broadcastPacketsTx').innerHTML='0';
+	document.getElementById('packetsDroppedTx').innerHTML='0';
+	document.getElementById('packetsDroppedRx').innerHTML='0';
+	document.getElementById('crcRx').innerHTML='0';
+	document.getElementById('snr').innerHTML='0 dBm';
+	document.getElementById('hpnaLinkUptime').innerHTML='0';
+}
+
+function Clear() {
+   setStatisticsValueToZero();
+	clearSkip = 1;
+	BackgroundUrl("modemstatus_hpnastatus_clear.cgi");
+}
+
+function frmLoad()
+{
+	var info;
+	
+	if (gblHpnaEnable == '1')
+	{
+		$('span.toggle-button-label').text('Click the button to disable HPNA.');
+		$(this).children('img').attr({
+			'src' : '../_images/h_wirelesssetup_wpsdisable.png',
+			'alt' : 'Click the button to enable HPNA.'
+		});
+		$('div#enabled').show();
+		$('div#disabled').hide();
+	}
+	else
+	{
+		$('span.toggle-button-label').text('Click the button to enable HPNA.');
+		$(this).children('img').attr({
+			'src' : '../_images/h_wirelesssetup_wpsenable.png',
+			'alt' : 'Click the button to disable HPNA.'		
+		});
+		$('div#enabled').hide();
+		$('div#disabled').show();
+	}
+
+	activeInfo = activeUsers.split('|');
+	
+	var optionStr = '';
+	var clientListStr =
+   '<table>\n\
+	<tr><th colspan="5" class="tableTitle">HPNA Client List</th></tr>\n\
+	<tr>\n\
+	<th>Device Name</th>\n\
+	<th>MAC Adderess</th>\n\
+	<th>HPNA Version</th>\n\
+	<th>Packets Sent</th>\n\
+	<th>Packets Received</th>\n\
+	</tr>\n';
+	var sum = 0;
+	
+	if (activeInfo.length > 1)
+	{
+		for (i = 0; i < activeInfo.length - 1; i++)
+		{
+			info = activeInfo[i].split('/');
+			
+			/* HPNA Port Status */
+			if (i == 0)
+			{
+				//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+				sum = parseInt(info[5]);
+				document.getElementById('portStatusTx').innerHTML=sum.toString();
+				//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+				sum = parseInt(info[4]);
+				document.getElementById('portStatusRx').innerHTML=sum.toString();
+			}
+			
+			/* HPNA Client List */
+			clientListStr += '<tr align="center">\n';
+			clientListStr += '<td>' + info[0] + '</td>\n';
+			clientListStr += '<td>' + info[1] + '</td>\n';
+			clientListStr += '<td>' + info[3] + '</td>\n';
+			//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+			sum = parseInt(info[5]);
+			clientListStr += '<td>' + sum.toString() + '</td>\n';
+			//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+			sum = parseInt(info[4]);
+			clientListStr += '<td>' + sum.toString() + '</td>\n';
+			clientListStr +='</tr>\n';
+			
+			/* HPNA Link Status */
+			optionStr = optionStr + '<option>' + info[0] + '</option>\n';
+			if (i == userSelected)
+			{
+				document.getElementById('hpnaMacAddress').innerHTML=info[1];
+				if (info[2] == '1')
+				{
+					document.getElementById('role').innerHTML='Master Unit';
+				}
+				else
+				{
+					document.getElementById('role').innerHTML='Remote Unit';
+				}
+				document.getElementById('hpnaIfVer').innerHTML=info[3];
+				//sum = parseInt(info[4]) + parseInt(info[6]) + parseInt(info[8]);	/* Packets Received */
+				sum = parseInt(info[4]);
+				document.getElementById('realTimePacketsRx').innerHTML=sum.toString();
+				//sum = parseInt(info[5]) + parseInt(info[7]) + parseInt(info[9]);	/* Packets Sent */
+				sum = parseInt(info[5]);
+				document.getElementById('realTimePacketsTx').innerHTML=sum.toString();
+				document.getElementById('multicastPacketsRx').innerHTML=info[6];
+				document.getElementById('multicastPacketsTx').innerHTML=info[7];
+				document.getElementById('broadcastPacketsRx').innerHTML=info[8];
+				document.getElementById('broadcastPacketsTx').innerHTML=info[9];
+				document.getElementById('packetsDroppedTx').innerHTML=info[10];
+				document.getElementById('packetsDroppedRx').innerHTML=info[11];
+				document.getElementById('crcRx').innerHTML=info[12];
+				/*document.getElementById('errorPackets').innerHTML=info[10];
+				document.getElementById('txPacketCollision').innerHTML=info[11];
+				document.getElementById('rxPacketCollision').innerHTML=info[12];
+				document.getElementById('totalPacketCollisions').innerHTML=info[13];
+				document.getElementById('txBitCounter').innerHTML=info[14];
+				document.getElementById('rxBitCounter').innerHTML=info[15];*/
+				document.getElementById('snr').innerHTML=info[13]+' dBm';
+				document.getElementById('hpnaLinkUptime').innerHTML=info[14];
+			}
+		}
+		document.getElementById('hpnaClientList').innerHTML = clientListStr + '</table>';
+		document.getElementById('hpanDevice').innerHTML =
+		'<select name="hpnaDeviceSelected" id="hpnaDeviceSelected" onchange="hpnaDeviceChange()">\n'
+		+ optionStr
+		+ '</select>';
+	}
+	else
+	{
+		document.getElementById('hpnaMacAddress').innerHTML="N/A";
+		document.getElementById('role').innerHTML="N/A";
+		document.getElementById('hpnaIfVer').innerHTML="N/A";
+		document.getElementById('realTimePacketsRx').innerHTML="N/A";
+		document.getElementById('realTimePacketsTx').innerHTML="N/A";
+		document.getElementById('multicastPacketsRx').innerHTML="N/A";
+		document.getElementById('multicastPacketsTx').innerHTML="N/A";
+		document.getElementById('broadcastPacketsRx').innerHTML="N/A";
+		document.getElementById('broadcastPacketsTx').innerHTML="N/A";
+		document.getElementById('packetsDroppedTx').innerHTML="N/A";
+		document.getElementById('packetsDroppedRx').innerHTML="N/A";
+		document.getElementById('crcRx').innerHTML="N/A";
+		/*document.getElementById('errorPackets').innerHTML="N/A";
+		document.getElementById('txPacketCollision').innerHTML="N/A";
+		document.getElementById('rxPacketCollision').innerHTML="N/A";
+		document.getElementById('totalPacketCollisions').innerHTML="N/A";
+		document.getElementById('txBitCounter').innerHTML="N/A";
+		document.getElementById('rxBitCounter').innerHTML="N/A";*/
+		document.getElementById('snr').innerHTML="N/A";
+		document.getElementById('hpnaLinkUptime').innerHTML="N/A";
+		document.getElementById('hpnaClientList').innerHTML = clientListStr + '</table>';
+		document.getElementById('hpanDevice').innerHTML =
+		'<select name="hpnaDeviceSelected" id="hpnaDeviceSelected" onchange="hpnaDeviceChange()">\n'
+		+ '</select>';
+	}
+	
+	setTimeout('updateValue_take()', 5000);
+}
+// done hiding -->
+</script>
+</head>
+
+<body id="modemstatus_hpnastatus" onload="frmLoad()">
+<div id="wrapper">
+   <div id="masthead">
+      <h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+      <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+   WriteMenuHeader('modemstatus', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+      <a href="help.html" title="Click here to launch" class="helplink">help</a>
+      <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+   WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+      </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+   </div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+      <div id="subnav_header"></div>
+      <ul id="subnav">
+<script language="javascript">
+   WriteModemStatusMenuHeader('hpnastatus','<%ejGetOther(sysInfo, l2Intf)%>', '<%ejGet(HpnaFeature)%>');
+</script>
+      </ul>
+      <div id="subnav_footer"></div>
+      <div id="connectionstatus">
+         <h1>Connection Status</h1>
+         <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+         </div>
+      </div>
+    </div>
+	 <form method=post name="hpnastatus" action="hpnastatus.cgi">
+     	<input type="hidden" name="hpnaEnable" id="hpnaEnable" value=""/>
+		<input type="hidden" name="sessionKey" id="sessionKey" value=""/>
+		<div id="content_right">
+            <div id="content_right_contentarea">
+                <h1 class="modemstatus_lanstatus">HPNA Status</h1>
+                <div id="hpnastate_state_wrapper" class="stepWrapper">
+                    <a class="toggle-button" href="#" onClick="btnActive();"><img alt="Click the button to enable HPNA in the modem." src="../_images/h_wirelesssetup_wpsenable.png"></a>
+                    <span class="toggle-button-label">Click the button to enable HPNA.</span>
+                </div>
+                
+	        <div id="enabled">
+		        <div class="stepWrapperdark">
+		         <table>
+                	<tr>
+							<th colspan="5" class="tableTitle">HPNA Port Status</th>
+						</tr>
+		            <tr>
+		              <th>HPNA</th>
+		              <th> Port</th>
+		              <th>Connection Speed</th>
+		              <th>Packets Sent</th>
+		              <th>Packets Received</th>
+	                </tr>
+		            <tr align="center">
+		              <td><img src="../_images/modemstatus_hpna.png" alt="" width="39" height="39" /></td>
+		              <td>1</td>
+		              <td>200M</td>
+		              <td><span id="portStatusTx">0</span></td>
+		              <td><span id="portStatusRx">0</span></td>
+	                </tr>
+	              </table>
+		        </div>
+                
+                <div class="stepWrapperdark">
+					 <div id="hpnaClientList">
+		         <table>
+                	<tr>
+							<th colspan="5" class="tableTitle">HPNA Client List</th>
+						</tr>
+		            <tr>
+		              <th>Device Name</th>
+		              <th>MAC Adderess</th>
+		              <th>HPNA Version</th>
+		              <th>Packets Sent</th>
+		              <th>Packets Received</th>
+	                </tr>
+		            <tr align="center">
+		              <td>N/A</td>
+		              <td>N/A</td>
+		              <td>N/A</td>
+		              <td>N/A</td>
+		              <td>N/A</td>
+	                </tr>
+	              </table>
+				    </div>
+		          </div>
+
+		        <div class="stepWrapperdark">
+			      <table>
+                	<tr>
+							<th colspan="2" class="tableTitle">HPNA Link Status</th>
+                    </tr>
+			        <tr>
+			          <th width="225">Parameter</th>
+			          <th> Status</th>
+		            </tr>
+                	<tr>
+                    <th>HPNA Device:</th>
+							<th align="center">
+							<span id="hpanDevice">
+                            <select name="hpnaDeviceSelected" id="hpnaDeviceSelected" onchange="hpnaDeviceChange()">
+                                <option>N/A</option>
+                            </select>
+                            </span>
+									 </th>
+                    </tr>
+			        <tr>
+			          <td width="225">HPNA MAC Address:</td>
+			          <td align="center"><span id="hpnaMacAddress">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Role:</td>
+			          <td align="center"><span id="role">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td>HPNA Interface Version:</td>
+			          <td align="center"><span id="hpnaIfVer">N/A</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Real Time Packets Rx:</td>
+			          <td align="center"><span id="realTimePacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td width="225">Real Time Packets Tx:</td>
+			          <td align="center"><span id="realTimePacketsTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Multicast Packets Rx:</td>
+			          <td align="center"><span id="multicastPacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Multicast Packets Tx:</td>
+			          <td align="center"><span id="multicastPacketsTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Broadcast Packets Rx:</td>
+			          <td align="center"><span id="broadcastPacketsRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Broadcast Packets Tx:</td>
+			          <td align="center"><span id="broadcastPacketsTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Packets Dropped Tx:</td>
+			          <td align="center"><span id="packetsDroppedTx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Packets Dropped Rx:</td>
+			          <td align="center"><span id="packetsDroppedRx">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>CRC Rx:</td>
+			          <td align="center"><span id="crcRx">0</span></td>
+		            </tr>
+<!-- hide
+			        <tr>
+			          <td width="225">Error Packets:</td>
+			          <td align="center"><span id="errorPackets">34,321</span></td>
+		            </tr>
+			        <tr>
+			          <td>Tx Packet Collision:</td>
+			          <td align="center"><span id="txPacketCollision">34</span></td>
+		            </tr>
+			        <tr>
+			          <td>Rx Packet Collision:</td>
+			          <td align="center"><span id="rxPacketCollision">0</span></td>
+		            </tr>
+			        <tr>
+			          <td>Total Packet Collisions:</td>
+			          <td align="center"><span id="totalPacketCollisions">34</span></td>
+		            </tr>
+			        <tr>
+			          <td>Tx BIT Counter:</td>
+			          <td align="center"><span id="txBitCounter">3.41 Mbps</span></td>
+		            </tr>
+			        <tr>
+			          <td>Rx BIT Counter:</td>
+			          <td align="center"><span id="rxBitCounter">1.21 Mbps</span></td>
+		            </tr>
+// done hiding -->
+			        <tr>
+			          <td>SNR:</td>
+			          <td align="center"><span id="snr">0 dBm</span></td>
+		            </tr>
+			        <tr>
+			          <td>HPNA Link Uptime:</td>
+			          <td align="center"><span id="hpnaLinkUptime">0S</span></td>
+		            </tr>
+		          </table>
+			    </div>
+		        <div class="stepWrapper">
+		          <p><strong>Clear Statistics </strong></p>
+		          <a href="#" onClick="Clear();" class="btn clear_btn">Clear</a>
+		        </div>
+	          </div>
+		  </div>
+  </div>
+  </form>
+</div>
+		<div class="clear_left"></div>
+<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2012, CenturyLink Communications International Inc., All Rights Reserved.</div>
+        </div>
+</body>
+</html>

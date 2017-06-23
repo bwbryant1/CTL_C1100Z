@@ -1,0 +1,959 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--hide
+var syncNvram = '<%ejGetWl(wlSyncNvram)%>';
+var enbl = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var country = '<%ejGetWl(wlCountry)%>';
+var rate = '<%ejGetWl(wlRate)%>';
+var frg = '<%ejGetWl(wlFrgThrshld)%>';
+var rts = '<%ejGetWl(wlRtsThrshld)%>';
+var dtm = '<%ejGetWl(wlDtmIntvl)%>';
+var bcn = '<%ejGetWl(wlBcnIntvl)%>';
+var phy = '<%ejGetWl(wlPhyType)%>';
+var brate = '<%ejGetWl(wlBasicRate)%>';
+var fburst = '<%ejGetWl(wlFrameBurst)%>';
+var gmode = '<%ejGetWl(wlgMode)%>';
+var pro = '<%ejGetWl(wlProtection)%>';
+var pre = '<%ejGetWl(wlPreambleType)%>';
+var band= '<%ejGetWl(wlBand)%>';
+var hasafterburner = '<%ejGetWl(wlHasAfterburner)%>';
+var afterburneren = '<%ejGetWl(wlAfterBurnerEn)%>';
+var bands = '<%ejGetWl(wlBands)%>';
+var mode = '<%ejGetWl(wlMode)%>';
+var wlRefresh = '<%ejGetWl(wlRefresh)%>';
+var TxPwrPcnt = '<%ejGetWl(wlTxPwrPcnt)%>';
+var reg_mode = '<%ejGetWl(wlRegMode)%>';
+var dfs_preism = '<%ejGetWl(wlDfsPreIsm)%>';
+var dfs_postism = '<%ejGetWl(wlDfsPostIsm)%>';
+var tpcDb = '<%ejGetWl(wlTpcDb)%>';
+var wme = '<%ejGetWl(wlWme)%>';
+var csscantimer = '<%ejGetWl(wlCsScanTimer)%>';
+var nctrlsb = '<%ejGetWl(wlNCtrlsb)%>';
+var corerev = '<%ejGetWl(wlCoreRev)%>';
+var npro = '<%ejGetWl(wlNProtection)%>';
+var nmcsidx = '<%ejGetWl(wlNMcsidx)%>';
+var chanspec = '<%ejGetWl(wlCurrentChSpec)%>';
+var nmode = '<%ejGetWl(wlNmode)%>'; 
+var nreqd = '<%ejGetWl(wlNReqd)%>'; 
+var wmenoack= '<%ejGetWl(wlWmeNoAck)%>';
+var wmeapsd= '<%ejGetWl(wlWmeApsd)%>';
+var nbwcap= '<%ejGetWl(wlNBwCap)%>'; 
+var haswme= '<%ejGetWl(wlHasWme)%>';
+var globalmaxassoc= '<%ejGetWl(wlGlobalMaxAssoc)%>';
+var maxassoc0='<%ejGetWl(wlMaxAssoc_wl0)%>';
+var curr_bw_str = "";
+var ampdu = '<%ejGetWl(wlAmpdu)%>';
+var amsdu = '<%ejGetWl(wlAmsdu)%>';
+var txchain = '<%ejGetWl(wlTxchain)%>';
+var rxchain = '<%ejGetWl(wlRxchain)%>';
+var wlMimoPs = parseInt('<%ejGetWl(wlRxChainPwrSaveEnable)%>');
+
+//channel
+var channel = '<%ejGetWl(wlChannel)%>';
+var wlCurrentChannel = '<%ejGetWl(wlCurrentChannel)%>';
+//var band = '<%ejGetWl(wlBand)%>';
+//var nbwcap = '<%ejGetWl(wlNBwCap)%>'; 
+//var nctrlsb = '<%ejGetWl(wlNCtrlsb)%>';
+
+
+//default
+var mcastrate = '<%ejGetWl(wlMCastRate)%>';
+
+/* //__Qwest__, no 40MHz, remove 20MHz option
+function sideBandDisplay(OnChange){
+   with (document.forms[0]) {
+      if (OnChange) {
+         var sb_length = document.forms[0].wlNCtrlsb.length;
+         var i;
+
+         if (wlNBwCap[0].checked == true) { // 20MHz
+            for (i = 0 ; i < sb_length ; i++) // clear options
+               document.forms[0].wlNCtrlsb.length--;
+
+            document.forms[0].wlNCtrlsb[0] = new Option("None", "0");
+            wlNCtrlsb.disabled = true;
+         } else { // 40MHz
+            for (i = 0 ; i < sb_length ; i++) // clear options
+                document.forms[0].wlNCtrlsb.length--;
+
+            document.forms[0].wlNCtrlsb[0] = new Option("Lower", "-1");
+            document.forms[0].wlNCtrlsb[1] = new Option("Upper", "1");
+            if (wlChannel.value == 0) {
+               wlNCtrlsb.disabled = true;
+            } else {
+               wlNCtrlsb.disabled = false;
+            }
+         }
+      } else {
+         if (wlNBwCap[0].checked == true) { // 20MHz
+            wlNCtrlsb.disabled = 1;
+         } else { // 40MHz
+            if (wlChannel.value == 0) {
+               wlNCtrlsb.disabled = true;
+            } else {
+               wlNCtrlsb.disabled = false;
+            }
+         }
+      }
+   }
+}
+
+function wl_recalc_changeSideBand() {
+   sideBandDisplay(true);
+   wl_recalc(false);
+}*/
+
+function wl_recalc(OnPageLoad){
+   with (document.forms[0]) {
+   /* //__Qwest__, no 40MHz, remove 20MHz option
+      if (OnPageLoad) {
+         if (parseInt(nbwcap) == 0)
+            wlNBwCap[0].checked=true;
+         else
+            wlNBwCap[1].checked=true;
+         sideBandDisplay(OnPageLoad);
+         setSelect(wlNCtrlsb, nctrlsb);	// upper.lower
+      }*/
+
+      updateCurChannel(OnPageLoad);   
+      loadChannelList(OnPageLoad);		
+   }
+}
+
+function updateCurChannel(OnPageLoad) {
+/*
+   if (document.forms[0].wlChannel.value == '0') {
+      document.getElementById("cur_channel").innerHTML = "Current: " + wlCurrentChannel;
+   } else {
+      document.getElementById("cur_channel").innerHTML = "";
+   }*/
+   
+   if ( document.forms[0].wlChannel.value == '0' ){
+      document.getElementById("wlSelectedchannel").innerHTML = wlCurrentChannel;	
+      $('.wlSelectedChannel').show();		
+   }else{
+      $('.wlSelectedChannel').hide();
+   }
+
+   
+   if(OnPageLoad) { 
+
+      var curr_chanspec = parseInt(chanspec);
+      var curr_sb = (curr_chanspec & 0x300 ) >> 8;
+      var curr_bw = (curr_chanspec & 0xc00 ) >> 10;
+      var curr_sb_str = "N/A";
+            
+      if(curr_bw == 2)
+         curr_bw_str = "20";
+      else if (curr_bw == 3)
+         curr_bw_str = "40";
+      else if (curr_bw == 1)
+         curr_bw_str = "10";               
+         
+      if(curr_sb == 1)
+         curr_sb_str = "Lower";
+      else if (curr_sb == 2)
+         curr_sb_str = "Upper";
+      else if (curr_sb == 3)
+         curr_sb_str = "None";   
+               
+            
+      if (document.getElementById)  // DOM3 = IE5, NS6
+         document.getElementById("cur_channel").innerHTML = " Current: " + wlCurrentChannel;
+      else {
+         if (document.layers == false) // IE4
+            document.all.cur_channel.innerHTML = " Current: " + wlCurrentChannel;
+      }
+      /*
+      if (document.getElementById)  // DOM3 = IE5, NS6
+         document.getElementById("CurNbw").innerHTML = " Current: " + curr_bw_str + "MHz";
+      else {
+         if (document.layers == false) // IE4
+            document.all.CurNbw.innerHTML = " Current: " + curr_bw_str + "MHz";
+      }         
+
+      if (document.getElementById)  // DOM3 = IE5, NS6
+         document.getElementById("CurNCtrlsb").innerHTML = " Current: " + curr_sb_str;
+      else {
+         if (document.layers == false) // IE4
+            document.all.CurNCtrlsb.innerHTML = " Current: " + curr_sb_str;
+      }        */
+   }  
+   //sideBandDisplay(false); //__Qwest__, no 40MHz, remove 20MHz option
+}
+
+
+/* don't need , just change display*/
+function gModeChange(idx, OnPageLoad) {
+   with (document.forms[0]) {
+      if (idx == 1) { // 54g auto
+         wlPreambleType.disabled = false;
+         wlProtection.disabled = false;        
+      }
+      else if (idx == 4) { // 54g performance
+         wlPreambleType.disabled = true;
+         wlPreambleType.selectedIndex = 1;
+         wlProtection.disabled = false;
+      }
+      else if (idx == 0) { // b only
+         wlPreambleType.disabled = false;
+         wlProtection.disabled = true;
+         if (!OnPageLoad)
+            wlProtection.selectedIndex = 0;
+      }
+      //wlNBwCap[0].checked=true; //__Qwest__, no 40MHz, remove 20MHz option
+   }
+}
+
+function nModeChange(idx, OnPageLoad) {
+   with (document.forms[0]) {
+      if (idx == 5) { // 54g b only
+         wlPreambleType.disabled = false;
+         wlPreambleType.selectedIndex = 0;         
+         wlProtection.disabled = true;
+         if (!OnPageLoad)
+            wlProtection.selectedIndex = 0;
+         //wlNBwCap[0].checked=true; //__Qwest__, no 40MHz, remove 20MHz option
+      }
+      else if (idx == 4) { // 54g performance
+         wlPreambleType.disabled = true;
+         wlPreambleType.selectedIndex = 1;
+         wlProtection.disabled = true;
+         if (!OnPageLoad) wlProtection.selectedIndex = 0;     
+         //wlNBwCap[0].checked=true;  //__Qwest__, no 40MHz, remove 20MHz option
+      }
+      else if (idx == 3) { // 54g auto
+         wlPreambleType.disabled = false;
+         wlPreambleType.selectedIndex = 0;                  
+         wlProtection.disabled = true;
+         if (!OnPageLoad) wlProtection.selectedIndex = 1;                       
+         //wlNBwCap[0].checked=true;//__Qwest__, no 40MHz, remove 20MHz option
+      }
+      else if (idx == 2) { // 11n only
+         wlPreambleType.disabled = true;
+         wlPreambleType.selectedIndex = 0;
+         wlProtection.disabled = true;
+         if (!OnPageLoad) wlProtection.selectedIndex = 0;              
+      }
+      else if (idx == 1) { // 11g/n only
+         wlPreambleType.disabled = true;
+         wlPreambleType.selectedIndex = 0;
+         wlProtection.disabled = true;
+         if (!OnPageLoad) wlProtection.selectedIndex = 1;              
+      }
+      else if (idx == 0) { // 11b/g/n
+         wlPreambleType.disabled = true;
+         wlPreambleType.selectedIndex = 0;
+         wlProtection.disabled = true;
+         if (!OnPageLoad) wlProtection.selectedIndex = 1;              
+      }
+   }
+}
+
+function loadMCastRateList(OnPageLoad) {
+   var sel_band;
+   var sel_rate;
+   var idx;
+   var sel_nmode;
+   var sel_gmode;
+   
+   /* save selected */
+   if (OnPageLoad) {
+      sel_band = band;
+      sel_rate = mcastrate;
+      sel_nmode = nmode;
+      sel_gmode = gmode;      
+   }
+   else {
+      sel_band = band;
+      sel_rate = mcastrate ;//document.forms[0].wlMCastRate.value;
+      if (phy == "n") {
+         
+         if (document.forms[0].wlMode.selectedIndex == 5) { // 11b
+            sel_gmode = 0;
+            sel_nmode = "off";
+         }
+         else if (document.forms[0].wlMode.selectedIndex == 4) { // 11g
+            sel_gmode = 4;
+            sel_nmode = "off";
+         }
+         else if (document.forms[0].wlMode.selectedIndex == 3) { // 11 b/g
+            sel_gmode = 1;
+            sel_nmode = "off";
+         }
+         else if (document.forms[0].wlMode.selectedIndex == 2) { // 11n
+            sel_gmode = gmode;
+            sel_nmode = "auto";
+         }
+         //else if   //g/n
+         else if (document.forms[0].wlMode.selectedIndex == 0) { // 11 b/g/n
+            sel_gmode = gmode;
+            sel_nmode = "auto";
+         }
+      }
+      else {
+         sel_nmode = nmode;
+         sel_gmode = document.forms[0].wlMode.value;
+      }
+   }
+
+   if(phy != "n") sel_nmode = "off";
+
+   document.forms[0].wlMCastRate.length = 0;
+
+   if (sel_band == "2") { // 2.4G
+      if ((phy == "b") ||      							//b
+         (country == "JP" && channel == 14) ||			//JP
+         (sel_nmode == "off" && sel_gmode == "0")) {	//b only
+         document.forms[0].wlMCastRate[0] = new Option("1 Mbps", "1000000");
+         document.forms[0].wlMCastRate[1] = new Option("2 Mbps", "2000000");
+         document.forms[0].wlMCastRate[2] = new Option("5.5 Mbps", "5500000");
+         document.forms[0].wlMCastRate[3] = new Option("11 Mbps", "11000000");
+      }
+      else {	//b/g g n
+         document.forms[0].wlMCastRate[0] = new Option("1 Mbps", "1000000");
+         document.forms[0].wlMCastRate[1] = new Option("2 Mbps", "2000000");
+         document.forms[0].wlMCastRate[2] = new Option("5.5 Mbps", "5500000");
+         document.forms[0].wlMCastRate[3] = new Option("6 Mbps", "6000000");
+         document.forms[0].wlMCastRate[4] = new Option("9 Mbps", "9000000");
+         document.forms[0].wlMCastRate[5] = new Option("11 Mbps", "11000000");
+         document.forms[0].wlMCastRate[6] = new Option("12 Mbps", "12000000");
+         document.forms[0].wlMCastRate[7] = new Option("18 Mbps", "18000000");
+         document.forms[0].wlMCastRate[8] = new Option("24 Mbps", "24000000");
+         document.forms[0].wlMCastRate[9] = new Option("36 Mbps", "36000000");
+         document.forms[0].wlMCastRate[10] = new Option("48 Mbps", "48000000");
+         document.forms[0].wlMCastRate[11] = new Option("54 Mbps", "54000000");
+      }
+   }
+   else if (sel_band == "1") { // 5G
+      document.forms[0].wlMCastRate[0] = new Option("6 Mbps", "6000000");
+      document.forms[0].wlMCastRate[1] = new Option("9 Mbps", "9000000");
+      document.forms[0].wlMCastRate[2] = new Option("12 Mbps", "12000000");
+      document.forms[0].wlMCastRate[3] = new Option("18 Mbps", "18000000");
+      document.forms[0].wlMCastRate[4] = new Option("24 Mbps", "24000000");
+      document.forms[0].wlMCastRate[5] = new Option("36 Mbps", "36000000");
+      document.forms[0].wlMCastRate[6] = new Option("48 Mbps", "48000000");
+      document.forms[0].wlMCastRate[7] = new Option("54 Mbps", "54000000");
+   }
+   else {
+      document.forms[0].wlMCastRate[0] = new Option("Auto", "0");
+   }
+    /* mark selected */
+   for (idx=0; idx < document.forms[0].wlMCastRate.options.length; idx++) {
+      if (document.forms[0].wlMCastRate.options[idx].value == sel_rate) {
+         document.forms[0].wlMCastRate.options[idx].selected = true;
+         break;
+      }
+   }
+
+   /* set to first(Auto) if not found */
+   if( idx == document.forms[0].wlMCastRate.options.length) {
+      document.forms[0].wlMCastRate.options[0].selected = true;
+   }
+}
+
+
+
+function wlModeChange(OnPageLoad) {
+   with (document.forms[0]) {
+      if (OnPageLoad) {
+         if (phy == 'n') {
+            if (nmode == 'off' && gmode == '0') { // 54g b only
+               wlMode.selectedIndex = 5;
+            }
+            else if (nmode == 'off' && gmode == '4') { // 54g performance
+               wlMode.selectedIndex = 4;
+            }            
+            else if (nmode == 'off' && gmode == '1') { // 54g auto b/g + 54g-only
+				if(brate=='wifi2'){
+	               wlMode.selectedIndex = 4;				
+				}else{
+	               wlMode.selectedIndex = 3;
+	            }
+            }
+            else if (nmode == 'auto' && nreqd == '1') { // 11n only
+               wlMode.selectedIndex = 2;
+            }// g/n
+            else if (nmode == 'auto' && nreqd == '0') { // 11b/g/n or g/n
+		         /* basic rate */
+		         if(brate=='wifi2' || brate=='all'){
+		         	wlMode.selectedIndex = 1;
+		         }else{
+                    wlMode.selectedIndex = 0;
+		         }	                        
+            }
+            if (nmode == 'auto')
+               document.forms[0].wlProtection.value = npro;
+            else
+               document.forms[0].wlProtection.value = pro;
+
+            nModeChange(wlMode.selectedIndex, OnPageLoad);
+         }
+         else {
+            if (gmode == '0') { //b only
+               wlMode.selectedIndex = 5;
+            }
+            else if (gmode == '1') { // 54g auto b/g + 54g-only
+				if(brate=='wifi2'){            
+	               wlMode.selectedIndex = 4;
+	            }else   
+	               wlMode.selectedIndex = 3;	            
+            }
+            else if (gmode == '4') { //54g Performance  g
+               wlMode.selectedIndex = 4;
+            }
+            document.forms[0].wlProtection.value = pro; 
+
+            gModeChange(wlMode.options[wlMode.selectedIndex].value, OnPageLoad);
+         }
+         
+         wlMode.options[wlMode.selectedIndex].selected = true;
+         $('#wlMode').trigger('change');	
+
+      }      
+      else {
+         var sel_mode;
+         sel_mode = wlMode.options[wlMode.selectedIndex].value;
+
+         if (phy == 'n') {
+            nModeChange(sel_mode, OnPageLoad);
+         }
+         else {
+            gModeChange(sel_mode, OnPageLoad);
+         }
+      }
+
+      loadMCastRateList(OnPageLoad);
+      wl_recalc(OnPageLoad);
+   }
+}
+
+function loadChannelList(OnPageLoad)
+{
+   var sel_ch;
+   var sel_band;
+   var sel_nbw_cap;
+   var sel_sb;
+   var idx;
+      
+   /* save selected */   
+   if (OnPageLoad) {      
+      sel_ch = channel;
+      sel_band = band;
+      sel_nbw_cap = nbwcap;
+      sel_sb = nctrlsb;
+   } else {
+      sel_ch = document.forms[0].wlChannel.value;
+      // sel_band = document.forms[0].wlBand.value;
+      sel_band = band;
+      /*//__Qwest__, no 40MHz, remove 20MHz option
+      if (document.forms[0].wlNBwCap[0].checked) { // 20.40
+         sel_nbw_cap = 0;
+      } else {
+         sel_nbw_cap = 1;
+      }*/
+      sel_nbw_cap = 0;
+      
+      //sel_sb = document.forms[0].wlNCtrlsb.value; // Lower.Upper ////__Qwest__, no 40MHz, remove 20MHz option
+	  sel_sb = 0;
+   }
+   
+   /* load list */
+   document.forms[0].wlChannel.length = 0;
+   if ((sel_band == "2") && (phy != "n")) { // 2.4GHz !n
+      <%ejGetWl(wlChannelList, b)%>
+   }
+   else if ((sel_band == "1") && (phy != "n")) { // 5GHz !n
+      <%ejGetWl(wlChannelList, a)%>
+   }
+   else if ((sel_band == "2") && (phy == "n")) { // 2.4GHz n
+      if (sel_nbw_cap == "1") {	// 40MHz
+         if (sel_sb == 1) {
+            <%ejGetWl(wlChannelList, n, b, 40, "upper")%>
+            if (document.forms[0].wlChannel.length == 1) { // Only for US
+               document.forms[0].wlChannel[1] = new Option("5", "5");
+               document.forms[0].wlChannel[2] = new Option("6", "6");
+               document.forms[0].wlChannel[3] = new Option("7", "7");
+               document.forms[0].wlChannel[4] = new Option("8", "8");
+               document.forms[0].wlChannel[5] = new Option("9", "9");
+               document.forms[0].wlChannel[6] = new Option("10", "10");
+               document.forms[0].wlChannel[7] = new Option("11", "11");
+            }
+         } else {												
+            <%ejGetWl(wlChannelList, n, b, 40, "lower")%>
+            if (document.forms[0].wlChannel.length == 1) { // Only for US
+               document.forms[0].wlChannel[1] = new Option("1", "1");
+               document.forms[0].wlChannel[2] = new Option("2", "2");
+               document.forms[0].wlChannel[3] = new Option("3", "3");
+               document.forms[0].wlChannel[4] = new Option("4", "4");
+               document.forms[0].wlChannel[5] = new Option("5", "5");
+               document.forms[0].wlChannel[6] = new Option("6", "6");
+               document.forms[0].wlChannel[7] = new Option("7", "7");
+            }
+         }            
+      } else if(sel_nbw_cap == "0" || sel_nbw_cap == "2") { // 20MHz, 20MHz in 2.4G Band and 40MHz in 5G Band 
+         <%ejGetWl(wlChannelList, n, b, 20 )%>
+      }
+   }
+   else  if ((sel_band == "1") && (phy == "n")) { // 5GHz n
+      if(sel_nbw_cap == "1" || sel_nbw_cap == "2") { // 40MHz, 20MHz in 2.4G Band and 40MHz in 5G Band
+         if (sel_sb == 1) {
+            <%ejGetWl(wlChannelList, n, a, 40, "upper")%>
+         } else {
+            <%ejGetWl(wlChannelList, n, a, 40, "lower")%>
+         }
+      } else if (sel_nbw_cap == "0") { // 20MHz
+         <%ejGetWl(wlChannelList, n, a, 20 )%>
+      }
+   }
+   else {
+      document.forms[0].wlChannel[0] = new Option("Auto", "0");
+   }
+         
+   /* mark selected */
+   for (idx=0; idx<document.forms[0].wlChannel.options.length; idx++) {
+      if (document.forms[0].wlChannel.options[idx].value == sel_ch) {
+         document.forms[0].wlChannel.options[idx].selected = true;
+         break;
+      }
+   }
+
+   /* set to first channel none-auto if not found */
+   if (idx == document.forms[0].wlChannel.options.length) {
+      document.forms[0].wlChannel.options[0].selected = true;
+   }
+}
+
+function ChangeSpcialStreams(onFrmLoad){
+	with(document.forms[0]){
+		if(spacialStreams.value != '3')
+		{
+				$('#set_MIMO_powersave *').addClass('greyed_out');
+				$('#mimoPs_on').attr("disabled", "disabled");
+				$('#mimoPs_off').attr("disabled", "disabled");
+				if(!onFrmLoad)
+					$('#mimoPs_off').attr("checked", "checked");					
+		} else {
+				$('#set_MIMO_powersave *').removeClass('greyed_out');				
+				$('#mimoPs_on').attr("disabled", "");
+				$('#mimoPs_off').attr("disabled", "");			
+		}		
+	}	
+}
+
+function frmLoad(){
+	with(document.forms[0]){
+		wl_recalc(true);		//20.40MHz display		
+		//loadChannelList(true);			//
+		wlModeChange(true);				//b/g/bg/n/gn/bgn
+		wlTxPower.selectedIndex = ( 10 -(TxPwrPcnt/10));
+
+		if(ampdu=='1')setSelect(aggregation,'a_mpdu');		 
+		else if(amsdu=='1')setSelect(aggregation,'a_msdu');
+		else setSelect(aggregation,'a_none')
+		
+		if(txchain!=rxchain)AlertOpen("Warning: the number of spacial streams is not equal!!");
+		setSelect(spacialStreams,txchain);
+		
+	      ChangeSpcialStreams(true);		
+	      // set mimo power save
+	      if(wlMimoPs == 1) {
+	         mimoPs[0].checked = true;
+	         mimoPs[1].checked = false;
+	      } else {
+	         mimoPs[0].checked = false;
+	         mimoPs[1].checked = true;
+	      }
+		
+		if(enbl == 1 && channel == 0){
+			document.getElementById("wlSelectedchannel").innerHTML = wlCurrentChannel;	
+			$('.wlSelectedChannel').show();		
+		
+		}else{
+			$('.wlSelectedChannel').hide();
+		}			
+	}
+}
+
+
+function btnSave() {
+   var loc = 'wirelesssetup_radiosetup.wl?';  
+   with (document.forms[0]) {
+/*
+		if (enbl==0){
+			AlertOpen("Cannot apply the change since wireless is currently disabled.");
+			return;
+		}*/
+
+      var rtsNum=rts;//<re> parseInt(wlRtsThrshld.value);
+      
+      if ( isNaN(rtsNum) == true || rtsNum < 0 || rtsNum > 2347 ) {
+         AlertOpen('RTS threshold "' + wlRtsThrshld.value + '" should be between 0 and 2347.');
+         return;
+      }
+		
+      var frgNum = frg ;//<re> parseInt(wlFrgThrshld.value);
+      if ( isNaN(frgNum) == true || frgNum < 256 || frgNum > 2346 ) {
+         AlertOpen('Fragmentation threshold "' + wlFrgThrshld.value + '" should be between 256 and 2346.');
+         return;
+      }
+
+      var globalMaxAssocNum = globalmaxassoc;//<re>parseInt(wlGlobalMaxAssoc.value);
+      if ( isNaN(globalMaxAssocNum) == true || globalMaxAssocNum < 1 || globalMaxAssocNum > 123 ) {
+         AlertOpen('Global Max Clients: "' + wlGlobalMaxAssoc.value + '" should be between 1 and 123.');
+         return;
+      }
+
+      loc += "wlFrgThrshld=" + frg ;//<re> wlFrgThrshld.value;
+      loc += "&wlRtsThrshld=" + rts;//<re>wlRtsThrshld.value;
+      loc += "&wlGlobalMaxAssoc=" + globalmaxassoc;
+      loc += "&wlMaxAssoc=" + maxassoc0;
+      loc += '&wlMCastRate=' + mcastrate; //<re>wlMCastRate.options[wlMCastRate.selectedIndex].value;
+
+      var wl_mode = wlMode.selectedIndex;
+
+
+      if (phy == 'n' && (wl_mode == 2 || wl_mode == 0 || wl_mode == 1)) { // n or b/g/n or g/n
+		 loc += '&wlNmode=auto';
+
+         if (wl_mode == 2) { //n
+            loc += '&wlNReqd=1';
+         }
+         else { //b/g/n or g/n
+             loc += '&wlNReqd=0';
+	         /* basic rate */
+	         if (wl_mode == 0) // b/g/n
+	            loc += '&wlBasicRate=default';
+	         else if (wl_mode == 1) // g/n
+	            loc += '&wlBasicRate=wifi2';
+         }
+
+         //loc += '&wlNProtection=' + wlProtection.options[wlProtection.selectedIndex].value;
+         
+		if(phy == "n") {
+			/*//__Qwest__, no 40MHz, remove 20MHz option
+			if(wlNBwCap[0].checked==true){
+				loc += '&wlNBwCap=0' ;
+				loc += '&wlNCtrlsb=' + 0;
+			}else{
+				loc += '&wlNBwCap=1';
+				loc += '&wlNCtrlsb=' + wlNCtrlsb.options[wlNCtrlsb.selectedIndex].value;
+			}*/
+			loc += "&wlNBwCap=0";
+			loc += '&wlNCtrlsb=0';				
+
+
+			loc += '&wlWme=1';
+			loc += '&wlNProtection=' + wlProtection.options[wlProtection.selectedIndex].value;
+			switch (getSelect(aggregation)){
+				case 'a_mpdu': loc += '&wlAmpdu=1&wlAmsdu=0';break;
+				case 'a_msdu': loc += '&wlAmpdu=0&wlAmsdu=1';break;
+				case 'a_none': loc += '&wlAmpdu=0&wlAmsdu=0';break;			
+			}
+			
+			var number = getSelect(spacialStreams);
+			loc += '&wlTxchain='+number;
+			loc += '&wlRxchain='+number;			
+			
+		      if(mimoPs[0].checked) {
+		         loc += '&wlRxChainPwrSaveEnable=1';
+		      } else {
+		         loc += '&wlRxChainPwrSaveEnable=0';
+		      }			
+		}         
+      }
+      else { // b/g, b, or g
+         loc += '&wlNmode=off';
+         if (phy == 'n') {
+            if (wl_mode == 5) { // 11b only
+               loc += "&wlgMode=0";
+            } 
+            else if (wl_mode == 4) { // 11g only
+               loc += "&wlgMode=1";
+            }
+            else if (wl_mode == 3) { // b/g
+               loc += "&wlgMode=1";
+            }
+         }
+         else {
+         	if (wl_mode == 4){
+	            loc += "&wlgMode=1";         	
+         	}else
+	            loc += "&wlgMode="+wlMode.options[wlMode.selectedIndex].value;
+         }
+
+			loc += "&wlNBwCap=0";
+			loc += '&wlNCtrlsb=0';		
+
+			
+         /* basic rate */
+         if (wl_mode == 3) // 54g auto
+            loc += '&wlBasicRate=default';
+         else if (wl_mode == 4) // 54 g only
+            loc += '&wlBasicRate=wifi2';
+         else if (wl_mode == 5) // 54g b only
+            loc += '&wlBasicRate=12';
+
+         if (band == '2') {
+            if (phy != 'b')
+               loc += "&wlProtection=" + wlProtection.options[wlProtection.selectedIndex].value;
+         }        
+        		 
+      }
+      
+		loc += '&wlChannel=' + wlChannel.options[wlChannel.selectedIndex].value;   
+		loc += '&wlPreambleType=' + wlPreambleType.options[wlPreambleType.selectedIndex].value;
+		loc += "&wlTxPwrPcnt=" + wlTxPower.options[wlTxPower.selectedIndex].value;
+   }
+   
+		loc += '&wlSyncNvram=1';
+		loc += '&sessionKey=<%ejGetOther(sessionKey)%>';		
+		
+/*   
+   var code = 'location="' + loc + '"'; 
+   alert(code);
+   eval(code);		*/
+   
+	submitFrm(loc);		
+}
+// done hiding -->
+</script>
+</head>
+
+<body id="wirelesssetup_radiosetup">
+<div id="wrapper">
+    <div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+        <a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">        	
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>  
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+    </div>
+    <div class="clear_left"></div>
+    <div id="content_left">
+        <ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('radio', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+        </ul>
+        <div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+
+    </div>
+    <div id="content_right">
+        <div id="content_right_header">
+        </div>
+        <div id="content_right_contentarea">
+            <h1 class="wirelesssetup_channel">Radio Setup <span>Radio Setup provides the ability to customize the wireless radio for your
+                    specific network needs.</span></h1>
+            <form>
+                  
+               <div class="stepWrapper"> 
+                <p><strong>1. Select channel.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="channel">Channel:</label>
+                        </td>
+                        <td><select name="wlChannel" id="wlChannel" onChange="updateCurChannel(false)">
+                                <script language=javascript>
+                                </script>
+                            </select>&nbsp;&nbsp;<span id="cur_channel" style="display: none;"></span>
+                        </td>
+                    </tr>
+                   <tr class="wlSelectedChannel">
+                     <td width="150">Channel Selected:</td>
+                     <td><span id="wlSelectedchannel"></span></td>
+                   </tr>
+                </table>
+                </div>
+                <div class="stepWrapper">
+                <p><strong>2. Select wireless power level.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="power_level">Wireless Power Level:</label>
+                        </td>
+                        <td><select name="wlTxPower" id="wlTxPower">
+                                <option value="100" selected="selected">100% </option>
+                                <option value="90">90% </option>
+                                <option value="80">80% </option>
+                                <option value="70">70% </option>
+                                <option value="60">60% </option>
+                                <option value="50">50% </option>
+                                <option value="40">40% </option>
+                                <option value="30">30% </option>
+                                <option value="20">20% </option>
+                                <option value="10">10% </option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+               </div>
+               <div class="stepWrapper">
+                <p><strong>3. Select mode.</strong></p>
+                <table>
+                    <tr>
+                        <td width="150"><label for="eightohtwo_mode">802.11 Mode:</label>
+                        </td>
+                        <td><select name="wlMode" id="wlMode" onChange="wlModeChange(false)">
+<script language="javascript">
+<!-- hide
+   if ( phy == 'n' ) {
+      document.writeln('<option value="0" selected="selected" class="extended">802.11b or 802.11g or 802.11n');
+      document.writeln('<option value="1" class="extended">802.11g or 802.11n  ');
+      document.writeln('<option value="2" class="extended">802.11n Only ');
+      document.writeln('<option value="3">802.11b or 802.11g');
+      document.writeln('<option value="4">802.11g Only');
+      document.writeln('<option value="5">802.11b Only');      
+   }
+   else {
+      document.writeln('<option value="0">802.11b Only');
+      document.writeln('<option value="4">802.11g Only');
+      document.writeln('<option value="1">802.11b or 802.11g');
+   }
+// done hiding -->
+</script>                        
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                </div>
+                <div class="non_nmode_group">
+                	<div class="stepWrapper">
+                    <p><strong>4. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onclick="btnSave()">Apply</a>
+                    </div>
+                </div>
+                <div class="nmode_group">
+                <div class="stepWrapper">
+                    <p><strong>4. Select number of spacial streams.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">Spacial Streams: </td>
+                            <td><select name="spacialStreams" id="select" onchange="ChangeSpcialStreams(false)">
+                                    <option value='3' selected="selected">Auto Detect </option>
+                                    <option value='1'>1</option>
+                                    <option value='2'>2</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                   </div>
+                   <!--div class="stepWrapper">
+                    <p><strong>5. Select channel width.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">Channel Width: </td>
+                            <td width="125"><input name="wlNBwCap" type="radio" id="radio7" value="on" checked="CHECKED" onclick="wl_recalc_changeSideBand()"/>
+                                20 Mhz </td>
+                            <td><input name="wlNBwCap" id="radio8" type="radio" value="off" onclick="wl_recalc_changeSideBand()"/>
+                                40 Mhz </td>
+                        </tr>
+                    </table>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>6. Select channel control if 40 Mhz channel width selected in
+                        step 5.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">Channel Control  40
+                                Mhz: </td>
+                            <td><select name="wlNCtrlsb" id="wlNCtrlsb" onchange="wl_recalc(false)">
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                   </div-->
+                   <div class="stepWrapper">
+                    <p><strong>5. Set the aggregation state.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">Aggregation: </td>
+                            <td><select name="aggregation" id="aggregation">
+                                    <option value='a_mpdu' selected="selected">MPDU</option>
+                                    <option value='a_msdu'>MSDU</option>
+                                    <option value='a_none'>Disabled</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                   </div>
+                    <div class="stepWrapper">
+                    <div id="set_MIMO_powersave">                    
+                    <p><strong>6. Set the MIMO power save state.</strong></p>
+                    <table>
+                        <tr>
+                            <td width="150">MIMO Power Save: </td>
+                            <td width="125"><input name="mimoPs" id="mimoPs_on" type="radio" value="1" />
+                                Enable </td>
+                            <td><input name="mimoPs" id="mimoPs_off" type="radio" value="0" />
+                                Disable </td>
+                        </tr>
+                    </table>
+                    </div>
+                    </div>
+                    <div class="stepWrapper">					
+                    <p><strong>7. Click &quot;Apply&quot; to save your changes.</strong></p>
+                    <a href="#" class="btn apply_btn" onclick="btnSave()">Apply</a>
+                    </div>
+                </div>    
+	                <div style="position:absolute; z-index:1; visibility: hidden">
+	                <!--div-->
+						<select name="wlProtection" size="1">
+							<option value="off">Off
+							<option value="auto">Auto
+						</select>
+						<select name="wlPreambleType" size="1">
+							<OPTION VALUE="long">Long </option>
+							<OPTION VALUE="short">Short</option> 
+						</select> 						
+						<select name="wlMCastRate" id="wlMCastRate" size="1">
+						</select>						
+	                </div>           
+			</form>
+        </div>
+        
+    </div>
+    <div class="clear_left">
+    </div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<script language="JavaScript">
+<!--hide
+frmLoad();
+// done hiding -->
+</script>
+
+</body>
+</html>

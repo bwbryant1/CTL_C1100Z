@@ -1,0 +1,1269 @@
+/*
+-----------------------------------------------
+CenturyLink Modem Configurator Stylesheet
+author:		KC Dunstan, Drew Neilson 
+date: 08.24.2011  
+----------------------------------------------- */
+@import "reset.css";
+body{
+	background: url(../_images/body_bg.png) repeat-x #FFF;
+	font: 11px/16px Arial, Helvetica, sans-serif;
+}
+strong{
+	font-weight: bold;
+}
+sup{
+	bottom: .7em;
+	font-size: smaller;
+	height: 0;
+	line-height: 1;
+	vertical-align: baseline;
+	position: relative;
+}
+a img{
+	border: none;
+}
+.float_left{
+	float: left;
+}
+.float_right{
+	float: right;
+}
+select.multiple{
+	background: #457EA4;
+	border: 0;
+	color: #0FF;
+}
+#wrapper{
+	margin: 0 auto;
+	width: 850px;
+}
+#masthead{
+	height: 185px;
+	position: relative;
+}
+h1#modem_type{
+	background:url(../_images/modemType.png) no-repeat;
+	height: 41px;
+	left:328px;
+	overflow: hidden;
+	position: absolute;
+	text-indent: -9999px;
+	top:42px;
+	width:220px;
+}
+#logo_link{
+	background: url(../_images/nav_logolink.png) no-repeat;
+	display: block;
+	height: 39px;
+	left:0;
+	position: relative;
+	text-indent: -9999em;
+	top:33px;
+	width: 197px;
+}
+ul#navigation_left{
+	background:url(../_images/nav_bg.png) no-repeat;
+	height:116px;
+	margin:46px 0 0 32px;
+	padding:9px 26px 0;
+}
+ul#navigation_left_support{
+	background:url(../_images/nav_bg_support.png) no-repeat;
+	height:116px;
+	margin:46px 0 0 32px;
+	padding:9px 26px 0;
+}
+
+ul#navigation_left li, ul#navigation_left_support li{
+	background-position: 0 0;
+	display: inline;
+	float: left;
+	overflow: hidden;
+}
+ul#navigation_left li a, ul#navigation_left_support li a{
+	display: block;
+	height: 105px;
+	overflow: hidden;
+	text-indent: -9999px;
+	width:92px;
+}
+ul#navigation_left li.modemstatus a, ul#navigation_left_support li.modemstatus a{
+	background: url(../_images/nav_modemstatus.png) no-repeat;
+}
+ul#navigation_left li.quicksetup a, ul#navigation_left_support li.quicksetup a{
+	background: url(../_images/nav_quicksetup.png) no-repeat;
+}
+ul#navigation_left li.wirelesssetup a, ul#navigation_left_support li.wirelesssetup a{
+	background: url(../_images/nav_wirelesssetup.png) no-repeat;
+}
+ul#navigation_left li.utilities a, ul#navigation_left_support li.utilities a{
+	background: url(../_images/nav_utilities.png) no-repeat;
+}
+ul#navigation_left li.advancedsetup a, ul#navigation_left_support li.advancedsetup a{
+	background: url(../_images/nav_advancedsetup.png) no-repeat;
+}
+ul#navigation_left li.supportconsole a, ul#navigation_left_support li.supportconsole a{
+	background: url(../_images/nav_supportconsole.png) no-repeat;
+}
+ul#navigation_left li a:hover, ul#navigation_left_support li a:hover{
+	background-position: 0 -100px;
+}
+ul#navigation_left li a.selected, ul#navigation_left_support li a.selected{
+	background-position: 0 -200px;
+	cursor: default;
+}
+ul#navigation_left li a.selected:hover, ul#navigation_left_support li a.selected:hover{
+	background-position: 0 -100px;
+	cursor: default;
+}
+
+a.helplink{
+	background: url(../_images/btn_help.png) no-repeat;
+	color: #FFF;
+	display: block;
+	font-size: 11px;
+	height: 77px;
+	position: absolute;
+	right:175px;
+	text-indent: -9999em;
+	text-decoration: none;
+	top:32px;
+	width: 60px;
+}
+a.helplink:hover{
+	background-position: 0 -77px;
+}
+div#date{
+	background: #FFF;
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	display: block;
+	height: 82px;
+	position:absolute;
+	right:85px;
+	top:23px;
+	width: 84px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+div#date p.month{
+	background: rgb(145,200,69);
+	border-radius:6px 6px 0 0;
+		-moz-border-radius:6px 6px 0 0;
+		-webkit-border-radius:6px 6px 0 0;
+	color:#FFF;
+	font:bold 12px/14px Arial, Helvetica, sans-serif;
+	height:19px; 
+	padding:6px 0 0;
+	text-align: center;
+	position: relative;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+div#date p.day{
+	color: #898989;
+	font:28px/32px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	padding-top: 5px;
+	text-align: center;
+}
+div#date p.time{
+	color: #898989;
+	font:10px/12px Arial, Helvetica, sans-serif;
+	padding-top:1px;
+	text-align: center;
+}
+#logout_btn {
+	display: block;
+	position:absolute;
+	right:0px;
+	top:17px;
+	width: 75px;
+	height: 90px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color:#8cc63f;
+	background: url(../_images/btn_logout.png) no-repeat;
+}
+#login_submit {
+	margin: 5px 0 0 0;
+	float:right;
+}
+#loginform p {clear:both;}
+#loginform a {color:#8cc63f;}
+
+#content_left{
+	float: left;
+	margin: 20px 0 0 0;
+}
+ul#subnav{
+	background: rgb(224,226,222);
+	border-radius:8px 8px 8px 8px;
+		-moz-border-radius:8px 8px 8px 8px;
+		-webkit-border-radius:8px 8px 8px 8px;
+	list-style: none;
+	padding: 15px 0;
+	width: 175px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+#subnav>li>ul>li{
+	border-bottom: 1px rgb(187,189,188) solid;
+}
+#subnav>li>a{
+}
+
+div#content_left div.message{
+	background: rgb(224,226,222);
+	border-radius:8px 8px 8px 8px;
+		-moz-border-radius:8px 8px 8px 8px;
+		-webkit-border-radius:8px 8px 8px 8px;
+	color:#000;
+	margin: 0 30px 0 15px;
+	padding: 20px 10px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+div#content_left div.message p{
+	font:bold 14px/16px Arial, Helvetica, sans-serif;
+	margin:0;
+	text-align: center;
+}
+ul#subnav>li>a{
+	color:#000;
+	display: block;
+	font:bold 14px/16px Arial, Helvetica, sans-serif;
+	padding: 9px 5px 10px 37px;
+	text-decoration: none;
+	width: 131px;
+	border-bottom: 1px rgb(187,189,188) solid;
+}
+ul#subnav>li>a:hover,
+ul#subnav>li>a.selected{
+	margin-left:3px;
+	padding:9px 5px 10px 34px;
+	text-decoration: underline;
+	width:131px;
+	behavior: url(../_css/css3pie/PIE.htc);
+	background: url(../_images/subnav_selected.png) no-repeat;
+}
+ul#subnav>li>a#double:hover,
+ul#subnav>li>a.selected2{
+	margin-left:3px;
+	padding:9px 5px 10px 34px;
+	text-decoration: underline;
+	width:131px;
+	behavior: url(../_css/css3pie/PIE.htc);
+	background: url(../_images/subnav_selected2.png) no-repeat;
+}
+
+ul#subnav>li>a.selected{
+	cursor: default;
+	text-decoration: none;
+}
+ul#subnav>li{
+	margin-bottom:4px;
+}
+ul#subnav li>ul>li>a{
+	color: rgb(0,152,219);
+	display: block;
+	font: 11px/14px Arial, Helvetica, sans-serif;
+	padding: 2px 36px;
+	text-decoration: underline;
+	width: 103px;
+}
+ul#subnav li>ul>li>a:hover{
+	background:rgb(175,214,234);
+	color:rgb(1,109,157);
+}
+ul#subnav li>ul>li>a.selected{
+	background:rgb(175,214,234);
+	color:rgb(1,109,157);
+	font-weight: bold;
+}
+ul#subnav li a p{
+	font-weight: normal;
+}
+ul#subnav hr{
+	background-color: rgb(23,77,114);
+	color: rgb(23,88,132);
+	height: 1px;
+	margin: 1px auto 1px auto;
+	width: 75%;
+}
+ul#subnav ul{
+	list-style: none;
+	padding: 0 0 5px 0;
+}
+ul#subnav ul li a{
+	color: #FFF;
+	display: block;
+	font: 11px/14px Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	padding: 5px 0 0 0;
+	text-decoration: none;
+	width: 136px;
+}
+ul#subnav ul li a.link{
+	margin: 0;
+	padding: 0 0 0 32px;
+}
+ul#subnav ul li a:hover{
+	background: rgb(28,144,178);
+	color: rgb(97,246,225);
+	text-decoration: none;
+}
+ul#subnav ul li a.selected{
+	background: rgb(28,144,178);
+	color: rgb(97,246,225);
+	text-decoration: none;
+}
+#connectionstatus{
+	background: rgb(188,189,188);
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	margin: 20px 0 0 0;
+	padding-bottom: 14px;
+	width: 168px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+#connectionstatus_wrapper{
+	background: rgb(0,0,0);
+	padding-top: 14px;
+	padding-bottom: 14px;
+	position:relative;
+	z-index:100;
+}
+#connectionstatus h1{
+	background: url(../_images/connectionstatus_header_bg.png) no-repeat;
+	color: #000;
+	display: block;
+	font: 15px/15px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	height: 39px;
+	padding: 9px 8px 0 53px;
+	width: 107px;
+}
+#connectionstatus h2{
+	color: #9a9b9c;
+	font: 14px/16px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	margin: 0 12px 8px;
+}
+#connectionstatus img{
+	display: block;
+	margin: 0 auto;
+}
+#connectionstatus p{
+	color: #0F0;
+	margin: 0 0 15px 0;
+	text-transform: uppercase;
+}
+#connectionstatus .connected{
+	background:#FFF;
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	box-shadow:inset 3px 3px 6px rgba(0,0,0,.5);
+		-moz-box-shadow:inset 3px 3px 6px rgba(0,0,0,.5);
+		-webkit-box-shadow:inset 3px 3px 6px rgba(0,0,0,.5);
+	color: rgb(103,164,35);
+	font: 14px/14px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	margin: 10px 6px;
+	padding:8px 0 6px;
+	text-align: center;
+	text-transform: none;
+	behavior: url(../_css/css3pie/PIE.htc);
+	position:relative;
+    	z-index:110;
+}
+
+#connectionstatus .notconnected{
+	background:#FFF;
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	box-shadow:inset 3px 3px 6px rgba(0,0,0,.5);
+		-moz-box-shadow:inset 3px 3px 6px rgba(0,0,0,.5);
+		-webkit-box-shadow:inset 3px 3px 6px rgba(0,0,0,.5);
+	color: rgb(182,0,0);
+	font: 14px/14px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	margin: 10px 6px;
+	padding:8px 0 6px;
+	text-align: center;
+	text-transform: none;
+	behavior: url(../_css/css3pie/PIE.htc);
+	position:relative;
+    	z-index:110;
+}
+
+#connectionstatus p.connectionstatus_notConnected{
+	background:url(../_images/connectionStatus_notConnected.png) no-repeat;
+	color: rgb(182,0,0);
+	font: 12px/12px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	height:25px;
+	width:152px;
+	margin: 0 0 0 10px;
+	padding:0 19px 0 28px;
+	text-transform: none;
+	text-indent: -99999999px;
+}
+#connectionstatus p.connectionstatus_connecting{
+	background:url(../_images/connectionStatus_Connecting.png) no-repeat;
+	color: rgb(147,115,3);
+	font: 12px/12px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	height:25px;
+	width:152px;
+	margin: 0 0 0 10px;
+	padding:0 19px 0 28px;
+	text-transform: none;
+	text-indent: -99999999px;
+}
+#connectionstatus p.connectionstatus_connected{
+	background:url(../_images/connectionStatus_Connected.png) no-repeat;
+	color: rgb(10,150,7);
+	font: 12px/12px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	height:25px;
+	width:152px;
+	margin: 0 0 0 10px;
+	padding:0 19px 0 28px;
+	text-transform: none;
+	text-indent: -99999999px;
+}
+#connectionstatus p.connectionstatus_walledGarden{
+	background:url(../_images/connectionStatus_walledgarden.png) no-repeat;
+	color: rgb(10,150,7);
+	font: 12px/12px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	height:25px;
+	width:152px;
+	margin: 0 0 0 10px;
+	padding:0 19px 0 28px;
+	text-transform: none;
+	text-indent: -99999999px;
+}
+/*#connectionstatus p.connectionstatus_connecting,
+#connectionstatus p.connectionstatus_walledGarden{
+	color: rgb(147,115,3);
+	font: 12px/10px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	margin: 10px 19px 10px 28px;
+	text-transform: none;
+}
+#connectionstatus p.connectionstatus_connected{
+	color: rgb(10,150,7);
+	font: 12px/10px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	margin: 10px 19px 10px 28px;
+	text-transform: none;
+}*/
+#content_right{
+	float: left;
+	margin: 0 0 0 30px;
+}
+#content_right h1{
+	color:#5F5F5F;
+	font: 24px/24px Arial, Helvetica, sans-serif;
+	font-weight: normal;
+	margin: 14px 0 18px;
+	padding: 5px 26px 0 0;
+}
+#content_right h1 span{
+	display: block;
+	font-size:11px;
+	line-height: 14px;
+	margin-top: 5px;
+}
+#content_right h2{
+	font: 13px/16px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	margin: 0 0 0 50px;
+	padding: 0 0 15px 0;
+}
+#content_right h2.inlineheader{
+	background: url(../_images/h_inlineheader.png) no-repeat;
+	font: 14px/16px;
+	height: 21px;
+	margin: 0 0 5px 40px;
+	padding: 8px 0 2px 5px;
+}
+#content_right h3{
+	background: url(../_images/h_inlineheader.png) no-repeat;
+	font-size: 11px;
+	font-weight: bold;
+	height: 25px;
+	margin: 0 auto;
+	overflow: hidden;
+	padding: 8px 0 0 10px;
+	width: 490px;
+}
+#content_right p{
+	font:bold 14px/18px Arial, Helvetica, sans-serif;
+	margin: 0 15px 10px;
+}
+#content_right table{
+	border-collapse: collapse;
+	color: #000;
+	font: 11px/16px Arial, Helvetica, sans-serif;
+	margin: 10px auto 0 auto;
+	text-align: center;
+	width: 525px;
+}
+#content_right table.nostyle{
+	border-collapse: inherit;
+	color: #fff;
+	font: Arial, Helvetica, sans-serif;
+	margin: 0;
+	text-align: center;
+	width: 525px;
+}
+#content_right table th{
+	background: none;
+	color: #FFF;
+	font-weight: bold;
+	text-align: left;
+}
+#content_right table tr{
+	border-bottom: 1px rgb(187,189,188) solid;
+}
+#content_right table td{
+	background: rgb(225,226,222);
+	margin: 0;
+	padding:7px 10px;
+	text-align: left;
+	vertical-align: top;
+}
+#content_right table.nostyle td{
+	background: rgb(18,71,105);
+	margin: 0;
+	padding: 0px;
+	text-align: left;
+	vertical-align: top;
+}
+#content_right table tr.nattable{
+	background: #457EA4;
+	font-size: 10px;
+	padding: 20px 10px 20px 10px;
+	text-align: center;
+}
+#content_right table tr.routingtable{
+	background: #457EA4;
+	border-bottom: 1px solid #2C8FC2;
+	color: #0FF;
+	font-size: 10px;
+	padding: 20px 10px 20px 10px;
+	text-align: center;
+}
+#content_right table.activeuserlistdefinitions{
+	background: rgb(225,226,222);
+	margin: 10px 25px 10px 25px;
+}
+#content_right table.activeuserlistdefinitions td{
+	font: 11px/14px;
+	padding: 5px 5px 5px 25px;
+}
+#content_right table.activeuserlist{
+	margin: 10px auto;
+	padding: 5px;
+}
+#content_right table.activeuserlist th{
+	background: none;
+	font: 11px/11px;
+	font-weight: bold;
+	padding: 5px;
+}
+#content_right table.activeuserlist td{
+	background: rgb(225,226,222);
+	border-bottom: 1px solid #3DBDD1;
+	color: #0FF;
+	font: 10px/10px Arial, Helvetica, sans-serif;
+	padding: 5px;
+	text-align: center;
+}
+#content_right table.activeuserlist a{
+	font-size: 10px;
+	font-weight: normal;
+	text-decoration: none;
+}
+#content_right table.activeuserlist a:hover{
+	text-decoration: underline;
+}
+#content_right table.firewallstatusdefinitions{
+	background: rgb(225,226,222);
+	margin: 10px 25px 10px 25px;
+}
+#content_right table.firewallstatusdefinitions td{
+	font: 11px/14px;
+	padding: 5px 5px 5px 25px;
+}
+#content_right table.firewallstatus{
+	margin: 10px 25px 10px 25px;
+	padding: 5px;
+}
+#content_right table.firewallstatus th{
+	background: none;
+	font: 11px/11px;
+	font-weight: bold;
+	padding: 5px;
+}
+#content_right table.firewallstatus td{
+	background: rgb(225,226,222);
+	border-bottom: 1px solid #3DBDD1;
+	color: #0FF;
+	font: 10px/10px Arial, Helvetica, sans-serif;
+	padding: 5px;
+	text-align: center;
+}
+#content_right table.modemutilization{
+	margin: 10px 25px 10px 25px;
+	padding: 5px;
+}
+#content_right table.modemutilization th{
+	background: none;
+	font: 11px/11px;
+	font-weight: bold;
+	padding: 5px;
+}
+#content_right table.modemutilization td{
+	background: rgb(225,226,222);
+	border-bottom: 1px solid #3DBDD1;
+	color: #0FF;
+	font: 10px/10px Arial, Helvetica, sans-serif;
+	padding: 5px;
+	text-align: center;
+}
+#content_right table tr.nattable{
+	background: #457EA4;
+	font-size: 10px;
+	padding: 20px 10px 20px 10px;
+	text-align: center;
+}
+#content_right .smallprint{
+	color: #000;
+	font-size: 10px;
+}
+#content_right .smallprint_green{
+	color: #9BE8F8;
+	font-size: 10px;
+}
+#content_right p.macaddresslist{
+	background: #457EA4;
+	color: #0FF;
+	font-size: 10px;
+	margin: 0 0 1px 40px;
+	padding: 5px;
+	width: 350px;
+}
+#content_right p.wirelesssettings{
+	background: #457EA4;
+	color: #0FF;
+	font-size: 10px;
+	margin: 0 0 0 50px;
+	padding: 5px;
+	width: 350px;
+}
+#content_right p.forwardedports{
+	background: #457EA4;
+	color: #0FF;
+	font-size: 10px;
+	margin: 0 0 1px 40px;
+	padding: 5px;
+	width: 350px;
+}
+#content_right a{
+	color: #0098DB;
+	font: 11px/16px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+}
+#content_right a:hover{
+	text-decoration: none;
+}
+#content_right form p{
+	color:#000;
+	font:bold 14px/18px Arial, Helvetica, sans-serif;
+}
+#content_right form div.field_labels{
+	float: left;
+}
+#content_right form div.fields{
+	float: left;
+}
+#content_right form div.fields p{
+	margin: 0 0 0 15px;
+	padding: 0 0 11px 0;
+}
+#content_right form div.threecolumn_container{
+	margin: 0 50px 0 50px;
+}
+#content_right form div.threecolumn{
+	float: left;
+	margin: 0 40px 0 0;
+}
+#content_right form div.threecolumn p{
+	margin: 0;
+	padding: 0;
+}
+#content_right form table#firewallsettings{
+	margin: 0 50px 0 50px;
+	width: 80%;
+}
+#content_right form table#firewallsettings th, #content_right form table#firewallsettings td{
+	font: 9px/11px Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	padding: 2px;
+	text-align: left;
+}
+#content_right form table#firewallsettings th{
+	border-bottom: 1px solid #FFF;
+}
+#content_right form table#firewallsettings th.checkbox, #content_right form table#firewallsettings td.checkbox{
+	text-align: center;
+}
+#content_right form table#firewallsettings td{
+	font-weight: normal;
+}
+#content_right div#utilities_timezoneoptions{
+	height: 160px;
+	margin: 0 0 5px 50px;
+	overflow: auto;
+	width: 370px;
+}
+#content_right div#utilities_timezoneoptions p{
+	background: #457EA4;
+	color: #0FF;
+	font-size: 10px;
+	margin: 0 0 1px 0;
+	padding: 10px;
+	width: 330px;
+}
+#content_right div#utilities_timezoneoptions a{
+	color: #0FF;
+	text-decoration: none;
+}
+#content_right div#utilities_timezoneoptions a:hover{
+	color: #FFF;
+	text-decoration: underline;
+}
+#content_right div#advancedutilities_ipping_pingtestresults{
+	background: #457EA4;
+	display: block;
+	height: 165px;
+	margin: 0 auto 0 auto;
+	overflow: auto;
+	width: 470px;
+}
+#content_right div#advancedutilities_ipping_pingtestresults p{
+	color: #0FF;
+	font: 11px/14px Arial, Helvetica, sans-serif;
+	margin: 0 0 0 10px;
+	padding: 0;
+}
+#content_right div#advancedutilities_traceroute_tracerouteresults{
+	background: #457EA4;
+	display: block;
+	height: 124px;
+	margin: 0 auto 0 auto;
+	overflow: auto;
+	width: 470px;
+}
+#content_right div#advancedutilities_traceroute_tracerouteresults p{
+	color: #0FF;
+	font: 11px/14px Arial, Helvetica, sans-serif;
+	margin: 0 10px 0 10px;
+	padding: 0;
+}
+#content_right p.utilities_webactivitylog{
+	background: #457EA4;
+	color: #FFF;
+	font-size: 10px;
+	height: 500px;
+	margin: 0 0 1px 27px;
+	overflow: auto;
+	padding: 10px;
+	width: 460px;
+}
+#content_right .textfield_inline{
+	margin: 0 15px 0 0;
+}
+#content_right_contentarea{
+	width: 550px;
+}
+#content_right_contentarea hr{
+	background-color: #FFF;
+	color: #FFF;
+	margin: 0 auto 20px auto;
+	width: 450px;
+}
+.stepWrapper{
+	background: rgb(187,189,188);
+	border-radius:12px 12px 12px 12px;
+		-moz-border-radius:12px 12px 12px 12px;
+		-webkit-border-radius:12px 12px 12px 12px;
+	margin-bottom: 10px;
+	padding:12px 0;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+.stepWrapper>p {
+	padding-left: 15px;
+	text-indent: -15px;
+}
+#help_page .stepWrapper>p, p.unindent {
+	padding-left: 0px;
+	text-indent: 0px;
+}
+
+.stepWrapperdark{
+	background: rgb(0,152,219);
+	border-radius:12px 12px 12px 12px;
+		-moz-border-radius:12px 12px 12px 12px;
+		-webkit-border-radius:12px 12px 12px 12px;
+	margin: 10px 0;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+#content_right .stepWrapperdark table{
+
+}
+#content_right .stepWrapperdark table th{
+	background: rgb(195,223,240);
+	color:#000;
+	font-size:12px;
+	padding:5px 8px;
+}
+#content_right .stepWrapperdark table th.tableTitle{
+	font-size:14px;
+	text-align: center;
+	padding:10px 8px 6px;
+}
+
+.lansubnet{
+	background: rgb(0,152,219);
+	border-radius:12px 12px 12px 12px;
+		-moz-border-radius:12px 12px 12px 12px;
+		-webkit-border-radius:12px 12px 12px 12px;
+	margin: 10px 0;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+#content_right .lansubnet table{
+    table-layout: fixed;
+}
+#content_right .lansubnet table th{
+	background: rgb(195,223,240);
+	color:#000;
+	font-size:12px;
+	padding:5px 8px;
+}
+#content_right .lansubnet table th.tableTitle{
+	font-size:14px;
+	text-align: center;
+	padding:10px 8px 6px;	
+}
+
+#content_right .lansubnet table td{
+	font-size:11px;
+	overflow:hidden;
+	text-overflow: ellipsis;
+}
+
+#webActivityLog_state_wrapper,
+#wps_state_wrapper,
+#systemLog_state_wrapper,
+#hpnastate_state_wrapper{
+	font: bold 14px/18px Arial,Helvetica,sans-serif;
+}
+#webActivityLog_state_wrapper .toggle-button,
+#wps_state_wrapper .toggle-button,
+#systemLog_state_wrapper .toggle-button,
+#hpnastate_state_wrapper .toggle-button{
+	margin: 0 10px 0 20px;
+	vertical-align: -20px;
+}
+#set_admin_pw .textInput, .textInput{
+	width: 200px;
+}
+#content_right .btn, .btn{
+	background: #00CCFF; /* Old browsers */
+	background: -moz-linear-gradient(top, #00CCFF 0%, #004CE5 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#00CCFF), color-stop(100%,#004CE5)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #00CCFF 0%,#004CE5 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #00CCFF 0%,#004CE5 100%); /* Opera11.10+ */
+	background: -ms-linear-gradient(top, #00CCFF 0%,#004CE5 100%); /* IE10+ */
+	background: linear-gradient(top, #00CCFF 0%,#004CE5 100%); /* W3C */
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	color:#FFF;
+	display: inline-block;
+	font:bold 14px/16px Arial, Helvetica, sans-serif;
+	margin: 5px 12px 0;
+	padding:7px 8px;
+	text-align: center;
+	text-shadow: 1px 1px 4px #000;
+	text-decoration: none;
+	position: relative;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+#content_right .remove_btn{
+	border-radius:13px 13px 13px 13px;
+		-moz-border-radius:13px 13px 13px 13px;
+		-webkit-border-radius:13px 13px 13px 13px;
+	font-size:12px;
+	height:16px;
+	margin:0;
+	padding:5px 12px 5px;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+#content_right .btn:hover, .btn:hover{
+	background:#00A5FF;
+	text-shadow:none;
+}
+
+#content_right .btn-wl, .btn-wl{
+	background: #c1d0d4; /* Old browsers */
+	background: -moz-linear-gradient(top, #c1d0d4 0%, #c1d0d4 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c1d0d4), color-stop(100%,#c1d0d4)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* Opera11.10+ */
+	background: -ms-linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* IE10+ */
+	background: linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* W3C */
+	background:#3bd94d;	
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	color:#FFF;
+	display: inline-block;
+	font:bold 14px/16px Arial, Helvetica, sans-serif;
+	margin: 5px 12px 0;
+	padding:7px 8px;
+	text-align: center;
+	text-shadow:none;
+	text-decoration: none;
+	position: relative;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+
+
+#content_right .btn-wl2, .btn-wl2{
+	background: #c1d0d4; /* Old browsers */
+	background: -moz-linear-gradient(top, #c1d0d4 0%, #c1d0d4 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c1d0d4), color-stop(100%,#c1d0d4)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* Opera11.10+ */
+	background: -ms-linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* IE10+ */
+	background: linear-gradient(top, #c1d0d4 0%,#c1d0d4 100%); /* W3C */
+	border-radius:6px 6px 6px 6px;
+		-moz-border-radius:6px 6px 6px 6px;
+		-webkit-border-radius:6px 6px 6px 6px;
+	color:#FFF;
+	display: inline-block;
+	font:bold 14px/16px Arial, Helvetica, sans-serif;
+	margin: 5px 12px 0;
+	padding:7px 8px;
+	text-align: center;
+	text-shadow: 1px 1px 4px #000;
+	text-decoration: none;
+	position: relative;
+	behavior: url(../_css/css3pie/PIE.htc);
+}
+
+#content_right .btn:active, .btn:active{
+	background:#0083E5;
+	color:#000;
+	text-shadow:none;
+}
+table .btn{
+	margin: 0;
+}
+.morehelp_btn, .internethelptopics_btn {
+	position: relative;
+	left: 15px;
+}
+
+#footer{
+	color: #000;
+	font: 11px/11px Arial, Helvetica, sans-serif;
+	margin: 50px 0 50px 0;
+	text-align: center;
+}
+.connected, 
+.access_allowed{
+	color: #090;
+	font: 10px/10px Arial, Helvetica, sans-serif;
+}
+.notconnected, 
+.access_denied{
+	color: #F00;
+	font: 10px/10px Arial, Helvetica, sans-serif;
+}
+.greentext{
+	color: #090;
+}
+.yellowtext{
+	color: #E08800;
+}
+.redtext{
+	color: #F00;
+}
+.orangetext{
+	color: #ff6319;
+}
+.greyed_out{
+	color: #999;
+}
+.greyed_out_textfield, 
+.greyed_out input, 
+.greyed_out_dropdown{
+	background-color: #999;
+}
+.clear_left{
+	clear: left;
+	height: 0;
+}
+.clear_right{
+	clear: right;
+	height: 0;
+}
+.clear_both{
+	clear: both;
+	height: 0;
+}
+
+.greenboldtext{
+	font-weight:bold;
+	color: #015F2C;
+}
+.hidden{
+	display: none;
+	height:0;
+	
+}
+.icon_label {
+	text-align:center;
+}
+
+#device_table tr td img {position: relative; left: 22%;}
+#advancedipconfiguration_btn{width:95px; height:85px; background:url(../_images/quicksetup_btn_advancedip.png) no-repeat; display:block;}
+#quick_set_buttons{width:500px; height:40px; margin: 0 auto; background: rgb(225,226,222); text-align:center;}
+
+/************
+* Start Lightbox CSS
+*************/
+
+.black_overlay{
+	display: none;
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	width: 200%;
+	height: 200%;
+	background-color: black;
+	z-index:1001;
+	-moz-opacity: 0.8;
+	opacity:.80;
+	filter: alpha(opacity=80);
+}
+ 
+.white_content {
+	display: none;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	width: 50%;
+	height: 50%;
+	padding: 16px;
+	z-index:1002;
+	overflow: auto;
+}
+.white_content p{
+	text-indent:0;
+	padding:0;
+}
+.white_content table{
+	border-collapse: collapse;
+	color: #000;
+	font: 11px/16px Arial, Helvetica, sans-serif;
+	text-align: center;
+	width: 100%;
+}
+.white_content table.nostyle{
+	border-collapse: inherit;
+	color: #fff;
+	font: Arial, Helvetica, sans-serif;
+	margin: 0;
+	text-align: center;
+}
+.white_content table th{
+	background: none;
+	color: #FFF;
+	font-weight: bold;
+	text-align: left;
+}
+.white_content table tr{
+	border-bottom: 1px rgb(187,189,188) solid;
+}
+.white_content table td{
+	background: rgb(225,226,222);
+	margin: 0;
+	padding:7px 10px;
+	text-align: left;
+	vertical-align: top;
+}
+.white_content .btn {
+	float:right;
+}
+#content_right h1{padding-left:105px;}
+#content_right h1.quicksetup{height:85px; background:url(../_images/h_quickconnect.png) no-repeat;}
+#content_right h1.login{height:85px;}
+#content_right h1.modemstatus_home{height:95px; background:url(../_images/h_modemstatus_home.png) no-repeat;}
+#content_right h1.modemstatus_iptrafficqos{height:85px; background:url(../_images/h_modemstatus_iptrafficqos.png) no-repeat;}
+#content_right h1.modemstatus_lanstatus{height:85px; background:url(../_images/h_modemstatus_lanstatus.png) no-repeat;}
+#content_right h1.modemstatus_wifistatus{height:85px; background:url(../_images/h_modemstatus_wirelessstatus.png) no-repeat;}
+#content_right h1.modemstatus_nattable{height:85px; background:url(../_images/h_modemstatus_nattable.png) no-repeat;}
+#content_right h1.modemstatus_routingtable{height:85px; background:url(../_images/h_modemstatus_routingtable.png) no-repeat;}
+#content_right h1.modemstatus_wanstatus{height:85px; background:url(../_images/h_modemstatus_wanstatus.png) no-repeat;}
+#content_right h1.modemstatus_wirelessstatus{height:85px; background:url(../_images/h_modemstatus_wirelessstatus.png) no-repeat;}
+#content_right h1.modemstatus_activeuserslist{height:85px; background:url(../_images/h_modemstatus_activeuserslist.png) no-repeat;}
+#content_right h1.modemstatus_firewallstatus{height:85px; background:url(../_images/h_modemstatus_firewallstatus.png) no-repeat;}
+#content_right h1.modemstatus_modemutilitization{height:85px; background:url(../_images/h_modemstatus_modemutilitization.png) no-repeat;}
+#content_right h1.wirelesssetup_basic{height:90px; background:url(../_images/h_wirelesssetup_basic.png) no-repeat;}
+#content_right h1.wirelesssetup_wmm{height:85px; background:url(../_images/h_wirelesssetup_wmm.png) no-repeat;}
+#content_right h1.wirelesssetup_wps{height:85px; background:url(../_images/h_wirelesssetup_wps.png) no-repeat;}
+#content_right h1.wirelesssetup_wep8021x{height:85px; background:url(../_images/h_wirelesssetup_wep8021x.png) no-repeat;}
+#content_right h1.wirelesssetup_wpa{height:85px; background:url(../_images/h_wirelesssetup_wpa.png) no-repeat;}
+#content_right h1.wirelesssetup_80211bg{height:85px; background:url(../_images/h_wirelesssetup_80211bg.png) no-repeat;}
+#content_right h1.wirelesssetup_channel{height:85px; background:url(../_images/h_wirelesssetup_channel.png) no-repeat;}
+#content_right h1.wirelesssetup_ssid{height:85px; background:url(../_images/h_wirelesssetup_ssid.png) no-repeat;}
+#content_right h1.wirelesssetup_wirelessmacauthentication{height:85px; background:url(../_images/h_wirelesssetup_wirelessmacauthentication.png) no-repeat;}
+#content_right h1.wirelesssetup_wep{height:85px; background:url(../_images/h_wirelesssetup_wep.png) no-repeat;}
+#content_right h1.wirelesssetup_nomodule{height:85px; background:url(../_images/h_wirelesssetup_nomodule.png) no-repeat;}
+#content_right h1.wirelesssetup_wds{height:85px; background:url(../_images/h_wirelesssetup_wirelessscheduling.png) no-repeat;}
+#content_right h1.wirelesssetup_wirelessaccessschedule{height:85px; background:url(../_images/h_wirelesssetup_wds.png) no-repeat;}
+#content_right h1.wirelesssetup_wireless5g{height:95px; background:url(../_images/h_wirelesssetup_wep.png) no-repeat;}
+#content_right h1.wirelesssetup_wps5g{height:85px; background:url(../_images/h_wirelesssetup_wps.png) no-repeat;}
+#content_right h1.wirelesssetup_ssidsetup5g{height:85px; background:url(../_images/h_wirelesssetup_ssid.png) no-repeat;}
+#content_right h1.wirelesssetup_basicsettings5g{height:90px; background:url(../_images/h_wirelesssetup_basic.png) no-repeat;}
+#content_right h1.wirelesssetup_wireless5gmacauthentication{height:85px; background:url(../_images/h_wirelesssetup_wirelessmacauthentication.png) no-repeat;}
+
+#content_right h1.utilities_timezone{height:85px; background:url(../_images/h_utilities_timezone.png) no-repeat;}
+#content_right h1.utilities_upgradefirmware{height:85px; background:url(../_images/h_utilities_upgradefirmware.png) no-repeat;}
+#content_right h1.utilities_speedtest{height:85px; background:url(../_images/h_utilities_speedtest.png) no-repeat;}
+#content_right h1.utilities_webactivitylog{height:85px; background:url(../_images/h_utilities_webactivitylog.png) no-repeat;}
+#content_right h1.utilities_traceroute{height:85px; background:url(../_images/h_utilities_traceroute.png) no-repeat;}
+#content_right h1.utilities_pingtest{height:85px; background:url(../_images/h_utilities_pingtest.png) no-repeat;}
+#content_right h1.utilities_oampingtest,
+#content_right h1.utilities_dnscache{height:auto; background:url(../_images/h_utilities_webactivitylog.png) no-repeat;}
+#content_right h1.utilities_restoredefaults{height:85px; background:url(../_images/h_utilities_restoredefaults.png) no-repeat;}
+#content_right h1.utilities_reboot{height:85px; background:url(../_images/h_utilities_reboot.png) no-repeat;}
+#content_right h1.advancedutilities_systemlog{height:85px; background:url(../_images/h_advancedutilities_systemlog.png) no-repeat;}
+#content_right h1.advancedsetup_blocking{height:85px; background:url(../_images/h_advancedsetup_blocking.png) no-repeat;}
+#content_right h1.advancedsetup_websiteblocking{height:85px; background:url(../_images/h_advancedsetup_websiteblocking.png) no-repeat;}
+#content_right h1.advancedsetup_dslsettings{height:85px; background:url(../_images/h_advancedsetup_dslsettings.png) no-repeat;}
+#content_right h1.advancedsetup_dmzhosting{height:85px; background:url(../_images/h_advancedsetup_dmzhosting.png) no-repeat;}
+#content_right h1.advancedsetup_advancedportforwarding{height:85px; background:url(../_images/h_advancedsetup_advancedportforwarding.png) no-repeat;}
+#content_right h1.advancedsetup_applications{height:85px; background:url(../_images/h_advancedsetup_applications.png) no-repeat;}
+#content_right h1.advancedsetup_adminusername{height:85px; background:url(../_images/h_advancedsetup_adminusername.png) no-repeat;}
+#content_right h1.advancedsetup_ipaddressing{height:85px; background:url(../_images/h_advancedsetup_ipaddressing.png) no-repeat;}
+#content_right h1.advancedsetup_vlan{height:85px; background:url(../_images/h_advancedsetup_vlan.png) no-repeat;}
+#content_right h1.advancedsetup_wan{height:85px; background:url(../_images/h_advancedsetup_wan.png) no-repeat;}
+#content_right h1.advancedsetup_ipsec{height:85px; background:url(../_images/h_advancedsetup_ipsec.png) no-repeat;}
+#content_right h1.advancedsetup_lan{height:85px; background:url(../_images/h_advancedsetup_lan.png) no-repeat;}
+#content_right h1.advancedsetup_dhcpres{height:85px; background:url(../_images/h_advancedsetup_dhcpres.png) no-repeat;}
+#content_right h1.advancedsetup_ipaddressing_lanip{height:85px; background:url(../_images/h_advancedsetup_ipaddressing_lanip.png) no-repeat;}
+#content_right h1.advancedsetup_ipaddressing_wanip{height:85px; background:url(../_images/h_advancedsetup_ipaddressing_wanip.png) no-repeat;}
+#content_right h1.advancedsetup_remotemgmt{height:85px; background:url(../_images/h_advancedsetup_remotemgmt.png) no-repeat;}
+#content_right h1.advancedsetup_dynamic_dns{height:85px; background:url(../_images/h_advancedsetup_dynamicdns.png) no-repeat;}
+#content_right h1.advancedsetup_remotetelnet{height:85px; background:url(../_images/h_advancedsetup_remotetelnet.png) no-repeat;}
+#content_right h1.advancedsetup_remotemgmt_telnettimeout{height:85px; background:url(../_images/h_advancedsetup_remotemgmt_telnettimeout.png) no-repeat;}
+#content_right h1.advancedsetup_routing{height:90px; background:url(../_images/h_advancedsetup_routing.png) no-repeat;}
+#content_right h1.advancedsetup_dynamicrouting{height:85px; background:url(../_images/h_advancedsetup_dynamicrouting.png) no-repeat;}
+#content_right h1.advancedsetup_security{height:90px; background:url(../_images/h_advancedsetup_security.png) no-repeat;}
+#content_right h1.advancedsetup_admin{height:90px; background:url(../_images/h_advancedsetup_adminusername.png) no-repeat;}
+#content_right h1.advancedsetup_security_nat{height:85px; background:url(../_images/h_advancedsetup_security_nat.png) no-repeat;}
+#content_right h1.advancedsetup_qosdownstream{height:85px; background:url(../_images/h_advancedsetup_qosdownstream.png) no-repeat;}
+#content_right h1.advancedsetup_qosupstream{height:85px; background:url(../_images/h_advancedsetup_qosupstream.png) no-repeat;}
+#content_right h1.advancedsetup_firewallsettings{height:85px; background:url(../_images/h_advancedsetup_firewallsettings.png) no-repeat;}
+#content_right h1.advancedsetup_ipv4firewall{height:85px; background:url(../_images/h_modemstatus_firewallstatus.png) no-repeat;}
+#content_right h1.advancedsetup_ipv6firewall{height:85px; background:url(../_images/h_advancedsetup_ipv6firewall.png) no-repeat;}
+#content_right h1.advancedsetup_ipv6wansettings{height:85px; background:url(../_images/h_advancedsetup_ipv6wan.png) no-repeat;}
+#content_right h1.advancedsetup_upnp{height:85px; background:url(../_images/h_advancedsetup_upnp.png) no-repeat;}
+#content_right h1.advancedsetup_schedulingaccess{height:85px; background:url(../_images/h_advancedsetup_schedulingaccess.png) no-repeat;}
+#content_right h1.advancedsetup_dnshostmapping{height:85px; background:url(../_images/h_advancedsetup_dnshostmapping.png) no-repeat;}
+#content_right h1.advancedsetup_lansubnet{height:85px; background:url(../_images/h_advancedsetup_lansubnets.png) no-repeat;}
+#content_right h1.advancedsetup_editlansubnet{height:85px; background:url(../_images/h_advancedsetup_lansubnets.png) no-repeat;}
+#content_right h1.advancedsetup_configurationsave{height:85px; background:url(../_images/h_utilities_configurationsave.png) no-repeat;}
+#content_right h1.supportconsole_IPv6{height:85px; background:url(../_images/h_advancedsetup_ipv6lan.png) no-repeat;}
+#content_right h1.supportconsole_systemlog{height:85px; background:url(../_images/h_utilities_webactivitylog.png) no-repeat;}
+#content_right h1.help_main{height:85px; background:url(../_images/h_help_main.png) no-repeat;}
+#content_right h1.help_faqs{height:90px; background:url(../_images/h_help_faqs.png) no-repeat;}
+#content_right h1.help_acronyms{height:85px; background:url(../_images/h_help_acronyms.png) no-repeat;}
+#content_right h1.help_glossary{height:85px; background:url(../_images/h_help_glossary.png) no-repeat;}
+#content_right h1.help_modemlights{height:85px; background:url(../_images/h_help_modemlights.png) no-repeat;}
+#content_right h1.help_advancedsetup{height:85px; background:url(../_images/h_help_advancedsetup.png) no-repeat;}
+#content_right h1.help_quicksetupfeature{height:85px; background:url(../_images/h_help_quicksetupfeature.png) no-repeat;}
+#content_right h1.help_utilitiesfeature{height:85px; background:url(../_images/h_help_utilitiesfeature.png) no-repeat;}
+#content_right h1.help_wirelessfeatures{height:85px; background:url(../_images/h_help_wirelessfeatures.png) no-repeat;}
+
+#content_right h1.supportconsole_dnscache{height:95px; background:url(../_images/h_supportutilities_dnscache.png) no-repeat;}
+#content_right h1.supportconsole_oampingtest{height:110px; background:url(../_images/h_supportutilities_oampingtest.png) no-repeat;}
+#content_right h1.supportconsole_systemlog{height:85px; background:url(../_images/h_supportutilities_systemlog.png) no-repeat;}
+#content_right h1.supportconsole_tr069{height:85px; background:url(../_images/h_supportutilities_tr069.png) no-repeat;}
+#content_right h1.supportconsole_upgradehistory{height:85px; background:url(../_images/h_supportutilities_upgradehistory.png) no-repeat;}
+#content_right h1.supportconsole_upgradeimage{height:85px; background:url(../_images/h_supportutilities_upgradeimage.png) no-repeat;}
+#content_right h1.supportconsole_wanvlans{height:85px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_igmpsnooping{height:95px; background:url(../_images/h_supportutilities_igmpsnooping.png) no-repeat;}
+#content_right h1.supportconsole_toolbox{height:95px; background:url(../_images/h_supportutilities_toolbox.png) no-repeat;}
+#content_right h1.supportconsole_IPv6{height:95px; background:url(../_images/h_supportutilities_IPv6.png) no-repeat;}
+#content_right h1.supportconsole_5G_basicsettings{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_5G_wireless5g{height:95px; background:url(../_images/h_wirelesssetup_wep.png) no-repeat;}
+#content_right h1.supportconsole_5G_devicetable{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_5G_wps{height:95px; background:url(../_images/h_wirelesssetup_wps.png) no-repeat;}
+#content_right h1.supportconsole_5G_radiosettings{height:95px; background:url(../_images/h_wirelesssetup_wps.png) no-repeat;}
+#content_right h1.supportconsole_5G_prismlinkstatus{height:95px; background:url(../_images/h_wirelesssetup_wps.png) no-repeat;}
+#content_right h1.supportconsole_voip_basicsettings{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_voip_line1features{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_voip_line2features{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_voip_sipclient{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+#content_right h1.supportconsole_voip_diagnostics{height:95px; background:url(../_images/h_supportutilities_wanvlans.png) no-repeat;}
+
+#content_right h1.thankyou{height:85px; background:url(../_images/h_thankyou.png) no-repeat;}
+
+#vendor_logo_footer{width:550px; height:31px;}
+/*#vendor_logo{width:79px; height:31px; background:url(../_images/ZyXEL.png) no-repeat; background-position: right; display:block;float: right;}*/
+#vendor_logo{width:79px; height:31px; background:#FFFFFF; background-position: right; display:block;float: right;}
+/*#connectionstatus .notconnected{color:#F00; font:12px/10px Arial, Helvetica, sans-serif; font-weight:bold; margin:10px 19px; text-align:right; text-transform:none;}*/
+
+.stepWrapper1{background: rgb(187,189,188); margin-bottom:0px; margin-top:0px; padding-bottom:17px; padding-top:9px; }
+#stepWrapper_header{width:550px; height:13px; background:url(../_images/stepWrapper_header_bg.gif) no-repeat; overflow:hidden;}
+#stepWrapper_footer{width:550px; height:13px; background:url(../_images/stepWrapper_footer_bg.gif) no-repeat; margin-bottom:10px;}
+
+.stepWrapperdark1{background:#003250; margin-bottom:0px; margin-top:0px; padding-bottom:17px; padding-top:9px;}
+#stepWrapperdark_header{width:550px; height:13px; background:url(../_images/stepWrapperdark_header_bg.gif) no-repeat; overflow:hidden;}
+#stepWrapperdark_footer{width:550px; height:13px; background:url(../_images/stepWrapperdark_footer_bg.gif) no-repeat; margin-bottom:10px;}
+
+#set_admin_pw .textInput2 {width: 220px;}
+
+.next_btn{width:74px; background:url(../_images/nextBT_all.png); display:block;}
+.hidden_back_btn{width:74px; display:block;}
+.confirm_btn{width:74px; background:url(../_images/btn_confirm.png); display:block;}
+
+.greentextbold{color:#0F0; font-weight:bold; font-size:12px;}
+/* for popup window */
+.popupHeader {background:url(../_images/body_bg.png);color:#5f5f5f;padding:24px 0;text-align:center;font-size:24px;}
+.popupContent {background:#fff url(../_images/body_bg.png) 0 -61px repeat-x;padding:0 30px;}
+.popupContent .popupWrapper {background:rgb(187,189,188);border-radius:12px 12px 0 0;-moz-border-radius:12px 12px 0 0;-webkit-border-radius:12px 12px 0 0;behavior:url(../_css/css3pie/PIE.htc);padding:22px 13px 0 13px;position:relative;z-index:110;}
+.popupContent .popupWrapper table {width:100%;}
+.container {background:#e1e2de;padding:20px 25px;font-size:14px;font-weight:bold;}
+.popupButton {background:#fff;padding:0 30px 25px 30px;}
+.popupButton .btnWrapper {background:rgb(187,189,188);border-radius:0 0 12px 12px;-moz-border-radius:0 0 12px 12px;-webkit-border-radius:0 0 12px 12px;margin-bottom:10px;behavior:url(../_css/css3pie/PIE.htc);padding:0 13px 13px 13px;position:relative;z-index:110;}
+.popupButton .btnWrapper table {width:100%;}
+.popupButton td {padding:0 25px 25px 25px;background:#e1e2de;font-size:14px;font-weight:bold;}
+.popupButton a.btn {margin:0;margin-right:20px;_behavior:url();*behavior:url();}
+.popupButton a.linking {color:#0098db;font-size:12px;text-decoration:underline;margin-right:0;}
+.popupButton a.linking:hover {text-decoration:none;}

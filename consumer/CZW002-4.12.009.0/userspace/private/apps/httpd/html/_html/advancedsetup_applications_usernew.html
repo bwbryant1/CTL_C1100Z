@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/AppRule.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var ruleinfo = '<%ejGetOtherBig(portMapRule)%>';
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+var info = ruleinfo.split('|');
+var found = 0;
+if ( info != '' ) {
+	for ( i = 0; i < info.length ; i ++ ) {
+		found = 0;
+		if (info[i] == '')
+			break;
+		var names = info[i].split('/');
+		for ( j = 0 ; c[6][j] != null; j ++ ) {
+			if ( c[6][j].name == names[0] ) {
+				found = 1;
+				c[6][j].eNum++;
+				c[6][j].e[c[6][j].eNum-1] = new iVe(names[2], names[3], names[1], names[4]);
+				break;
+			}
+		}
+		if ( found == 0 ) {
+			c[6][j] = new cV(names[0], names[0], 1);
+			c[6][j].e[0] = new iVe(names[2], names[3], names[1], names[4]);
+		}
+	}
+}
+
+function removeRule( names, prot, sport, eport ) {
+	with( document.forms[0] ) {
+		action.value="ruleremove";
+		srvName.value=names;
+		proto.value=prot;
+		eStart.value=sport;
+		eEnd.value=eport;
+		//iStart.value=map;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+	return;
+}
+
+function checkPortCover( cS, cE, rS, rE ) {
+	if ( cS >= rS && cS <= rE ) {
+		return true;
+	}
+	else if ( cE >= rS && cE <= rE ) {
+		return true;
+	}
+	else if ( rS >= cS && rS <= cE ) {
+		return true;
+	}
+	else if ( rE >= cS && rE <= cE ) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+function applyClick(){
+	var i = 0;
+	with ( document.forms[0]) {
+		action.value="ruleadd";
+		var eStartValue = port_start.value;
+		var eEndValue = port_end.value;
+		//var iStartValue = port_map.value;
+		var srviveName = rule_name.value;
+		var Prot = protocol.value;
+	}
+	
+	if ( Prot == "GRE" ) {
+			eStartValue = "0";
+			eEndValue = "0";
+			//iStartValue.value = "0";
+	}
+//	if ( !isValidPort(eStartValue+":"+eEndValue) || !isValidPort(iStartValue) ) {
+	else if ( !isValidPort(eStartValue+":"+eEndValue) ) {
+		AlertOpen('The IP port range is invalid.');
+		return false;
+	}
+	
+	if ( !isAppValidName(srviveName) ) {
+		AlertOpen('The applications name is invalid.\nPlease use a different application name.');
+		return false;
+	}
+//applications name cannot consist of "/" and "|" character.
+	if (srviveName.indexOf('/')!=-1 || srviveName.indexOf('|')!=-1)
+	{
+		AlertOpen('The applications name cannot consist of "/" and "|" character.\nPlease use a different application name.');
+		return false;
+	}
+	//else {
+		//srviveName = encodeUrl(srviveName);
+	//}
+
+	for ( i = 0 ; i < TOTAL_CAT ; i ++ ) {
+		for ( j = 0 ; c[i][j] != null; j ++ ) {
+			if ( c[i][j].show == srviveName ) {
+				AlertOpen ( 'The applications name is in use.\nPlease use a different application name.' );
+				return false;
+			}
+		}
+	}
+
+	var i = 0;
+	if ( info != '' ) {
+		for ( i = 0; i < info.length ; i ++ ) {
+			if (info[i] == '')
+				break;
+			var names = info[i].split('/');
+			//if (names[0] == srviveName) {
+				if ( names[1] == 2 ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+						return false;
+					}
+				}
+				else if ( Prot == "TCP or UDP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+						return false;
+					}
+				}
+				else if ( names[1] == 0 && Prot == "TCP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+						return false;
+					}
+				}
+				else if ( names[1] == 1 && Prot == "UDP" ) {
+					if ( checkPortCover(eStartValue, eEndValue, names[2], names[3]) ) {
+						AlertOpen('The defined port or port range is in use by another port forwarding or application rule.');
+						return false;
+					}
+				}
+			//}
+		}
+	}
+	with ( document.forms[0]) {
+		srvName.value=srviveName;
+		proto.value=Prot;
+		eStart.value=eStartValue;
+		eEnd.value=eEndValue;
+	//	iStart.value=iStartValue;
+	}
+	document.forms[0].sessionKey.value = gblsessionKey;
+	document.forms[0].submit();
+
+	//Return false to avoid do submit twice.
+	return false;
+}
+
+function backBtn() {
+	var app = '<%ejGet(applicationsIdx)%>';
+	var ca = '<%ejGet(applicationsCatIdx)%>';
+	var ip = '<%ejGet(applicationsIPaddress)%>';	
+	var loc = 'advancedsetup_applications.cgi?applicationsCatIdx='+ca+'&applicationsIdx='+app+'&applicationsIPaddress='+ip+'&sessionKey'+gblsessionKey;
+	var code = 'location="' + loc + '"';	
+	eval(code);
+}
+
+function protoChange () {
+	with ( document.forms[0]) {
+		if ( protocol.value == "GRE" ) {
+			port_start.disabled = true;
+			port_end.disabled = true;
+		}
+		else {
+			port_start.disabled = false;
+			port_end.disabled = false;
+		}
+	}
+}
+</SCRIPT>
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+	<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+
+<script language="javascript">
+   WriteMenuHeader('advancedsetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+</script>
+				<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<script language="javascript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</script>
+        </div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteAdvancedSetupMenuHeader('applications');
+</script>		</ul>
+		<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+        </div>
+	</div>
+		<div id="content_right">
+			<div id="content_right_contentarea">
+				<h1 class="advancedsetup_applications">Applications Custom Rule</h1>
+			  <form action="application.cmd" method="post" onSubmit="return applyClick();">
+				<input type="hidden" name="action" id="action" value="">
+				<input type="hidden" name="srvName" id="srvName" value="">
+				<input type="hidden" name="proto" id="proto" value="">
+				<input type="hidden" name="eStart" id="eStart" value="">
+				<input type="hidden" name="eEnd" id="eEnd" value="">
+				<input name="sessionKey" type="HIDDEN" id="sessionKey" value=""/>
+				<!-- <input type="hidden" name="iStart" id="iStart" value=""> -->
+				<div class="stepWrapper">
+			          <p><strong>1. Enter the rule name.</strong></p>
+					<table>
+            <tr>
+							<td width="150">Rule Name: </td>
+						<td><input name="rule_name" id="rule_name" type="text" size="35" maxlength=20/></td>
+						</tr>
+		              </table>
+		            </div>
+					<div class="stepWrapper">
+                      <p><strong>2. Select the protocol.</strong></p>
+                      <table>
+						<tr>
+							<td width="150">Protocol:</td>
+							<td><select name="protocol" id="protocol" onChange="protoChange()">
+								<option value="TCP" selected="selected">TCP</option>
+								<option value="UDP">UDP</option>
+								<option value="GRE">GRE</option>
+								<option value="TCP or UDP">TCP, UDP</option>
+							</select></td>
+						</tr>
+                      </table>
+                    </div>
+					<div class="stepWrapper">
+			          <p><strong>3. Enter  port settings below.</strong></p>
+			          <table>
+						<tr>
+							<td width="150">Port Start: </td>
+							<td><input type="text" name="port_start" id="port_start"  size="35" /> 
+						  </td>
+						</tr>
+						<tr>
+						  <td width="150">Port End:</td>
+						  <td><input type="text" name="port_end" id="port_end" size="35" /></td>
+					  </tr>
+					</table>
+				  </div>
+                  <div class="stepWrapper">
+					<p><strong>4. Click &quot;Apply&quot; to save changes. </strong></p>
+					<a href="#" class="btn apply_btn" onClick='applyClick();'>Apply</a>
+                    </div>
+                    <div class="stepWrapperdark">
+				  <table>
+					<tr>
+							<th colspan="5" class="tableTitle">Applications Custom Rule List</th>
+					</tr>
+                    <tr>
+                        <th>Name</th>
+                        <th>Protocol</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <!-- <th>PORT MAP</th> -->
+                        <th>Edit</th>
+                      </tr>
+<SCRIPT LANGUAGE="JavaScript">
+	var info = ruleinfo.split('|');
+	var Prot = "";
+	var i = 0;
+	if ( info != '' ) {
+		for ( i = 0; i < info.length ; i ++ ) {
+			if (info[i] == '')
+				break;
+			var names = info[i].split('/');
+			if ( names[1] == 0 ) {
+				Prot = "TCP";
+			}
+			else if ( names[1] == 1 ) {
+				Prot = "UDP";
+			}
+			else if ( names[1] == 2 ) {
+				Prot = "TCP or UDP";
+			}
+			else {
+				Prot = "GRE";
+			}
+
+			//var appname = processLongName( names[0], 13 );
+			var appname = names[0];
+
+			document.writeln('<tr align=\"center\">');
+			document.writeln('<td>'+appname+'</td>');
+			if (Prot == "TCP or UDP"){
+				document.writeln('<td>TCP/UDP</td>');
+			}
+			else{
+				document.writeln('<td>'+Prot+'</td>');
+			}
+			if (Prot == "GRE"){
+				document.writeln('<td>N/A</td>');
+				document.writeln('<td>N/A</td>');
+			}
+			else{
+				document.writeln('<td>'+names[2]+'</td>');
+				document.writeln('<td>'+names[3]+'</td>');
+			}
+			//document.writeln('<td>'+names[4]+'</td>');
+			document.writeln('<td><a href=\"#\" onClick=\'removeRule(\"'+names[0]+'\", \"'+Prot+'\", \"'+names[2]+'\", \"'+names[3]+'\");\' class=\"btn remove_btn\">Remove</a></td>');
+			document.writeln('</tr>');
+		}
+	}
+	if ( i == 0 ) {
+		document.writeln("<tr align=\"center\" class=\"nattable\">");
+		document.writeln("<td colspan=6 style=\"padding:10px;\">No Rules Defined</td>");
+		document.writeln("</tr>");
+	}
+</SCRIPT>
+                    </table>
+                  </div>
+			  </form>
+			</div>
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

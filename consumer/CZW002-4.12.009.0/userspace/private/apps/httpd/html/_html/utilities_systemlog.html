@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<script LANGUAGE="JavaScript" SRC="../_js/jquery.min.js" TYPE="text/javascript"></script>
+<script LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></script>
+<script LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></script>
+<script LANGUAGE="JavaScript">
+
+var Status = "<%ejGet(logStatus)%>";
+var saveInFlash = "<%ejGet(saveInFlash)%>";
+var gblsessionKey = "<%ejGetOther(sessionKey)%>";
+
+function updateSyslogPage (req)
+{	
+	var SysLog=req.responseText;
+	var i;
+	var rowfound = 0;
+	if ( SysLog != "" && SysLog != null ) {
+		var LogTable = document.getElementById("LogTables").getElementsByTagName("TBODY")[0];
+		var lastRow = LogTable.rows.length;
+		for ( i = lastRow; i > 1 ; i-- ) {
+			LogTable.removeChild(LogTable.rows[i - 1]);
+		}
+
+			if( SysLog.indexOf('|') > 0 )
+			{
+				var temps=SysLog.split('|');
+            
+            var maxLines = 100;
+            var startLines = 0;
+            if ( (temps.length-1) > maxLines )
+            {
+               startLines = (temps.length-1) - maxLines;                              
+            }
+            else
+            {
+               startLines = 0;
+            }
+ 
+            for ( i = startLines; i < (temps.length-1); i++ ) { 
+				//for( i=0 ; i < (temps.length-1) ; i++ ){ 
+					var items = temps[i].split('$');
+					var row = document.createElement("TR");
+			  		var td1 = document.createElement("TD");
+			  		td1.appendChild (document.createTextNode(items[0]));
+			  		var td2 = document.createElement("TD");
+			  		td2.appendChild (document.createTextNode(items[1]));
+			  		var td3 = document.createElement("TD");
+			  		td3.appendChild (document.createTextNode(items[2]));
+			  		var td4 = document.createElement("TD");
+			  		td4.appendChild (document.createTextNode(items[3]));
+			  		row.appendChild(td1);
+			    	row.appendChild(td2);
+			    	row.appendChild(td3);
+			    	row.appendChild(td4);
+				    LogTable.appendChild(row);
+				    rowfound = 1;
+			  	}
+			}
+			if ( rowfound == 0 ) {
+				var row = document.createElement("TR");
+				var td1 = document.createElement("TD");
+				td1.appendChild(document.createTextNode("N/A"));
+				var td2 = document.createElement("TD");
+				td2.appendChild (document.createTextNode("N/A"));
+				var td3 = document.createElement("TD");
+				td3.appendChild (document.createTextNode("N/A"));
+				var td4 = document.createElement("TD");
+				td4.appendChild (document.createTextNode("N/A"));
+				row.appendChild(td1);
+				row.appendChild(td2);
+				row.appendChild(td3);
+				row.appendChild(td4);
+				LogTable.appendChild(row);
+			}
+		}
+	setTimeout('updateSysLog_take()', 5000);
+	//setTimeout(function(){ window.parent.location.href='/utilities_systemlog.html';  }, 10000);	
+}
+
+function updateSysLog_take() {
+	var objXMLHTTP = null; 
+
+	if (window.XMLHttpRequest) { 
+		objXMLHTTP=new XMLHttpRequest(); 
+	}// code for IE 
+	else if (window.ActiveXObject) { 
+		objXMLHTTP=new ActiveXObject("Microsoft.XMLHTTP"); 
+	}	
+	if ( objXMLHTTP != null ) {
+		objXMLHTTP.open("POST","GetSysLog.cmd",true);
+		//objXMLHTTP.setRequestHeader("If-Modified-Since","0");
+		objXMLHTTP.send(null);
+    	objXMLHTTP.onreadystatechange = function() {
+			if(objXMLHTTP.readyState == 4) {
+    			updateSyslogPage(objXMLHTTP);
+			}
+    	}
+		//objXMLHTTP.send(null);
+	}
+}
+
+function btnApply()
+{
+	with ( document.forms[0] ) {
+		logStatus.value = 1;
+		if ( logclear[0].checked == true) {
+			saveInFlash.value=0;
+		}
+		else {
+			saveInFlash.value=1;
+		}
+		submitValue.value = '1';
+		document.forms[0].sessionKey.value = gblsessionKey;
+		document.forms[0].submit();
+	}	
+}
+
+function btnActive()
+{
+	with ( document.forms[0] ) {
+		if($('span.toggle-button-label').text() == 'Click the button to enable the System Log.'){
+			logStatus.value = 1;
+		}
+		else{
+			logStatus.value = 0;
+		}
+		document.forms[0].sessionKey.value = gblsessionKey;
+		submitValue.value = '1';
+		document.forms[0].submit();
+	}	
+}
+
+function btnGetFile(){
+   var code = 'location="systemlog.csv"';
+   eval(code);
+}
+</script>
+</head>
+
+<body>
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+    <a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+		
+<script language="javascript">
+      WriteMenuHeader('utilities', '<% ejGetOther(isSupportConsoleAllowed) %>');
+</script>
+			<a href="_html/help.html" title="Click here to launch" class="helplink">help</a>
+		 <div id="date">
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>
+        </div>	
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+	</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+   WriteUtilitiesMenuHeader('systemlog', '<%ejGet(HpnaFeature)%>');
+</script>
+       </ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+</script>
+                </div>
+            </div>
+	</div>
+	<form method=post name="systemLog" action="logconfig.cgi">
+		<input type="hidden" name="page_name" id="page_name" value="utilities_systemlog.html"/>
+		<input type="hidden" name="submitValue" id="submitValue" value="0" />
+		<input type="hidden" name="sessionKey" id="sessionKey" value=""/>
+     	<input type="hidden" name="logStatus" id="logStatus" value=""/>
+		<input type="hidden" name="saveInFlash" id="saveInFlash" value=""/>
+		
+		<div id="content_right">
+			<div id="content_right_header"></div>
+		  <div id="content_right_contentarea">
+			<h1 class="supportconsole_systemlog">System Log</h1>
+			<div id="systemLog_state_wrapper" class="stepWrapper">
+        		<a href="#" class="toggle-button" onClick="btnActive();">
+        		<img alt="Click the button to enable System Log in the modem." src="../_images/h_wirelesssetup_wpsdisable.png"></a>
+        		<span class="toggle-button-label">Click the button to disable System Log.</span>
+			</div>
+
+          	<div class="stepWrapper">
+            	<p><strong>1. Set the System Log clear state.</strong></p>
+            	<table>
+            	<tr>
+            	<td><label for="clear"><input type="radio" name="logclear" checked="checked" id="clear" value="clear"/>Clear on Reboot</label></td>
+				<td><label for="save"><input type="radio" name="logclear" id="save" value="save"/>Save on Reboot</label></td>
+            	</tr>
+            	</table>
+				<a href="#" class="btn apply_btn" onClick="btnApply();">Apply</a>
+          	</div>
+
+
+          	<div class="stepWrapper">		  
+            	<p><strong>2. Click &quot;Download&quot; to save the system log on your PC.</strong></p>
+				<a href="#" id="savelogas_btn" class="btn" onClick="btnGetFile()">Download</a>
+			</div>	              			
+            <div class="stepWrapper">
+              <table id="LogTables">
+                <tr>
+                  <th width="74">Date</th>
+                  <th width="94">Time</th>
+                  <th width="95">System</th>
+                  <th width="202">Action</th>
+                </tr>
+				<tr align="center">
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                 </tr>
+              </table>
+            </div>
+        </div>
+	</div>
+	</form>
+    <div class="clear_left"></div>
+<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<script language='JavaScript'>
+<!--
+$(document).ready(function() {
+	if (Status == '0')
+	{
+	  $('span.toggle-button-label').text('Click the button to enable the System Log.');
+      $('a.toggle-button').children('img').attr({
+      	'src' : '../_images/h_wirelesssetup_wpsenable.png',
+      	'alt' : 'Click the button to disable System Log in the modem.'		
+      });
+      $('a.toggle-button').parent().nextAll('.stepWrapper').hide();
+	}
+	else{
+		$('span.toggle-button-label').text('Click the button to disable the System Log.');
+		$('a.toggle-button').children('img').attr({
+			'src' : '../_images/h_wirelesssetup_wpsdisable.png',
+			'alt' : 'Click the button to enable the System Log.'
+		});
+		$('a.toggle-button').parent().nextAll('.stepWrapper').show();
+		if (saveInFlash == '0')
+		{
+			$('input[name=logclear]').get(0).checked = true;
+		}
+		else
+		{
+			$('input[name=logclear]').get(1).checked = true;
+		}
+		updateSysLog_take();
+	}
+});
+//-->
+</script>
+</body>
+</html>

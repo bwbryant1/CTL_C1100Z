@@ -1,0 +1,1 @@
+cmd_arch/mips/bcm963xx/ktools/built-in.o :=  rm -f arch/mips/bcm963xx/ktools/built-in.o; /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ar rcs arch/mips/bcm963xx/ktools/built-in.o

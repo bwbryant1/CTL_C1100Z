@@ -1,0 +1,1 @@
+cmd_net/netfilter/xt_multiport.ko := /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld -r  -m elf32btsmip  -o net/netfilter/xt_multiport.ko net/netfilter/xt_multiport.o net/netfilter/xt_multiport.mod.o

@@ -1,0 +1,160 @@
+.SS DSCP
+This target allows to alter the value of the DSCP bits within the TOS
+header of the IPv4 packet.  As this manipulates a packet, it can only
+be used in the mangle table.
+.TP
+.BI "--set-dscp " "value"
+Set the DSCP field to a numerical value (can be decimal or hex)
+.TP
+.BI "--set-dscp-class " "class"
+Set the DSCP field to a DiffServ class.
+.SS HL
+This is used to modify the Hop Limit field in IPv6 header. The Hop Limit field
+is similar to what is known as TTL value in IPv4.  Setting or incrementing the
+Hop Limit field can potentially be very dangerous, so it should be avoided at
+any cost. This target is only valid in
+.B mangle
+table.
+.TP
+.B Don't ever set or increment the value on packets that leave your local network!
+.TP
+.BI "--hl-set " "value"
+Set the Hop Limit to `value'.
+.TP
+.BI "--hl-dec " "value"
+Decrement the Hop Limit `value' times.
+.TP
+.BI "--hl-inc " "value"
+Increment the Hop Limit `value' times.
+.SS LOG
+Turn on kernel logging of matching packets.  When this option is set
+for a rule, the Linux kernel will print some information on all
+matching packets (like most IPv6 IPv6-header fields) via the kernel log
+(where it can be read with
+.I dmesg
+or 
+.IR syslogd (8)).
+This is a "non-terminating target", i.e. rule traversal continues at
+the next rule.  So if you want to LOG the packets you refuse, use two
+separate rules with the same matching criteria, first using target LOG
+then DROP (or REJECT).
+.TP
+.BI "--log-level " "level"
+Level of logging (numeric or see \fIsyslog.conf\fP(5)).
+.TP
+.BI "--log-prefix " "prefix"
+Prefix log messages with the specified prefix; up to 29 letters long,
+and useful for distinguishing messages in the logs.
+.TP
+.B --log-tcp-sequence
+Log TCP sequence numbers. This is a security risk if the log is
+readable by users.
+.TP
+.B --log-tcp-options
+Log options from the TCP packet header.
+.TP
+.B --log-ip-options
+Log options from the IPv6 packet header.
+.TP
+.B --log-uid
+Log the userid of the process which generated the packet.
+.SS MARK
+This is used to set the netfilter mark value associated with the
+packet.  It is only valid in the
+.B mangle
+table.
+.TP
+.BI "--set-mark " "mark"
+.SS NFQUEUE
+This target is an extension of the QUEUE target. As opposed to QUEUE, it allows
+you to put a packet into any specific queue, identified by its 16-bit queue
+number.  
+.TP
+.BR "--queue-num " "\fIvalue"
+This specifies the QUEUE number to use. Valud queue numbers are 0 to 65535. The default value is 0.
+.TP
+It can only be used with Kernel versions 2.6.14 or later, since it requires
+the
+.B
+nfnetlink_queue
+kernel support.
+.SS REJECT
+This is used to send back an error packet in response to the matched
+packet: otherwise it is equivalent to 
+.B DROP
+so it is a terminating TARGET, ending rule traversal.
+This target is only valid in the
+.BR INPUT ,
+.B FORWARD
+and
+.B OUTPUT
+chains, and user-defined chains which are only called from those
+chains.  The following option controls the nature of the error packet
+returned:
+.TP
+.BI "--reject-with " "type"
+The type given can be
+.nf
+.B " icmp6-no-route"
+.B " no-route"
+.B " icmp6-adm-prohibited"
+.B " adm-prohibited"
+.B " icmp6-addr-unreachable"
+.B " addr-unreach"
+.B " icmp6-port-unreachable"
+.B " port-unreach"
+.fi
+which return the appropriate ICMPv6 error message (\fBport-unreach\fP is
+the default). Finally, the option
+.B tcp-reset
+can be used on rules which only match the TCP protocol: this causes a
+TCP RST packet to be sent back.  This is mainly useful for blocking 
+.I ident
+(113/tcp) probes which frequently occur when sending mail to broken mail
+hosts (which won't accept your mail otherwise).
+.B tcp-reset
+can only be used with kernel versions 2.6.14 or latter.
+
+.SS TCPMSS
+This target allows to alter the MSS value of TCP SYN packets, to control
+the maximum size for that connection (usually limiting it to your
+outgoing interface's MTU minus 60).  Of course, it can only be used
+in conjunction with
+.BR "-p tcp" .
+It is only valid in the
+.BR mangle
+table.
+.br
+This target is used to overcome criminally braindead ISPs or servers
+which block ICMPv6 Packet Too Big packets or are unable to send them.
+The symptoms of this problem are that everything works fine from your 
+Linux firewall/router, but machines behind it can never exchange large
+packets:
+.PD 0
+.RS 0.1i
+.TP 0.3i
+1)
+Web browsers connect, then hang with no data received.
+.TP
+2)
+Small mail works fine, but large emails hang.
+.TP
+3)
+ssh works fine, but scp hangs after initial handshaking.
+.RE
+.PD
+Workaround: activate this option and add a rule to your firewall
+configuration like:
+.nf
+ ip6tables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \\
+             -j TCPMSS --clamp-mss-to-pmtu
+.fi
+.TP
+.BI "--set-mss " "value"
+Explicitly set MSS option to specified value.
+.TP
+.B "--clamp-mss-to-pmtu"
+Automatically clamp MSS value to (path_MTU - 60).
+.TP
+These options are mutually exclusive.
+

@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="JavaScript">
+<!--hide
+var ssidIdx = parseInt('<%ejGetWl(wlSsidIdx)%>');
+var wme = '<%ejGetWl(wlWme)%>';
+var wmenoack= '<%ejGetWl(wlWmeNoAck)%>';
+var wmeapsd= '<%ejGetWl(wlWmeApsd)%>';
+var haswme= '<%ejGetWl(wlHasWme)%>';
+var nmode = '<%ejGetWl(wlNmode)%>'; 
+var enblWireless = '<%ejGetWl(wlEnbl_wl0v0)%>';
+var g_sessionKey = '<%ejGetOther(sessionKey)%>';	
+
+function btnApply(){
+	with (document.forms[0]) {
+/*
+		if (enblWireless==0){
+			AlertOpen("Cannot apply the change since wireless is currently disabled.");
+			return;
+		}	*/
+		if (wlHasWme.value==0){	AlertOpen("WMM not supported!"); return; }		
+		wlHasWme.disabled=1;
+		
+      if(wlWme[1].checked && (nmode != 'off'))
+      {
+         // check if B/G/N mode, WMM cannot be disabled
+         //alert('WMM cannot be disabled when wireless mode is B/G/N mixed');
+         AlertOpen("WMM can't be disabled when wireless mode includes N mode.");
+         return;
+      }
+		
+		if(wlWme[1].checked){
+			//wlWmeApsd.disabled=0;
+			$('#powersave_on').attr("disabled", "");			
+			$('#powersave_off').attr("disabled", "");
+		}
+	    sessionKey.value = g_sessionKey;		
+	}	
+	document.forms[0].submit();
+}
+
+function check(){
+	with (document.forms[0]) {
+		if(wlWme[0].checked){
+				$('#set_WWM_powersave *').removeClass('greyed_out');					
+				$('#powersave_on').attr("disabled", "");
+				$('#powersave_off').attr("disabled", "");			
+		}else if(wlWme[1].checked){
+				$('#set_WWM_powersave *').addClass('greyed_out');
+				$('#powersave_off').attr("checked", "checked");			
+				$('#powersave_on').attr("disabled", "disabled");
+				$('#powersave_off').attr("disabled", "disabled");
+		}
+	}
+}
+
+function frmLoad(){
+	with (document.forms[0]) {
+		wlHasWme.value = haswme;
+        
+		//For Quest, added by Ling-Chun
+		if(($('#wlHasWme').attr('value')== '1' )){
+			$('#set_WWM_wireless *').removeClass('greyed_out');
+			$('#wireless_on').attr("disabled", "");
+			$('#wireless_off').attr("disabled", "");
+		} else {
+			$('#set_WWM_wireless *').addClass('greyed_out');	
+			$('#wireless_off').attr("checked", "checked");																		
+			$('#wireless_on').attr("disabled", "disabled");
+			$('#wireless_off').attr("disabled", "disabled");								
+			//$('#wireless_off').trigger('change');				
+			$('#set_WWM_powersave *').addClass('greyed_out');
+			$('#powersave_on').attr("disabled", "disabled");
+			$('#powersave_off').attr("disabled", "disabled");			
+		}				
+        
+		if (wlHasWme.value==1){
+			setCheck(wlWme[1], wme^1);
+			setCheck(wlWmeApsd[1], wmeapsd^1);		
+			//$('#wireless_off').trigger('change');				
+			$('#set_WWM_powersave *').addClass('greyed_out');
+			$('#powersave_on').attr("disabled", "disabled");
+			$('#powersave_off').attr("disabled", "disabled");				
+		}else{
+			AlertOpen("WMM not supported!");
+		}
+		check();
+	
+	}
+}
+
+// done hiding -->
+</script>
+</head>
+
+<body id="wirelesssetup_wmm">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>
+		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">			
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>   
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('wmm', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+			<div id="connectionstatus">
+                <h1>Connection Status</h1>
+                <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+                </div>
+            </div>
+	</div>
+		<div id="content_right">
+			
+			<div id="content_right_contentarea">
+				<h1 class="wirelesssetup_wmm">WMM (Wi-Fi Multimedia) <span>WMM is a Quality of Service feature that prioritizes traffic on your
+					  wireless network. </span></h1>
+				<form action="wirelesssetup_wmm.wl" method="post">
+					<input type="hidden" name="sessionKey" value="">
+					<div class="stepWrapper">
+
+					<p><strong>1. Set the WMM state.</strong></p>
+					<table>
+                      <tr>
+                        <td width="150">WMM:                        </td>
+                        <td>
+                            <label><input name="wlWme" id="wireless_on" type="radio" value="1" checked="checked" onclick="check()" />
+        Enable</label>
+                        </td>
+                        <td>
+                            <label><input name="wlWme" id="wireless_off" type="radio" value="0" onclick="check()"/>
+        Disable</label>
+                        </td>
+                      </tr>
+                    </table>
+
+					</div>
+                    <div class="stepWrapper" id="wmm_optional">
+                    <div id="set_WWM_powersave">
+					<p><strong>2. Set WMM Power Save (optional).</strong></p>
+					<table>
+                      <tr>
+                        <td width="150">WMM Power Save:                        </td>
+                        <td>
+                            <label><input name="wlWmeApsd" id="powersave_on" type="radio" value="1" checked="checked" />
+        Enable</label>
+                        </td>
+                        <td>
+                            <label><input name="wlWmeApsd" id="powersave_off" type="radio" value="0" />
+                            Disable</label>
+                        </td>
+                      </tr>
+                    </table>
+                    </div>
+                    </div>
+                    <div class="stepWrapper">
+                    <p><strong>3. Click &quot;Apply&quot; to save your changes.</strong></p>
+					<a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a>
+                    </div>
+                    <div>
+                    <input type="hidden" name="wlHasWme" id="wlHasWme" value="">
+                    </div>
+				</form>				
+			</div>
+			
+		</div>
+		<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+<script language="JavaScript">
+<!--hide
+frmLoad();
+// done hiding -->
+</script>
+</body>
+</html>

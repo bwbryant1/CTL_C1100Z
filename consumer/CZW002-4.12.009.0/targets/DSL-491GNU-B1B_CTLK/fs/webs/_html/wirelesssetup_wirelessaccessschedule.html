@@ -1,0 +1,746 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>CenturyLink Modem Configuration</title>
+<link href="../_css/basic.css" rel="stylesheet" type="text/css" />
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery-1.3.2.min.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/jquery.popupWindow.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/functionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/util.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/wirelessFunctionsC1000Z.js" TYPE="text/javascript"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="../_js/popupAlert.js" TYPE="text/javascript"></SCRIPT>
+<script language="javascript">
+var enbl = '<%ejGetWl(wlEnbl_wl0v0)%>';
+
+var scheduleEnable ='<%ejGetWl(wlScheduleEnable)%>';
+var scheduleDayEnable ='<%ejGetWl(wlScheduleDayEnable)%>';
+var scheduleDayStart ='<%ejGetWl(wlScheduleDayStart)%>';
+var scheduleDayEnd ='<%ejGetWl(wlScheduleDayEnd)%>';
+
+var scheduleOldWlanEnable ='<%ejGetWl(wlScheduleOldWlanEnable)%>';
+
+var scheduleDayEnableArray = scheduleDayEnable.split(",");
+var scheduleDayStartArray = scheduleDayStart.split(",");
+var scheduleDayEndArray = scheduleDayEnd.split(",");
+
+var currDay = '<%ejGetOther(sysInfo, dateTime)%>';
+
+function btnApply(){
+   if($("#enabled").is(":checked")){
+
+      /*if((!$("#all_days").is(":checked")) &&
+         (($("#sunday").is(":checked") && scheduleDayEnableArray[$("#sunday").val()] == 1) || 
+         ($("#monday").is(":checked") && scheduleDayEnableArray[$("#monday").val()] == 1) ||
+         ($("#tuesday").is(":checked") && scheduleDayEnableArray[$("#tuesday").val()] == 1) ||
+         ($("#wednesday").is(":checked") && scheduleDayEnableArray[$("#wednesday").val()] == 1) ||
+         ($("#thursday").is(":checked") && scheduleDayEnableArray[$("#thursday").val()] == 1) ||
+         ($("#friday").is(":checked") && scheduleDayEnableArray[$("#friday").val()] == 1) ||
+         ($("#saturday").is(":checked") && scheduleDayEnableArray[$("#saturday").val()] == 1)) ){
+
+         AlertOpen('duplicate day');
+			return;
+      }*/
+
+      if( !((scheduleEnable == 0 && $("#enabled").is(":checked")) || //if scheduling 0->1 1->, do not check no one checked
+          (scheduleEnable == 1 && $("#disabled").is(":checked"))) &&
+         !$("#all_days").is(":checked") &&   //check if any day is checked
+         !$("#sunday").is(":checked") &&
+         !$("#monday").is(":checked") &&
+         !$("#tuesday").is(":checked") &&
+         !$("#wednesday").is(":checked") &&
+         !$("#thursday").is(":checked") &&
+         !$("#friday").is(":checked") &&
+         !$("#saturday").is(":checked") ){
+
+         AlertOpen('No day is selected. Please select at least one day.');
+         return;
+      }
+
+      if($("#all_days").is(":checked") || //if any day is checked, check the time value
+         $("#sunday").is(":checked") ||
+         $("#monday").is(":checked") ||
+         $("#tuesday").is(":checked") ||
+         $("#wednesday").is(":checked") ||
+         $("#thursday").is(":checked") ||
+         $("#friday").is(":checked") ||
+         $("#saturday").is(":checked")){
+
+        /* if(convertValueToMin($("#from").val()) > convertValueToMin($("#to").val())){
+            AlertOpen('The time range is invalid. Please make sure the ending time is later than the starting time.');
+            return;
+         }*/
+         if($("#from").val() == $("#to").val()){
+           // AlertOpen('Specify the same begin time and end time means the whole day schedule.');
+		    AlertOpen('An invalid timeframe was selected for your rule. Please enter a valid from and to time.');
+            return;
+         }
+
+      }
+         
+
+      var day_array = [$("#sunday"), $("#monday"), $("#tuesday"), $("#wednesday"), $("#thursday"), $("#friday"), $("#saturday")];
+
+    /*  for(i = 0; i < day_array.length; i++){
+         if(day_array[i].is(":checked") || $("#all_days").is(":checked")){
+            scheduleDayEnableArray[day_array[i].val()] = 1;
+
+            if($("#from").val() != $("#to").val()){
+               scheduleDayStartArray[day_array[i].val()] = convertValueToMin($("#from").val());
+               scheduleDayEndArray[day_array[i].val()] = convertValueToMin($("#to").val());;
+            }else{
+               scheduleDayStartArray[day_array[i].val()] = 0;
+               scheduleDayEndArray[day_array[i].val()] = 23 * 60 + 59;
+            }
+         }
+      }*/
+      //to limit the num of rule
+      var cnt=0, set_cnt=0;
+	  for(i=0;i<scheduleDayEnableArray.length;i++)
+	  {
+		if(scheduleDayEnableArray[i]!="")
+			cnt++;
+	  }
+	  for(i = 0; i < day_array.length; i++){
+         if(day_array[i].is(":checked")){ 
+		 	set_cnt++;
+         }else if($("#all_days").is(":checked")){
+			set_cnt = 7;
+			break;
+		 }
+	  }
+	  
+	  if((cnt+set_cnt)>21){
+	  	AlertOpen('The maximum of wireless schedule rule is 21');
+	  	return;
+	  }
+	  var setScheduleDayEnableArray = new Array(0,0,0,0,0,0,0);	  
+
+	  for(i = 0; i < day_array.length; i++){
+         if(day_array[i].is(":checked")){
+		 	setScheduleDayEnableArray[i] = day_array[i].val();
+       	 }else if( $("#all_days").is(":checked")){
+			setScheduleDayEnableArray[i] = i+1;
+		 }
+	  }
+	  //check duplicate
+	  if(checkScheduleDup(setScheduleDayEnableArray, convertValueToMin($("#from").val())/15, convertValueToMin($("#to").val())/15) == 1){
+		AlertOpen('Wireless schedule rule is duplicate.');
+		return;
+	  }
+	  	
+      //convert back to send parameter
+	  if(scheduleDayEnable!=''){
+    	  scheduleDayEnable = scheduleDayEnableArray[0];
+     	 scheduleDayStart = scheduleDayStartArray[0];
+     	 scheduleDayEnd = scheduleDayEndArray[0];
+
+     	 for(i = 1; i < scheduleDayEnableArray.length; i++){
+		 	if(scheduleDayEnableArray[i]!="")
+		 	{
+     	    	scheduleDayEnable += "," + scheduleDayEnableArray[i];
+	     	    scheduleDayStart += "," + scheduleDayStartArray[i];
+    	  	    scheduleDayEnd += "," + scheduleDayEndArray[i];
+		 	}	
+      	}		 
+		 scheduleDayEnable += ",";
+    	 scheduleDayStart += ",";
+      	 scheduleDayEnd += ",";
+	  }
+	  //new rule
+	  for(i = 0; i < day_array.length; i++){
+         if(day_array[i].is(":checked") || $("#all_days").is(":checked")){           
+			scheduleDayEnable += day_array[i].val()+",";
+            if($("#from").val() != $("#to").val()){               
+			   scheduleDayStart += convertValueToMin($("#from").val())+",";               
+			   scheduleDayEnd += convertValueToMin($("#to").val())+",";
+            }else{               
+			   scheduleDayStart += "0,"; 
+			   scheduleDayEnd += "1439,";//23 * 60 + 59
+            }
+         }
+      }
+
+      $("#wlScheduleEnable").val(1);
+      $("#wlScheduleDayEnable").val(scheduleDayEnable);
+      $("#wlScheduleDayStart").val(scheduleDayStart);
+      $("#wlScheduleDayEnd").val(scheduleDayEnd);
+
+   }else{
+      $("#wlScheduleEnable").val(0);
+      $("#wlScheduleDayEnable").val(scheduleDayEnable);
+      $("#wlScheduleDayStart").val(scheduleDayStart);
+      $("#wlScheduleDayEnd").val(scheduleDayEnd);
+   }
+
+   //backup old value (schedule from disabled to enabled)
+   if(scheduleEnable == 0 && $("#enabled").is(":checked")){
+      $("#wlScheduleOldWlanEnable").val(enbl);
+   }else{
+      $("#wlScheduleOldWlanEnable").attr("disabled", true);
+   }
+
+   //restore old value (schedule from enabled to disabled)
+   if(scheduleEnable == 1 && $("#disabled").is(":checked")){
+      $("#wlEnbl").val(scheduleOldWlanEnable);
+   }else{
+      $("#wlEnbl").attr("disabled", true);
+   }
+
+   $("#post_form").submit();
+}
+
+function btnRemove(day){
+   scheduleDayEnableArray[day] = 0;
+   scheduleDayStartArray[day] = 0;
+   scheduleDayEndArray[day] = 0;
+
+   //convert back to send parameter
+   scheduleDayEnable = scheduleDayEnableArray[0];
+   scheduleDayStart = scheduleDayStartArray[0];
+   scheduleDayEnd = scheduleDayEndArray[0];
+
+   for(i = 1; i < scheduleDayEnableArray.length; i++){
+      scheduleDayEnable += "," + scheduleDayEnableArray[i];
+      scheduleDayStart += "," + scheduleDayStartArray[i];
+      scheduleDayEnd += "," + scheduleDayEndArray[i];
+   }
+
+   var currDay_part = currDay.split(' ');
+   var currDay_val= -1;
+   if(currDay_part[0]!=''){
+   		if(currDay_part[0]=='Mon')currDay_val=1;   		   
+   		else if(currDay_part[0]=='Tue')currDay_val=2;
+   		else if(currDay_part[0]=='Wed')currDay_val=3;
+   		else if(currDay_part[0]=='Thu')currDay_val=4;
+   		else if(currDay_part[0]=='Fri')currDay_val=5;
+   		else if(currDay_part[0]=='Sat')currDay_val=6;
+   		else if(currDay_part[0]=='Sun')currDay_val=0;
+   }	
+   if(currDay_val==day){	
+	   $("#wlScheduleOldWlanEnable").attr("disabled", true);
+	   //restore old value (schedule from enabled to disabled)
+	   $("#wlEnbl").val(scheduleOldWlanEnable);
+   }else{
+	   $("#wlScheduleOldWlanEnable").attr("disabled", true);
+	   $("#wlEnbl").attr("disabled", true);   
+   }
+
+   $("#wlScheduleEnable").val(scheduleEnable);
+   $("#wlScheduleDayEnable").val(scheduleDayEnable);
+   $("#wlScheduleDayStart").val(scheduleDayStart);
+   $("#wlScheduleDayEnd").val(scheduleDayEnd);
+
+   $("#post_form").submit();
+}
+
+function convertValueToMin(str){
+   return (str == "12:00 AM" ? 0 : parseInt((str.split(" ")[1] == "AM" ? str.split(" ")[0].split(":")[0]*60 : str.split(" ")[0].split(":")[0]*60 + 60*12)) + parseInt(str.split(" ")[0].split(":")[1]));
+}
+
+function checkScheduleDup(guiDay, guiStartTime, guiEndTime){	
+	var SIZE_X = 7;	
+	var SIZE_Y = 96;	
+	var i = 0, j = 0, x = 0, y = 0;		
+	var markStart = 0, markEnd = 0;	
+	var scheduleTbl = new Array(SIZE_X);	
+    
+	for(x = 0; x < SIZE_X; x++){		
+		scheduleTbl[x] =  new Array(SIZE_Y);	
+	}	
+
+	/* init array */	
+	for(x = 0; x < SIZE_X; x++){		
+		for(y = 0; y < SIZE_Y; y++){			
+			scheduleTbl[x][y] = 0;		
+		}	
+	}	
+
+	for(i = 0; i < (scheduleDayEnableArray.length - 1); i++){		
+		var configDay = parseInt(scheduleDayEnableArray[i]);
+		var configStart = parseInt(scheduleDayStartArray[i])/15;
+		var configEnd = parseInt(scheduleDayEndArray[i])/15;
+
+		markStart = configStart;
+		if((configStart > configEnd) || (configStart==0 && configEnd==0)){
+			markEnd = configEnd + 96;
+		}else{
+			markEnd = configEnd;
+		}
+
+		for(j = markStart;j < markEnd; j++){
+			x = parseInt(j/96) + configDay -1 ;
+			y = j%96;
+
+			x = (x == 7)?0:x;
+			scheduleTbl[x][y] = 1;
+			
+		}	
+	}
+
+	markStart = guiStartTime;
+	if(guiStartTime > guiEndTime || guiStartTime==guiEndTime)
+		markEnd = guiEndTime + 96;	
+	else
+		markEnd = guiEndTime;
+
+	for(i=0;i<guiDay.length;i++){		
+		if(parseInt(guiDay[i])!=0){
+			
+			for(j = markStart; j < markEnd; j++){		
+				x = parseInt(j/96) + parseInt(guiDay[i]) -1;
+				y = j%96;
+				
+				x = (x == 7)?0:x;
+				if(scheduleTbl[x][y]==1)
+					return 1;
+			}
+		}
+	}	
+		
+	return 0;
+}
+function frmLoad(){
+   if(scheduleEnable == 1){
+      $("#enabled").attr("checked", "checked");
+
+      $('div#enabled').show();
+		$('span#enabled').show();
+		$('div#disabled').hide();
+		$('span#disabled').hide();
+   }else{
+      $("#disabled").attr("checked", "checked");
+
+      $('div#enabled').hide();
+		$('span#enabled').hide();
+		$('div#disabled').show();
+		$('span#disabled').show();
+   }
+   
+   var active_schedule=0;
+   for( i = 0; i < scheduleDayEnableArray.length; i++){
+      if(scheduleDayEnableArray[i] != 0){
+	  	 active_schedule=1;	
+         var day = "";
+         var start_hour = "";
+         var start_min = "";
+         var start_ampm = "";
+         var end_hour = "";
+         var end_min = "";
+         var end_ampm = "";
+		 var nextday = "";
+
+         if(scheduleDayEnableArray[i] == 1){
+            day = "Sunday";
+			nextday = "Monday";
+         }else if(scheduleDayEnableArray[i] == 2){
+            day = "Monday";
+			nextday = "Tuesday";
+         }else if(scheduleDayEnableArray[i] == 3){
+            day = "Tuesday";
+			nextday = "Wednesday";
+         }else if(scheduleDayEnableArray[i] == 4){
+            day = "Wednesday";
+			nextday = "Thursday";
+         }else if(scheduleDayEnableArray[i] == 5){
+            day = "Thursday";
+			nextday = "Friday";
+         }else if(scheduleDayEnableArray[i] == 6){
+            day = "Friday";
+			nextday = "Saturday";
+         }else if(scheduleDayEnableArray[i] == 7){
+            day = "Saturday";
+			nextday = "Sunday";
+         }
+
+         start_hour = ((scheduleDayStartArray[i] / 60) < 13 ? (scheduleDayStartArray[i] / 60) : (scheduleDayStartArray[i] / 60 -12));
+         if(parseInt(scheduleDayStartArray[i] / 60) == 0) start_hour =12;
+         start_min = scheduleDayStartArray[i] % 60;
+         start_ampm = ((scheduleDayStartArray[i] / 60) < 12 ? "AM" : "PM");
+
+         end_hour = ((scheduleDayEndArray[i] / 60) < 13 ? (scheduleDayEndArray[i] / 60) : (scheduleDayEndArray[i] / 60 -12));         
+         if(parseInt(scheduleDayEndArray[i] / 60) == 0) end_hour =12;         
+         end_min = scheduleDayEndArray[i] % 60;
+         end_ampm = ((scheduleDayEndArray[i] / 60) < 12 ? "AM" : "PM");
+		 if(parseInt(scheduleDayStartArray[i])<parseInt(scheduleDayEndArray[i]))
+		 	nextday = "";		 
+
+         $("#schedule_list").append("<tr>" + 
+            "<td>" + day + "</td>" +
+            "<td>" + parseInt(start_hour) + ":" + (parseInt(start_min) == 0 ? "0" + parseInt(start_min) : parseInt(start_min)) + start_ampm + "</td>" +
+            "<td>" + parseInt(end_hour) + ":" + (parseInt(end_min) == 0 ? "0" + parseInt(end_min) : parseInt(end_min))  + end_ampm + " " + nextday + "</td>" +
+            "<td><a href=\"#\" class=\"btn remove_btn\" onclick=\"btnRemove(" + i +")\">Remove</a></td>")
+      }
+   }
+   if(active_schedule==0){
+   		$("#schedule_list").append("<tr align='center'><td colspan=5 style='padding:10px;'>No Rules Defined</td></tr>");
+   }
+}
+
+</script>
+<style type="text/css">
+#LowSignal {
+	color: #F00;
+}
+</style>
+</head>
+
+<body id="wirelesssetup_wirelessaccessschedule" onload="frmLoad()">
+<div id="wrapper">
+	<div id="masthead">
+		<h1 id="modem_type">CenturyLink&reg; Modem Configuration ZyXEL C1000Z</h1>
+		<a href="http://www.CenturyLink.com" id="logo_link" target="_blank">CenturyLink.com</a>
+<script language="javascript">
+<!--hide
+WriteMenuHeader('wirelesssetup', '<%ejGetOther(isSupportConsoleAllowed)%>');
+// done hiding -->
+</script>			
+		<a href="help.html" title="Click here to launch" class="helplink">help</a>
+    <div id="date">			
+<SCRIPT LANGUAGE="JavaScript">
+	WriteDateTime('<%ejGetOther(sysInfo, dateTime)%>');
+</SCRIPT>        	
+		</div>
+<script language="JavaScript">
+	WriteLogout('<%ejGetOther(isLogin)%>');
+</script>
+</div>
+    <div class="clear_left"></div>
+	<div id="content_left">
+			<ul id="subnav">				
+<script language="javascript">
+<!-- hide
+   WriteWirelessMenuHeader('schedule', '<%ejGet(wifi5GFeature)%>', '<%ejGetExtWl(wlQtnExist)%>');
+// done hiding -->
+</script>
+			</ul>
+			<div id="connectionstatus">
+            <h1>Connection Status</h1>
+            <div id="connectionstatus_wrapper">
+<script language="javascript">
+<!-- hide
+   WriteConnectionStatus('<%ejGetOther(dslinfo, STATUS_LINE1)%>', '<%ejGetOther(dslinfo, STATUS_LINE2)%>', '<%ejGetOther(sysInfo, defaultWan)%>', '<%ejGetOther(lineRate, 1, 0)%>', '<%ejGetOther(lineRate, 0, 0)%>', '<%ejGetOther(bondingStatus)%>', '<%ejGetOther(lineRate, 1, 1)%>', '<%ejGetOther(lineRate, 0, 1)%>');
+// done hiding -->
+</script>
+            </div>
+		</div>
+	</div>
+	<div id="content_right">
+	  <div id="content_right_contentarea">
+	    <h1 class="wirelesssetup_wirelessaccessschedule">Wireless Schedule<span> Wireless  Schedule sets disable times for your wireless radio. The wireless light will turn amber when the radio is disabled via Wireless  Schedule. Select one day to set unique enable and disable times.</span></h1>
+	    <form id="post_form" method="post" action="wirelesssetup_wirelessaccessschedule.wl">
+	      <input type="hidden" name="sessionKey" id="sessionKey" value="<%ejGetOther(sessionKey)%>">
+	      <input type="hidden" name="wlScheduleEnable" id="wlScheduleEnable" value="">
+	      <input type="hidden" name="wlScheduleDayEnable" id="wlScheduleDayEnable" value="">
+	      <input type="hidden" name="wlScheduleDayStart" id="wlScheduleDayStart" value="">
+	      <input type="hidden" name="wlScheduleDayEnd" id="wlScheduleDayEnd" value="">
+	      <input type="hidden" name="wlScheduleOldWlanEnable" id="wlScheduleOldWlanEnable" value="">
+	      <input type="hidden" name="wlEnbl" id="wlEnbl" value="">
+	      
+	      <div class="stepWrapper">
+	        <p><strong>1. Set the wireless schedule state.</strong></p>
+	        <table>
+	          <tr>
+	            <td width="150"> Wireless Schedule: </td>
+	            <td><input name="schedule_on" id="enabled" type="radio" value="on" />
+	              Enable </td>
+	            <td><input name="schedule_on" id="disabled" type="radio" value="off" checked="checked" />
+	              Disable </td>
+              </tr>
+            </table>
+	      </div>
+	    </form>
+	    <form>
+        <div id="enabled">
+	      <div class="stepWrapper">
+	        <p><strong>2. Set the days of the week on which your radio will be disabled.</strong></p>
+	        <table>
+                <tr>
+                    <td width="43"><label for="Sunday" class="day">Sunday:</label></td>
+                    <td width="64"><input type="checkbox" name="Sunday" id="sunday" value="1" /></td>
+                    <td width="73"><label for="Wednesday" class="day">Wednesday:</label></td>
+                    <td width="65"><input type="checkbox" name="Wednesday" id="wednesday" value="4" /></td>
+                    <td width="64"><label for="Saturday" class="day">Saturday:</label></td>
+                    <td width="71"><input type="checkbox" name="Saturday" id="saturday" value="7" /></td>
+                </tr>
+                <tr>
+                    <td><label for="Monday" class="day">Monday:</label></td>
+                    <td width="64"><input type="checkbox" name="Monday" id="monday" value="2" /></td>
+                    <td width="73"><label for="Thursday" class="day">Thursday:</label></td>
+                    <td width="65"><input type="checkbox" name="Thursday" id="thursday" value="5" /></td>
+                    <td><label for="All Days">All Days:</label></td>
+                    <td width="71"><input type="checkbox" name="All Days" id="all_days" value="8" /></td>
+                </tr>
+                <tr>
+                    <td><label for="Tuesday" class="day">Tuesday:</label></td>
+                    <td width="64"><input type="checkbox" name="Tuesday" id="tuesday" value="3" /></td>
+                    <td width="73"><label for="Friday" class="day">Friday:</label></td>
+                    <td width="65"><input type="checkbox" name="Friday" id="friday" value="6" /></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+          </div>
+	      <div class="stepWrapper">
+	        <p><strong>3. Select the time  range the wireless radio is disabled.</strong></p>
+	        <table>
+	          <tr>
+                        <td width="150"><label for="from">Disable Time:</label></td>
+	            <td><select name="from" id="from">
+	              <option value="0:00 AM">12:00 AM</option>
+	              <option value="0:15 AM">12:15 AM</option>
+	              <option value="0:30 AM">12:30 AM</option>
+	              <option value="0:45 AM">12:45 AM</option>	              	              	              
+	              <option value="1:00 AM">1:00 AM</option>
+	              <option value="1:15 AM">1:15 AM</option>
+	              <option value="1:30 AM">1:30 AM</option>
+	              <option value="1:45 AM">1:45 AM</option>
+	              <option value="2:00 AM">2:00 AM</option>
+	              <option value="2:15 AM">2:15 AM</option>
+	              <option value="2:30 AM">2:30 AM</option>
+	              <option value="2:45 AM">2:45 AM</option>
+	              <option value="3:00 AM">3:00 AM</option>
+	              <option value="3:15 AM">3:15 AM</option>
+	              <option value="3:30 AM">3:30 AM</option>
+	              <option value="3:45 AM">3:45 AM</option>
+	              <option value="4:00 AM">4:00 AM</option>
+	              <option value="4:15 AM">4:15 AM</option>
+	              <option value="4:30 AM">4:30 AM</option>
+	              <option value="4:45 AM">4:45 AM</option>
+	              <option value="5:00 AM">5:00 AM</option>
+	              <option value="5:15 AM">5:15 AM</option>
+	              <option value="5:30 AM">5:30 AM</option>
+	              <option value="5:45 AM">5:45 AM</option>
+	              <option value="6:00 AM">6:00 AM</option>
+	              <option value="6:15 AM">6:15 AM</option>
+	              <option value="6:30 AM">6:30 AM</option>
+	              <option value="6:45 AM">6:45 AM</option>
+	              <option value="7:00 AM">7:00 AM</option>
+	              <option value="7:15 AM">7:15 AM</option>
+	              <option value="7:30 AM">7:30 AM</option>
+	              <option value="7:45 AM">7:45 AM</option>
+	              <option value="8:00 AM">8:00 AM</option>
+	              <option value="8:15 AM">8:15 AM</option>
+	              <option value="8:30 AM">8:30 AM</option>
+	              <option value="8:45 AM">8:45 AM</option>
+	              <option value="9:00 AM" selected="selected">9:00 AM</option>
+	              <option value="9:15 AM">9:15 AM</option>
+	              <option value="9:30 AM">9:30 AM</option>
+	              <option value="9:45 AM">9:45 AM</option>
+	              <option value="10:00 AM">10:00 AM</option>
+	              <option value="10:15 AM">10:15 AM</option>
+	              <option value="10:30 AM">10:30 AM</option>
+	              <option value="10:45 AM">10:45 AM</option>
+	              <option value="11:00 AM">11:00 AM</option>
+	              <option value="11:15 AM">11:15 AM</option>
+	              <option value="11:30 AM">11:30 AM</option>
+	              <option value="11:45 AM">11:45 AM</option>
+	              <option value="0:00 PM">12:00 PM</option>
+	              <option value="0:15 PM">12:15 PM</option>
+	              <option value="0:30 PM">12:30 PM</option>
+	              <option value="0:45 PM">12:45 PM</option>
+	              <option value="1:00 PM">1:00 PM</option>
+	              <option value="1:15 PM">1:15 PM</option>
+	              <option value="1:30 PM">1:30 PM</option>
+	              <option value="1:45 PM">1:45 PM</option>
+	              <option value="2:00 PM">2:00 PM</option>
+	              <option value="2:15 PM">2:15 PM</option>
+	              <option value="2:30 PM">2:30 PM</option>
+	              <option value="2:45 PM">2:45 PM</option>
+	              <option value="3:00 PM">3:00 PM</option>
+	              <option value="3:15 PM">3:15 PM</option>
+	              <option value="3:30 PM">3:30 PM</option>
+	              <option value="3:45 PM">3:45 PM</option>
+	              <option value="4:00 PM">4:00 PM</option>
+	              <option value="4:15 PM">4:15 PM</option>
+	              <option value="4:30 PM">4:30 PM</option>
+	              <option value="4:45 PM">4:45 PM</option>
+	              <option value="5:00 PM">5:00 PM</option>
+	              <option value="5:15 PM">5:15 PM</option>
+	              <option value="5:30 PM">5:30 PM</option>
+	              <option value="5:45 PM">5:45 PM</option>
+	              <option value="6:00 PM">6:00 PM</option>
+	              <option value="6:15 PM">6:15 PM</option>
+	              <option value="6:30 PM">6:30 PM</option>
+	              <option value="6:45 PM">6:45 PM</option>
+	              <option value="7:00 PM">7:00 PM</option>
+	              <option value="7:15 PM">7:15 PM</option>
+	              <option value="7:30 PM">7:30 PM</option>
+	              <option value="7:45 PM">7:45 PM</option>
+	              <option value="8:00 PM">8:00 PM</option>
+	              <option value="8:15 PM">8:15 PM</option>
+	              <option value="8:30 PM">8:30 PM</option>
+	              <option value="8:45 PM">8:45 PM</option>
+	              <option value="9:00 PM">9:00 PM</option>
+	              <option value="9:15 PM">9:15 PM</option>
+	              <option value="9:30 PM">9:30 PM</option>
+	              <option value="9:45 PM">9:45 PM</option>
+	              <option value="10:00 PM">10:00 PM</option>
+	              <option value="10:15 PM">10:15 PM</option>
+	              <option value="10:30 PM">10:30 PM</option>
+	              <option value="10:45 PM">10:45 PM</option>
+	              <option value="11:00 PM">11:00 PM</option>
+	              <option value="11:15 PM">11:15 PM</option>
+	              <option value="11:30 PM">11:30 PM</option>
+	              <option value="11:45 PM">11:45 PM</option>
+	              </select></td>
+              </tr>
+	          <tr>
+                        <td width="150"><label for="to">Enable Time:</label></td>
+	            <td><select name="to" id="to">
+	              <option value="0:00 AM">12:00 AM</option>
+	              <option value="0:15 AM">12:15 AM</option>
+	              <option value="0:30 AM">12:30 AM</option>
+	              <option value="0:45 AM">12:45 AM</option>	              	              	              	              
+	              <option value="1:00 AM">1:00 AM</option>
+	              <option value="1:15 AM">1:15 AM</option>
+	              <option value="1:30 AM">1:30 AM</option>
+	              <option value="1:45 AM">1:45 AM</option>
+	              <option value="2:00 AM">2:00 AM</option>
+	              <option value="2:15 AM">2:15 AM</option>
+	              <option value="2:30 AM">2:30 AM</option>
+	              <option value="2:45 AM">2:45 AM</option>
+	              <option value="3:00 AM">3:00 AM</option>
+	              <option value="3:15 AM">3:15 AM</option>
+	              <option value="3:30 AM">3:30 AM</option>
+	              <option value="3:45 AM">3:45 AM</option>
+	              <option value="4:00 AM">4:00 AM</option>
+	              <option value="4:15 AM">4:15 AM</option>
+	              <option value="4:30 AM">4:30 AM</option>
+	              <option value="4:45 AM">4:45 AM</option>
+	              <option value="5:00 AM">5:00 AM</option>
+	              <option value="5:15 AM">5:15 AM</option>
+	              <option value="5:30 AM">5:30 AM</option>
+	              <option value="5:45 AM">5:45 AM</option>
+	              <option value="6:00 AM">6:00 AM</option>
+	              <option value="6:15 AM">6:15 AM</option>
+	              <option value="6:30 AM">6:30 AM</option>
+	              <option value="6:45 AM">6:45 AM</option>
+	              <option value="7:00 AM">7:00 AM</option>
+	              <option value="7:15 AM">7:15 AM</option>
+	              <option value="7:30 AM">7:30 AM</option>
+	              <option value="7:45 AM">7:45 AM</option>
+	              <option value="8:00 AM">8:00 AM</option>
+	              <option value="8:15 AM">8:15 AM</option>
+	              <option value="8:30 AM">8:30 AM</option>
+	              <option value="8:45 AM">8:45 AM</option>
+	              <option value="9:00 AM" selected="selected">9:00 AM</option>
+	              <option value="9:15 AM">9:15 AM</option>
+	              <option value="9:30 AM">9:30 AM</option>
+	              <option value="9:45 AM">9:45 AM</option>
+	              <option value="10:00 AM">10:00 AM</option>
+	              <option value="10:15 AM">10:15 AM</option>
+	              <option value="10:30 AM">10:30 AM</option>
+	              <option value="10:45 AM">10:45 AM</option>
+	              <option value="11:00 AM">11:00 AM</option>
+	              <option value="11:15 AM">11:15 AM</option>
+	              <option value="11:30 AM">11:30 AM</option>
+	              <option value="11:45 AM">11:45 AM</option>
+	              <option value="0:00 PM">12:00 PM</option>
+	              <option value="0:15 PM">12:15 PM</option>
+	              <option value="0:30 PM">12:30 PM</option>
+	              <option value="0:45 PM">12:45 PM</option>
+	              <option value="1:00 PM">1:00 PM</option>
+	              <option value="1:15 PM">1:15 PM</option>
+	              <option value="1:30 PM">1:30 PM</option>
+	              <option value="1:45 PM">1:45 PM</option>
+	              <option value="2:00 PM">2:00 PM</option>
+	              <option value="2:15 PM">2:15 PM</option>
+	              <option value="2:30 PM">2:30 PM</option>
+	              <option value="2:45 PM">2:45 PM</option>
+	              <option value="3:00 PM">3:00 PM</option>
+	              <option value="3:15 PM">3:15 PM</option>
+	              <option value="3:30 PM">3:30 PM</option>
+	              <option value="3:45 PM">3:45 PM</option>
+	              <option value="4:00 PM">4:00 PM</option>
+	              <option value="4:15 PM">4:15 PM</option>
+	              <option value="4:30 PM">4:30 PM</option>
+	              <option value="4:45 PM">4:45 PM</option>
+	              <option value="5:00 PM">5:00 PM</option>
+	              <option value="5:15 PM">5:15 PM</option>
+	              <option value="5:30 PM">5:30 PM</option>
+	              <option value="5:45 PM">5:45 PM</option>
+	              <option value="6:00 PM">6:00 PM</option>
+	              <option value="6:15 PM">6:15 PM</option>
+	              <option value="6:30 PM">6:30 PM</option>
+	              <option value="6:45 PM">6:45 PM</option>
+	              <option value="7:00 PM">7:00 PM</option>
+	              <option value="7:15 PM">7:15 PM</option>
+	              <option value="7:30 PM">7:30 PM</option>
+	              <option value="7:45 PM">7:45 PM</option>
+	              <option value="8:00 PM">8:00 PM</option>
+	              <option value="8:15 PM">8:15 PM</option>
+	              <option value="8:30 PM">8:30 PM</option>
+	              <option value="8:45 PM">8:45 PM</option>
+	              <option value="9:00 PM">9:00 PM</option>
+	              <option value="9:15 PM">9:15 PM</option>
+	              <option value="9:30 PM">9:30 PM</option>
+	              <option value="9:45 PM">9:45 PM</option>
+	              <option value="10:00 PM">10:00 PM</option>
+	              <option value="10:15 PM">10:15 PM</option>
+	              <option value="10:30 PM">10:30 PM</option>
+	              <option value="10:45 PM">10:45 PM</option>
+	              <option value="11:00 PM">11:00 PM</option>
+	              <option value="11:15 PM">11:15 PM</option>
+	              <option value="11:30 PM">11:30 PM</option>
+	              <option value="11:45 PM">11:45 PM</option>
+	              </select></td>
+              </tr>
+            </table>
+          </div>
+	      <div class="stepWrapper">
+	        <p><strong>4. Click &quot;Apply&quot; to create a wireless schedule.</strong></p>
+	        <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a> </div>
+        </div>
+<div id="disabled">
+    <div class="stepWrapper">
+        <p><strong>2. Click &quot;Apply&quot; to create a wireless schedule.</strong></p>
+        <a href="#" class="btn apply_btn" onclick="btnApply()">Apply</a> </div>
+    </div>
+</div>
+	      <div class="stepWrapperdark">
+	        <table id="schedule_list">
+                	<tr>
+							<th colspan="4" class="tableTitle">Wireless Schedule List</th>
+						</tr>
+	          <tr>
+	            <th width="223">Disabled Day</th>
+	            <th width="155">Disable Time</th>
+	            <th width="155">Enable Time </th>
+	            <th width="91">Edit</th>
+              </tr>
+	          <!-- <tr>
+	            <td>Monday</td>
+	            <td>9:30AM</td>
+	            <td> 3:00PM</td>
+	            <td><a href="#" class="btn remove_btn">Remove</a></td>
+              </tr>
+	          <tr>
+	            <td>Tuesday</td>
+	            <td>3:00PM</td>
+	            <td> 10:45PM </td>
+	            <td><a href="#" class="btn remove_btn">Remove</a></td>
+              </tr>
+	          <tr>
+	            <td>Wednesday</td>
+	            <td>12:30PM</td>
+	            <td>  1:00PM </td>
+	            <td><a href="#" class="btn remove_btn">Remove</a></td>
+              </tr>
+	          <tr>
+	            <td>Thursday</td>
+	            <td>12:30PM</td>
+	            <td>  1:00PM </td>
+	            <td><a href="#" class="btn remove_btn">Remove</a></td>
+              </tr> -->
+            </table>
+          </div>
+        </form>
+	    <div class="clear_left"></div>
+      </div>
+  </div>
+<div class="clear_left"></div>
+		<div id="footer">Copyright &copy; 2015, CenturyLink Inc., All Rights Reserved.</div>
+</div>
+</body>
+</html>

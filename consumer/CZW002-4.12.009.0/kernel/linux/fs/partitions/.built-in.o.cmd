@@ -1,0 +1,1 @@
+cmd_fs/partitions/built-in.o :=  /opt/toolchains/uclibc-crosstools-gcc-4.4.2-1/usr/bin/mips-linux-uclibc-ld  -m elf32btsmip   -r -o fs/partitions/built-in.o fs/partitions/check.o fs/partitions/ldm.o fs/partitions/msdos.o 
